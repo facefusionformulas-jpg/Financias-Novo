@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerar PNGs de ícone — Finanças</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           background: #0a0a0b; color: #fafafa; padding: 24px; max-width: 720px; margin: 0 auto; line-height: 1.5; }
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    p { color: #a1a1aa; margin-bottom: 16px; }
+    .preview { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin: 20px 0; }
+    .preview > div { text-align: center; }
+    canvas { background: #111; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+    button { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+             border: none; padding: 12px 20px; border-radius: 8px;
+             font-size: 14px; font-weight: 600; cursor: pointer; }
+    code { background: #1a1a1f; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+    ol { padding-left: 22px; margin: 12px 0; }
+    li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Gerar ícones PNG do app</h1>
+  <p>Esta página gera dois arquivos PNG (192×192 e 512×512) com a identidade visual do app. Você só precisa abrir uma vez, baixar e subir pro GitHub.</p>
+
+  <div class="preview">
+    <div><canvas id="c192" width="192" height="192"></canvas><br><code>icon-192.png</code></div>
+    <div><canvas id="c512" width="512" height="512" style="width:192px;height:192px"></canvas><br><code>icon-512.png</code></div>
+  </div>
+
+  <button onclick="gerar()">Baixar os 2 PNGs</button>
+
+  <h2 style="font-size:16px;margin-top:24px">Passo a passo</h2>
+  <ol>
+    <li>Click no botão acima — vai baixar <code>icon-192.png</code> e <code>icon-512.png</code> automaticamente.</li>
+    <li>No GitHub, abre a pasta <code>icons/</code> do repositório.</li>
+    <li>Click no botão <strong>Add file → Upload files</strong>.</li>
+    <li>Arrasta os 2 PNGs pra dentro.</li>
+    <li>Commit com mensagem <em>"Adicionar ícones PNG"</em>.</li>
+    <li>Pronto. O manifest já está atualizado pra usá-los automaticamente.</li>
+  </ol>
+
+  <script>
+    function desenhar(ctx, size) {
+      // Background gradient
+      const g = ctx.createLinearGradient(0, 0, size, size);
+      g.addColorStop(0, '#1f2937');
+      g.addColorStop(1, '#0f172a');
+      ctx.fillStyle = g;
+      const radius = size * (30 / 192);
+      ctx.beginPath();
+      ctx.moveTo(radius, 0);
+      ctx.lineTo(size - radius, 0);
+      ctx.quadraticCurveTo(size, 0, size, radius);
+      ctx.lineTo(size, size - radius);
+      ctx.quadraticCurveTo(size, size, size - radius, size);
+      ctx.lineTo(radius, size);
+      ctx.quadraticCurveTo(0, size, 0, size - radius);
+      ctx.lineTo(0, radius);
+      ctx.quadraticCurveTo(0, 0, radius, 0);
+      ctx.closePath();
+      ctx.fill();
+      // Linha azul
+      ctx.fillStyle = '#60a5fa';
+      ctx.fillRect(size * 0.24, size * 0.18, size * 0.52, size * 0.03);
+      // Letter F
+      ctx.fillStyle = '#f3f4f6';
+      ctx.font = 'bold ' + (size * 0.55) + 'px Georgia, "Times New Roman", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('F', size / 2, size / 2 + size * 0.04);
+      // Linha verde
+      ctx.fillStyle = '#34d399';
+      ctx.fillRect(size * 0.24, size * 0.79, size * 0.52, size * 0.03);
+    }
+    function baixar(canvas, nome) {
+      canvas.toBlob(function (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = nome;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+    function gerar() {
+      baixar(document.getElementById('c192'), 'icon-192.png');
+      setTimeout(function () {
+        baixar(document.getElementById('c512'), 'icon-512.png');
+      }, 400);
+    }
+    window.onload = function () {
+      desenhar(document.getElementById('c192').getContext('2d'), 192);
+      desenhar(document.getElementById('c512').getContext('2d'), 512);
+    };
+  </script>
+</body>
+</html>

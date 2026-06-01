@@ -479,6 +479,36 @@
         <p class="section-desc" style="margin-top:0">Os dados são salvos automaticamente no seu navegador. Use essas ferramentas pra backup, restauração e configurações.</p>
 
         <div class="card" style="margin-bottom:14px">
+          <h3>Conta e segurança</h3>
+          <p class="item-meta" style="margin-top:8px">Nome de usuário e bloqueio do app.</p>
+          <br>
+          <div class="form-grid" style="grid-template-columns:1fr auto">
+            <input id="confNome" type="text" placeholder="Seu nome">
+            <button class="btn" type="button" onclick="salvarNomeConfig()">Salvar nome</button>
+          </div>
+          <br>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr auto">
+            <input id="confSenhaNova" type="password" placeholder="Nova senha (vazia = remover)">
+            <input id="confSenhaConfirma" type="password" placeholder="Confirmar nova senha">
+            <button class="btn" type="button" onclick="salvarSenhaConfig()">Trocar senha</button>
+          </div>
+          <br>
+          <p class="item-meta">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="confBloqueioAtivo" onchange="alternarBloqueioAtivo()" style="width:auto">
+              Pedir senha ao abrir o app
+            </label>
+          </p>
+          <p class="item-meta">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="confBiometriaAtiva" onchange="alternarBiometriaAtiva()" style="width:auto">
+              Permitir biometria/PIN do celular pra desbloquear (Touch ID, Face ID, fingerprint)
+            </label>
+          </p>
+          <p class="item-meta" id="avisoBiometria" style="color:var(--muted2)"></p>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
           <h3>Pasta de backup automático</h3>
           <p class="item-meta" style="margin-top:8px">O app gravará um arquivo <code>backup-financas.json</code> nessa pasta sempre que você fizer alterações. Se a pasta estiver dentro do Google Drive ou Dropbox local, sincroniza sozinho.</p>
           <br>
@@ -517,12 +547,54 @@
           <div id="listaSnapshots" class="list"></div>
         </div>
 
-        <div class="card">
+        <div class="card" style="margin-bottom:14px">
           <h3>Instalar como app no celular</h3>
           <p class="item-meta" style="margin-top:8px"><strong>Android (Chrome):</strong> menu (⋮) → "Adicionar à tela inicial" / "Instalar app".</p>
           <p class="item-meta"><strong>iPhone (Safari):</strong> botão compartilhar (□↑) → "Adicionar à Tela de Início".</p>
           <p class="item-meta">Depois disso, o ícone vira um app independente, abre em tela cheia e funciona offline.</p>
         </div>
+
+        <p class="item-meta" style="text-align:center;margin-top:4px;color:var(--muted2)">
+          Versão do app: <strong id="modalConfigAppVersao">1.1</strong> · <span id="modalConfigVersao">SW desconhecido</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tela de setup inicial (primeira abertura) -->
+  <div id="setupOverlay" class="lock-overlay hidden">
+    <div class="lock-panel">
+      <div class="logo" style="margin:0 auto 14px">F</div>
+      <h2 style="text-align:center">Bem-vindo</h2>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin:6px 0 18px">Vamos configurar seu acesso. Você pode pular e fazer isso depois.</p>
+
+      <label class="lock-label">Seu nome</label>
+      <input id="setupNome" type="text" placeholder="Como devo te chamar?" autocomplete="given-name">
+
+      <label class="lock-label" style="margin-top:10px">Senha (opcional)</label>
+      <input id="setupSenha" type="password" placeholder="Deixe vazio se não quiser bloquear" autocomplete="new-password">
+      <p class="lock-hint">Se você definir uma senha, dá pra ativar o bloqueio nas configurações depois.</p>
+
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn" type="button" onclick="salvarSetupInicial()" style="flex:1">Salvar</button>
+        <button class="btn btn-dark" type="button" onclick="pularSetupInicial()">Pular</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tela de bloqueio (quando bloqueio está ativo) -->
+  <div id="bloqueioOverlay" class="lock-overlay hidden">
+    <div class="lock-panel">
+      <div class="logo" style="margin:0 auto 14px">F</div>
+      <h2 style="text-align:center" id="bloqueioSaudacao">Bloqueado</h2>
+      <p style="text-align:center;color:var(--muted);font-size:13px;margin:6px 0 18px">Digite sua senha pra continuar.</p>
+
+      <input id="bloqueioSenha" type="password" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarDesbloquearComSenha()">
+      <p id="bloqueioErro" class="lock-hint" style="color:var(--red);min-height:18px"></p>
+
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn" type="button" onclick="tentarDesbloquearComSenha()" style="flex:1">Desbloquear</button>
+        <button id="btnBioDesbloquear" class="btn btn-dark hidden" type="button" onclick="desbloquearComBiometria()">Usar biometria</button>
       </div>
     </div>
   </div>

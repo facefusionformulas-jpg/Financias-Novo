@@ -1,7 +1,12 @@
-// Service Worker — funciona offline depois da primeira visita
+// Service Worker — Finanças & Rotina
+// Estratégia: network-first pro HTML (updates aparecem rápido)
+//             cache-first pros assets (CSS/JS/SVG)
+// Pra forçar atualização total: bumpe o número da versão abaixo.
 "use strict";
 
-const CACHE = "financas-v1";
+const VERSION = "v3";
+const CACHE = "financas-" + VERSION;
+
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +14,8 @@ const ASSETS = [
   "./db.js",
   "./app.js",
   "./manifest.webmanifest",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg",
   "./icons/icon-maskable.svg"
@@ -16,35 +23,75 @@ const ASSETS = [
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(ASSETS))
+    caches.open(CACHE).then((c) =>
+      // Cacheia cada asset individualmente — se um faltar, não quebra os outros
+      Promise.all(ASSETS.map((a) =>
+        c.add(a).catch((err) => console.warn("[SW] não cacheou:", a, err && err.message))
+      ))
+    )
   );
-  self.skipWaiting();
+  // Não dá skipWaiting automático — espera o usuário aprovar via mensagem
 });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
+
+// Permite que o app peça pra ativar a nova versão
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (e.data && e.data.type === "GET_VERSION" && e.source) {
+    e.source.postMessage({ type: "VERSION", version: VERSION });
+  }
+});
+
+function isNavigation(req) {
+  return req.mode === "navigate"
+      || (req.headers.get("accept") || "").includes("text/html");
+}
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(e.request)
+  const url = new URL(e.request.url);
+  if (!url.origin.startsWith(self.location.origin)) return;
+
+  if (isNavigation(e.request)) {
+    // Network-first pra HTML — busca online; só cai pro cache se offline
+    e.respondWith(
+      fetch(e.request)
         .then((resp) => {
-          // Cache only same-origin successful responses
-          if (resp && resp.status === 200 && e.request.url.startsWith(self.location.origin)) {
+          if (resp && resp.status === 200) {
             const copy = resp.clone();
             caches.open(CACHE).then((c) => c.put(e.request, copy));
           }
           return resp;
         })
-        .catch(() => caches.match("./index.html"));
+        .catch(() =>
+          caches.match(e.request).then((cached) => cached || caches.match("./index.html"))
+        )
+    );
+    return;
+  }
+
+  // Cache-first pros assets — rápido, cai pra rede se não tem em cache
+  e.respondWith(
+    caches.match(e.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(e.request)
+        .then((resp) => {
+          if (resp && resp.status === 200) {
+            const copy = resp.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy));
+          }
+          return resp;
+        })
+        .catch(() => cached);
     })
   );
 });

@@ -705,6 +705,65 @@ input[type="color"] { padding: 4px; height: 38px; }
   .modal-body { padding: 16px; }
 }
 
+/* ===== Telas de setup e bloqueio (overlay full-screen) ===== */
+.lock-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--primary) 8%, transparent) 0%, transparent 50%);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+.lock-overlay.hidden { display: none !important; }
+.lock-panel {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 380px;
+  padding: 28px 24px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+}
+.lock-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.lock-hint {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* ===== Banner de atualização disponível ===== */
+.update-banner {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--green);
+  border-radius: 999px;
+  padding: 6px 8px 6px 16px;
+  box-shadow: var(--shadow);
+  z-index: 9999;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
 /* ===== Botão flutuante de instalar PWA ===== */
 #btnInstalarPWA {
   position: fixed; right: 18px; bottom: 18px; z-index: 9998;

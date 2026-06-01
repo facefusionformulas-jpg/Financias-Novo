@@ -19,6 +19,8 @@ let habitos = [];
 let registroHabitos = {};
 let conquistasDesbloqueadas = {};
 let snapshots = []; // histórico de versões — até 30, gerado automaticamente
+let usuario = { nome: "", senhaHash: "", senhaSalt: "", criadoEm: "" };
+let seguranca = { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false };
 
 let contaEditandoId = null;
 let compraEditandoId = null;
@@ -108,6 +110,8 @@ async function carregarTudo() {
   registroHabitos = (data.registroHabitos && typeof data.registroHabitos === "object") ? data.registroHabitos : {};
   conquistasDesbloqueadas = (data.conquistasDesbloqueadas && typeof data.conquistasDesbloqueadas === "object") ? data.conquistasDesbloqueadas : {};
   snapshots = Array.isArray(data.snapshots) ? data.snapshots : [];
+  usuario = (data.usuario && typeof data.usuario === "object") ? data.usuario : { nome: "", senhaHash: "", senhaSalt: "", criadoEm: "" };
+  seguranca = (data.seguranca && typeof data.seguranca === "object") ? data.seguranca : { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false };
   ultimaGravacaoBackupStr = data.ultimaGravacaoBackup || "";
   // Preferência de tema
   if (data.tema && (data.tema === "claro" || data.tema === "escuro")) {
@@ -124,7 +128,8 @@ function salvar() {
     dbSetMany({
       contas, metas, comprasCartao, cartao, salarioMes,
       ultimaAtualizacaoCartao, salariosPorMes, faturasPorMes, valesPorMes,
-      habitos, registroHabitos, conquistasDesbloqueadas
+      habitos, registroHabitos, conquistasDesbloqueadas,
+      usuario, seguranca
     }).then(function () {
       talvezCriarSnapshot();
       agendarBackupAutoSeConfigurado();
@@ -195,6 +200,231 @@ function alternarTema() {
   try { localStorage.setItem("financas_tema_v1", novo); } catch (e) {}
   dbSet("tema", novo).catch(function () {});
   aplicarTemaSalvo();
+}
+
+/* ===========================================================
+   Autenticação (setup inicial, senha, biometria/WebAuthn)
+   =========================================================== */
+async function sha256Hex(texto) {
+  const data = new TextEncoder().encode(texto);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+}
+function gerarSalt() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+}
+async function hashSenha(senha, salt) {
+  return sha256Hex(senha + ":" + salt);
+}
+
+function setupNecessario() {
+  return !usuario.criadoEm && !seguranca.setupPulado;
+}
+function bloqueioPrecisaSerMostrado() {
+  return !!(seguranca.bloqueioAtivo && usuario.senhaHash);
+}
+
+function mostrarOverlay(id) {
+  const el = $(id); if (el) el.classList.remove("hidden");
+}
+function esconderOverlay(id) {
+  const el = $(id); if (el) el.classList.add("hidden");
+}
+
+async function salvarSetupInicial() {
+  const nome = $("setupNome").value.trim();
+  const senha = $("setupSenha").value;
+  if (!nome) return toast("Digite seu nome.", "warn");
+  usuario.nome = nome;
+  usuario.criadoEm = new Date().toISOString();
+  if (senha) {
+    usuario.senhaSalt = gerarSalt();
+    usuario.senhaHash = await hashSenha(senha, usuario.senhaSalt);
+  }
+  await dbSet("usuario", usuario);
+  await dbSet("seguranca", seguranca);
+  esconderOverlay("setupOverlay");
+  toast("Bem-vindo, " + nome + "!", "success");
+  renderizar();
+}
+function pularSetupInicial() {
+  seguranca.setupPulado = true;
+  dbSet("seguranca", seguranca);
+  esconderOverlay("setupOverlay");
+}
+
+async function tentarDesbloquearComSenha() {
+  const senha = $("bloqueioSenha").value;
+  if (!senha) return;
+  const hash = await hashSenha(senha, usuario.senhaSalt);
+  if (hash === usuario.senhaHash) {
+    $("bloqueioSenha").value = "";
+    $("bloqueioErro").innerText = "";
+    esconderOverlay("bloqueioOverlay");
+    toast("Desbloqueado.", "success");
+  } else {
+    $("bloqueioErro").innerText = "Senha incorreta.";
+    $("bloqueioSenha").select();
+  }
+}
+
+function verificarBloqueioAoAbrir() {
+  if (!bloqueioPrecisaSerMostrado()) return;
+  $("bloqueioSaudacao").innerText = usuario.nome ? "Olá, " + usuario.nome : "Bloqueado";
+  mostrarOverlay("bloqueioOverlay");
+  if (seguranca.biometriaCredId) {
+    $("btnBioDesbloquear").classList.remove("hidden");
+    // Tenta automaticamente após pequeno delay (pra UX dar tempo de carregar)
+    setTimeout(function () { desbloquearComBiometria(true); }, 300);
+  } else {
+    $("btnBioDesbloquear").classList.add("hidden");
+  }
+  setTimeout(function () { if ($("bloqueioSenha")) $("bloqueioSenha").focus(); }, 100);
+}
+
+// WebAuthn — biometria/PIN do dispositivo
+function biometriaSuportada() {
+  return !!(window.PublicKeyCredential && navigator.credentials);
+}
+async function registrarBiometria() {
+  if (!biometriaSuportada()) throw new Error("Biometria não suportada neste navegador.");
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const userId = new TextEncoder().encode((usuario.nome || "usuario") + ":" + (usuario.criadoEm || ""));
+  const credential = await navigator.credentials.create({
+    publicKey: {
+      challenge: challenge,
+      rp: { name: "Finanças & Rotina" },
+      user: {
+        id: userId,
+        name: usuario.nome || "usuario",
+        displayName: usuario.nome || "Usuário"
+      },
+      pubKeyCredParams: [
+        { type: "public-key", alg: -7 },
+        { type: "public-key", alg: -257 }
+      ],
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        userVerification: "required",
+        residentKey: "preferred"
+      },
+      timeout: 60000,
+      attestation: "none"
+    }
+  });
+  if (!credential) throw new Error("Sem credencial retornada.");
+  seguranca.biometriaCredId = Array.from(new Uint8Array(credential.rawId));
+  await dbSet("seguranca", seguranca);
+  return true;
+}
+async function desbloquearComBiometria(automatico) {
+  if (!seguranca.biometriaCredId || !biometriaSuportada()) {
+    if (!automatico) toast("Biometria não disponível.", "warn");
+    return false;
+  }
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const credIdArray = new Uint8Array(seguranca.biometriaCredId);
+    const assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: challenge,
+        allowCredentials: [{ type: "public-key", id: credIdArray }],
+        userVerification: "required",
+        timeout: 60000
+      }
+    });
+    if (assertion) {
+      $("bloqueioSenha").value = "";
+      $("bloqueioErro").innerText = "";
+      esconderOverlay("bloqueioOverlay");
+      toast("Desbloqueado.", "success");
+      return true;
+    }
+  } catch (e) {
+    if (!automatico) toast("Biometria falhou. Use a senha.", "warn");
+    console.warn("WebAuthn falhou:", e);
+  }
+  return false;
+}
+
+// Configurações de segurança no modal
+function popularConfigSeguranca() {
+  if ($("confNome")) $("confNome").value = usuario.nome || "";
+  if ($("confBloqueioAtivo")) $("confBloqueioAtivo").checked = !!seguranca.bloqueioAtivo;
+  if ($("confBiometriaAtiva")) $("confBiometriaAtiva").checked = !!seguranca.biometriaCredId;
+  if ($("avisoBiometria")) {
+    if (!biometriaSuportada()) {
+      $("avisoBiometria").innerText = "Biometria não suportada neste navegador. Disponível em Chrome/Edge Android e iOS Safari modernos.";
+    } else if (seguranca.biometriaCredId) {
+      $("avisoBiometria").innerText = "Biometria registrada neste dispositivo.";
+    } else {
+      $("avisoBiometria").innerText = "";
+    }
+  }
+}
+function salvarNomeConfig() {
+  const novo = $("confNome").value.trim();
+  if (!novo) return toast("Nome não pode ficar vazio.", "warn");
+  usuario.nome = novo;
+  if (!usuario.criadoEm) usuario.criadoEm = new Date().toISOString();
+  salvar();
+  toast("Nome atualizado.", "success");
+}
+async function salvarSenhaConfig() {
+  const nova = $("confSenhaNova").value;
+  const confirma = $("confSenhaConfirma").value;
+  if (nova !== confirma) return toast("As senhas não conferem.", "warn");
+  if (!nova) {
+    if (!confirm("Remover a senha do app? O bloqueio e a biometria serão desativados.")) return;
+    usuario.senhaHash = ""; usuario.senhaSalt = "";
+    seguranca.bloqueioAtivo = false; seguranca.biometriaCredId = null;
+    $("confSenhaNova").value = ""; $("confSenhaConfirma").value = "";
+    salvar(); popularConfigSeguranca();
+    toast("Senha removida.", "warn");
+    return;
+  }
+  usuario.senhaSalt = gerarSalt();
+  usuario.senhaHash = await hashSenha(nova, usuario.senhaSalt);
+  if (!usuario.criadoEm) usuario.criadoEm = new Date().toISOString();
+  $("confSenhaNova").value = ""; $("confSenhaConfirma").value = "";
+  salvar();
+  toast("Senha atualizada.", "success");
+}
+function alternarBloqueioAtivo() {
+  const novo = $("confBloqueioAtivo").checked;
+  if (novo && !usuario.senhaHash) {
+    $("confBloqueioAtivo").checked = false;
+    return toast("Defina uma senha primeiro.", "warn");
+  }
+  seguranca.bloqueioAtivo = novo;
+  salvar();
+  toast(novo ? "Bloqueio ativado." : "Bloqueio desativado.", "success");
+}
+async function alternarBiometriaAtiva() {
+  const novo = $("confBiometriaAtiva").checked;
+  if (novo) {
+    if (!biometriaSuportada()) {
+      $("confBiometriaAtiva").checked = false;
+      return toast("Biometria não suportada.", "error");
+    }
+    if (!usuario.senhaHash) {
+      $("confBiometriaAtiva").checked = false;
+      return toast("Defina uma senha primeiro.", "warn");
+    }
+    try {
+      await registrarBiometria();
+      popularConfigSeguranca();
+      toast("Biometria ativada.", "success");
+    } catch (e) {
+      $("confBiometriaAtiva").checked = false;
+      console.warn(e);
+      toast("Não foi possível ativar a biometria. " + (e && e.message || ""), "error");
+    }
+  } else {
+    seguranca.biometriaCredId = null;
+    salvar(); popularConfigSeguranca();
+    toast("Biometria desativada.", "warn");
+  }
 }
 
 /* ===========================================================
@@ -1270,7 +1500,7 @@ function linhaHabitoCompacta(h) {
 }
 function renderizarHoje() {
   if (!$("hoje")) return;
-  $("hojeSaudacao").innerText = saudacaoHora() + "!";
+  $("hojeSaudacao").innerText = saudacaoHora() + (usuario.nome ? ", " + usuario.nome : "") + "!";
   $("hojeData").innerText = "Hoje é " + dataHojeExtenso() + ".";
   const totalHab = habitos.length;
   const cumpridos = habitos.filter(function (h) { return bateuMetaNoDia(h.id, hoje); }).length;
@@ -1670,9 +1900,9 @@ function abrirConfig() {
   if (!m) return;
   m.classList.remove("hidden");
   document.body.style.overflow = "hidden";
-  // re-renderiza pra atualizar status da pasta e snapshots
   renderizarStatusBackup();
   renderizarSnapshots();
+  popularConfigSeguranca();
 }
 function fecharConfig() {
   const m = $("modalConfig");
@@ -1688,13 +1918,71 @@ document.addEventListener("keydown", function (e) {
 });
 
 /* ===========================================================
-   PWA: service worker + botão instalar
+   PWA: service worker + botão instalar + auto-update
    =========================================================== */
+const APP_VERSION = "1.1";   // bump quando lançar mudança significativa
+let _swRegistration = null;
+let _swNovoEsperando = null;
+
 function registrarSW() {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(function (e) {
-      console.warn("Service worker não registrado:", e);
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("./sw.js").then(function (reg) {
+    _swRegistration = reg;
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      _swNovoEsperando = reg.waiting;
+      mostrarBannerAtualizacao();
+    }
+    reg.addEventListener("updatefound", function () {
+      const novo = reg.installing;
+      if (!novo) return;
+      novo.addEventListener("statechange", function () {
+        if (novo.state === "installed" && navigator.serviceWorker.controller) {
+          _swNovoEsperando = novo;
+          mostrarBannerAtualizacao();
+        }
+      });
     });
+    let recarregando = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (recarregando) return;
+      recarregando = true;
+      window.location.reload();
+    });
+    // Checa atualização a cada 30 minutos
+    setInterval(function () { reg.update().catch(function () {}); }, 30 * 60 * 1000);
+    // Pede versão do SW
+    if (reg.active) {
+      const ch = new MessageChannel();
+      ch.port1.onmessage = function (e) {
+        if (e.data && e.data.type === "VERSION") {
+          const v = $("modalConfigVersao");
+          if (v) v.innerText = "SW " + e.data.version;
+        }
+      };
+      reg.active.postMessage({ type: "GET_VERSION" }, [ch.port2]);
+    }
+  }).catch(function (e) {
+    console.warn("Service worker não registrado:", e);
+  });
+}
+
+function mostrarBannerAtualizacao() {
+  let banner = document.getElementById("bannerUpdate");
+  if (banner) return;
+  banner = document.createElement("div");
+  banner.id = "bannerUpdate";
+  banner.className = "update-banner";
+  banner.innerHTML =
+    '<span>Nova versão disponível</span>'
+    + '<button class="btn btn-small btn-green" type="button" onclick="aplicarAtualizacao()">Atualizar</button>'
+    + '<button class="btn btn-small btn-dark" type="button" onclick="document.getElementById(\'bannerUpdate\').remove()">Depois</button>';
+  document.body.appendChild(banner);
+}
+function aplicarAtualizacao() {
+  if (_swNovoEsperando) {
+    _swNovoEsperando.postMessage({ type: "SKIP_WAITING" });
+  } else {
+    window.location.reload();
   }
 }
 window.addEventListener("beforeinstallprompt", function (e) {
@@ -1731,6 +2019,7 @@ function iniciarCampos() {
 
 async function iniciar() {
   try {
+    if ($("modalConfigAppVersao")) $("modalConfigAppVersao").innerText = APP_VERSION;
     await openDB();
     // Migra dados do localStorage do app antigo, se houver
     await migrarLocalStorageSeNecessario();
@@ -1749,6 +2038,13 @@ async function iniciar() {
     alternarCampoQuinzenas();
     renderizar();
     renderizarStatusBackup();
+    // Bloqueio aparece SE estiver ativado — antes do app ficar visível pra interação
+    verificarBloqueioAoAbrir();
+    // Setup só na primeira vez
+    if (setupNecessario()) {
+      mostrarOverlay("setupOverlay");
+      setTimeout(function () { if ($("setupNome")) $("setupNome").focus(); }, 100);
+    }
     registrarSW();
   } catch (e) {
     console.error("Erro no init:", e);
@@ -1825,3 +2121,12 @@ window.importarBackupArquivoComoMerge = importarBackupArquivoComoMerge;
 window.mesclarDoClipboard = mesclarDoClipboard;
 window.abrirConfig = abrirConfig;
 window.fecharConfig = fecharConfig;
+window.aplicarAtualizacao = aplicarAtualizacao;
+window.salvarSetupInicial = salvarSetupInicial;
+window.pularSetupInicial = pularSetupInicial;
+window.tentarDesbloquearComSenha = tentarDesbloquearComSenha;
+window.desbloquearComBiometria = desbloquearComBiometria;
+window.salvarNomeConfig = salvarNomeConfig;
+window.salvarSenhaConfig = salvarSenhaConfig;
+window.alternarBloqueioAtivo = alternarBloqueioAtivo;
+window.alternarBiometriaAtiva = alternarBiometriaAtiva;
