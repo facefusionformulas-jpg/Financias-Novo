@@ -1663,6 +1663,31 @@ function renderizarStatusBackup() {
 }
 
 /* ===========================================================
+   Modal de configurações (engrenagem)
+   =========================================================== */
+function abrirConfig() {
+  const m = $("modalConfig");
+  if (!m) return;
+  m.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  // re-renderiza pra atualizar status da pasta e snapshots
+  renderizarStatusBackup();
+  renderizarSnapshots();
+}
+function fecharConfig() {
+  const m = $("modalConfig");
+  if (!m) return;
+  m.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    const m = $("modalConfig");
+    if (m && !m.classList.contains("hidden")) fecharConfig();
+  }
+});
+
+/* ===========================================================
    PWA: service worker + botão instalar
    =========================================================== */
 function registrarSW() {
@@ -1798,3 +1823,5 @@ window.selecionarDiaCalendario = selecionarDiaCalendario;
 window.mesclarBackup = mesclarBackup;
 window.importarBackupArquivoComoMerge = importarBackupArquivoComoMerge;
 window.mesclarDoClipboard = mesclarDoClipboard;
+window.abrirConfig = abrirConfig;
+window.fecharConfig = fecharConfig;

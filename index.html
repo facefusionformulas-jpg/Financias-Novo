@@ -48,7 +48,13 @@
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <button id="btnAlternarTema" type="button" class="btn btn-dark btn-small" onclick="alternarTema()">Tema</button>
-        <div class="tag">Backup: <strong id="statusPastaBackup">não configurado</strong></div>
+        <button id="btnAbrirConfig" type="button" class="btn btn-dark btn-icon" onclick="abrirConfig()" title="Configurações e backup" aria-label="Configurações">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <div class="tag" title="Pasta sincronizada">Backup: <strong id="statusPastaBackup">não configurado</strong></div>
       </div>
     </header>
 
@@ -66,7 +72,6 @@
       <button onclick="openTab('metas',this)">Metas</button>
       <button onclick="openTab('prioridades',this)">Prioridades</button>
       <button onclick="openTab('ia',this)">IA Anti-Sufoco</button>
-      <button onclick="openTab('backup',this)">Backup</button>
     </nav>
 
     <main>
@@ -460,12 +465,20 @@
         </div>
       </section>
 
-      <!-- BACKUP -->
-      <section id="backup" class="tab section hidden">
-        <h2 class="section-title">Backup e dados</h2>
-        <p class="section-desc">Configure uma pasta sincronizada (Google Drive ou Dropbox local) para o app salvar backup automático. Os dados ficam no seu aparelho — o backup é o seu seguro.</p>
+    </main>
+  </div>
 
-        <div class="card" style="margin-bottom:18px">
+  <!-- Modal de configurações e backup (engrenagem no header) -->
+  <div id="modalConfig" class="modal-overlay hidden" onclick="if(event.target===this)fecharConfig()">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalConfigTitle">
+      <div class="modal-header">
+        <h2 id="modalConfigTitle">Configurações &amp; backup</h2>
+        <button class="modal-close" type="button" onclick="fecharConfig()" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="section-desc" style="margin-top:0">Os dados são salvos automaticamente no seu navegador. Use essas ferramentas pra backup, restauração e configurações.</p>
+
+        <div class="card" style="margin-bottom:14px">
           <h3>Pasta de backup automático</h3>
           <p class="item-meta" style="margin-top:8px">O app gravará um arquivo <code>backup-financas.json</code> nessa pasta sempre que você fizer alterações. Se a pasta estiver dentro do Google Drive ou Dropbox local, sincroniza sozinho.</p>
           <br>
@@ -480,9 +493,9 @@
           <p class="item-meta" style="margin-top:10px" id="avisoFSCompat"></p>
         </div>
 
-        <div class="card" style="margin-bottom:18px">
+        <div class="card" style="margin-bottom:14px">
           <h3>Backup manual</h3>
-          <p class="item-meta" style="margin-top:8px">Use isto pra exportar/importar entre dispositivos ou se preferir não conectar pasta.</p>
+          <p class="item-meta" style="margin-top:8px">Use isto pra mover dados entre dispositivos ou pra ter uma cópia de segurança.</p>
           <br>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn" type="button" onclick="exportarBackupArquivo()">Exportar backup (.json)</button>
@@ -497,9 +510,9 @@
           </div>
         </div>
 
-        <div class="card" style="margin-bottom:18px">
+        <div class="card" style="margin-bottom:14px">
           <h3>Histórico de versões (snapshots automáticos)</h3>
-          <p class="item-meta" style="margin-top:8px">O app salva um snapshot a cada 6 horas de uso. Até 30 versões anteriores ficam guardadas — você pode restaurar qualquer uma se algo der errado.</p>
+          <p class="item-meta" style="margin-top:8px">O app salva uma versão a cada 6 horas de uso. Até 30 versões ficam guardadas — você pode restaurar qualquer uma se algo der errado.</p>
           <br>
           <div id="listaSnapshots" class="list"></div>
         </div>
@@ -510,8 +523,8 @@
           <p class="item-meta"><strong>iPhone (Safari):</strong> botão compartilhar (□↑) → "Adicionar à Tela de Início".</p>
           <p class="item-meta">Depois disso, o ícone vira um app independente, abre em tela cheia e funciona offline.</p>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   </div>
 
   <button id="btnInstalarPWA" class="btn btn-green" type="button" onclick="instalarPWA()">Instalar app</button>
