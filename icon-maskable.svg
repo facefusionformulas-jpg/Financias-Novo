@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0f172a"/>
-  <g transform="translate(256 256)" fill="#f3f4f6" font-family="Georgia,serif" font-weight="700" text-anchor="middle">
-    <text font-size="220" y="76">F</text>
-    <rect x="-100" y="-138" width="200" height="12" fill="#60a5fa"/>
-    <rect x="-100" y="120" width="200" height="12" fill="#34d399"/>
-  </g>
-</svg>
