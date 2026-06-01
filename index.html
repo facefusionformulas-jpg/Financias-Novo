@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Finanças & Rotina</title>
+
+  <meta name="description" content="Controle de finanças, rotina e metas — gamificado, offline-first." />
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Finanças" />
+
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon-192.svg" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./styles.css" />
+
+  <script>
+    // Tema escuro é o padrão. Só aplica "light" se o usuário escolheu explicitamente.
+    (function () {
+      try {
+        var ls = localStorage.getItem("financas_tema_v1");
+        if (ls === "claro") {
+          document.documentElement.setAttribute("data-theme", "light");
+        } else if (ls === "escuro") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+        // se ls === null, deixa sem atributo → CSS aplica dark como padrão
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">F</div>
+        <div><h1>Painel pessoal</h1><p class="subtitle">Finanças, rotina e metas · offline-first</p></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <button id="btnAlternarTema" type="button" class="btn btn-dark btn-small" onclick="alternarTema()">Tema</button>
+        <div class="tag">Backup: <strong id="statusPastaBackup">não configurado</strong></div>
+      </div>
+    </header>
+
+    <nav>
+      <button class="active" onclick="openTab('hoje',this)">Hoje</button>
+      <button onclick="openTab('calendario',this)">Calendário</button>
+      <button onclick="openTab('rotina',this)">Rotina</button>
+      <button onclick="openTab('conquistas',this)">Conquistas</button>
+      <button onclick="openTab('painel',this)">Painel</button>
+      <button onclick="openTab('mesames',this)">Mês a mês</button>
+      <button onclick="openTab('contas',this)">Contas</button>
+      <button onclick="openTab('parcelas',this)">Parcelas</button>
+      <button onclick="openTab('cartao',this)">Cartão</button>
+      <button onclick="openTab('vales',this)">Vales</button>
+      <button onclick="openTab('metas',this)">Metas</button>
+      <button onclick="openTab('prioridades',this)">Prioridades</button>
+      <button onclick="openTab('ia',this)">IA Anti-Sufoco</button>
+      <button onclick="openTab('backup',this)">Backup</button>
+    </nav>
+
+    <main>
+      <!-- HOJE -->
+      <section id="hoje" class="tab section">
+        <h2 class="section-title" id="hojeSaudacao">Olá</h2>
+        <p class="section-desc" id="hojeData">Resumo do dia: hábitos, contas urgentes e próximos marcos.</p>
+
+        <div class="grid-4">
+          <div class="card"><p class="metric-title">Score dos hábitos (hoje)</p><p class="metric-value" id="hojeScoreHabitos">0%</p></div>
+          <div class="card"><p class="metric-title">Contas em dia (mês)</p><p class="metric-value" id="hojeScoreContas">0%</p></div>
+          <div class="card"><p class="metric-title">Streak combinado</p><p class="metric-value" id="hojeStreakCombo">0 dias</p></div>
+          <div class="card"><p class="metric-title">Saldo previsto do mês</p><p class="metric-value" id="hojeSaldo">R$ 0,00</p></div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card"><h3>Hábitos de hoje</h3><br><div id="hojeHabitos" class="list"></div></div>
+          <div class="card"><h3>Contas urgentes (≤ 7 dias)</h3><br><div id="hojeUrgentes" class="list"></div></div>
+          <div class="card"><h3>Próximos marcos</h3><br><div id="hojeProximosMarcos" class="list"></div></div>
+        </div>
+      </section>
+
+      <!-- CALENDÁRIO -->
+      <section id="calendario" class="tab section hidden">
+        <h2 class="section-title">Calendário</h2>
+        <p class="section-desc">Visão mensal: vencimentos das contas, pagamentos e hábitos batidos. Clique num dia pra ver detalhes.</p>
+
+        <div class="cal-header">
+          <div class="cal-mes" id="calMesNome">Mês</div>
+          <div class="cal-actions">
+            <button class="btn btn-small btn-dark" type="button" onclick="alterarMesCalendario(-1)" aria-label="Mês anterior">‹</button>
+            <button class="btn btn-small" type="button" onclick="irParaMesAtualCalendario()">Hoje</button>
+            <button class="btn btn-small btn-dark" type="button" onclick="alterarMesCalendario(1)" aria-label="Próximo mês">›</button>
+          </div>
+        </div>
+
+        <div class="cal-legend">
+          <span><span class="cal-dot red"></span>Vencida</span>
+          <span><span class="cal-dot yellow"></span>≤ 7 dias</span>
+          <span><span class="cal-dot gray"></span>Futura</span>
+          <span><span class="cal-dot green"></span>Paga</span>
+          <span><span class="cal-habit-flag-mini"></span>Hábitos do dia batidos</span>
+        </div>
+
+        <div class="cal-weekdays">
+          <div class="cal-wd">Dom</div>
+          <div class="cal-wd">Seg</div>
+          <div class="cal-wd">Ter</div>
+          <div class="cal-wd">Qua</div>
+          <div class="cal-wd">Qui</div>
+          <div class="cal-wd">Sex</div>
+          <div class="cal-wd">Sáb</div>
+        </div>
+
+        <div class="cal-grid" id="calGrid"></div>
+
+        <div class="cal-detail hidden" id="calDetail">
+          <div class="cal-detail-title" id="calDetailTitle">Dia</div>
+          <div id="calDetailBody"></div>
+        </div>
+      </section>
+
+      <!-- ROTINA -->
+      <section id="rotina" class="tab section hidden">
+        <h2 class="section-title">Rotina e hábitos</h2>
+        <p class="section-desc">Cadastre seus hábitos diários. Marque o quanto fez hoje, acompanhe o anel, a sequência e o histórico do mês.</p>
+
+        <div class="form-grid">
+          <input id="habitoNome" type="text" placeholder="Nome do hábito (ex: Beber água)">
+          <input id="habitoMeta" type="number" min="1" step="1" placeholder="Meta diária">
+          <input id="habitoUnidade" type="text" placeholder="Unidade (copos, min, ...)">
+          <input id="habitoCor" type="color" value="#2563eb" title="Cor do hábito">
+          <button id="btnHabito" class="btn" type="button" onclick="salvarHabitoFormulario()">Adicionar hábito</button>
+          <button id="btnCancelarHabito" class="btn btn-dark hidden" type="button" onclick="limparFormularioHabito()">Cancelar edição</button>
+        </div>
+
+        <div class="grid-4">
+          <div class="card"><p class="metric-title">Hábitos cadastrados</p><p class="metric-value" id="totalHabitosCard">0</p></div>
+          <div class="card"><p class="metric-title">Cumpridos hoje</p><p class="metric-value metric-green" id="habitosCumpridosCard">0 / 0</p></div>
+          <div class="card"><p class="metric-title">Score do dia</p><p class="metric-value" id="scoreDiaCard">0%</p></div>
+          <div class="card"><p class="metric-title">Maior streak ativo</p><p class="metric-value" id="maiorStreakCard">0 dias</p></div>
+        </div>
+
+        <div id="listaHabitos" class="list"></div>
+      </section>
+
+      <!-- CONQUISTAS -->
+      <section id="conquistas" class="tab section hidden">
+        <h2 class="section-title">Conquistas</h2>
+        <p class="section-desc">Marcos que você desbloqueia mantendo a rotina e a saúde financeira. Sem punição — só ganho.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <p class="metric-title">Progresso geral</p>
+          <p class="metric-value" id="resumoConquistasTexto">0 / 0 desbloqueadas</p>
+          <div class="progress"><div class="progress-bar" id="resumoConquistasBarra" style="width:0%"></div></div>
+        </div>
+
+        <h3 style="margin-bottom:10px">Desbloqueadas</h3>
+        <div id="listaConquistasDesbloqueadas" class="grid-3" style="margin-bottom:24px"></div>
+
+        <h3 style="margin-bottom:10px">A desbloquear</h3>
+        <div id="listaConquistasPendentes" class="grid-3"></div>
+      </section>
+
+      <!-- PAINEL -->
+      <section id="painel" class="tab section hidden">
+        <h2 class="section-title">Painel mensal</h2>
+        <p class="section-desc">Informe seu salário e veja quanto será descontado pelas contas do mês atual.</p>
+        <div class="grid-4">
+          <div class="card">
+            <p class="metric-title">Salário do mês</p>
+            <div class="salary-input-card">
+              <input id="salarioMes" type="number" min="0" step="0.01" placeholder="Digite seu salário">
+              <button class="btn btn-green" onclick="salvarSalario()">Salvar salário</button>
+            </div>
+            <p class="metric-value" id="salarioCard">R$ 0,00</p>
+          </div>
+          <div class="card"><p class="metric-title">Total das contas do mês atual</p><p class="metric-value" id="totalMesCard">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Desconto no salário</p><p class="metric-value metric-red" id="descontoCard">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Saldo restante</p><p class="metric-value" id="saldoCard">R$ 0,00</p></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h3>Próximos vencimentos</h3><br><div id="listaProximos" class="list"></div></div>
+          <div class="card"><h3>Contas urgentes</h3><br><div id="listaUrgentes" class="list"></div></div>
+        </div>
+      </section>
+
+      <!-- MÊS A MÊS -->
+      <section id="mesames" class="tab section hidden">
+        <h2 class="section-title">Acompanhamento mês a mês</h2>
+        <p class="section-desc">Escolha um mês para ver salário, contas, desconto, saldo e lançamentos daquele período.</p>
+        <div class="form-grid">
+          <input id="mesReferencia" type="month" onchange="renderizarMesAMes()">
+          <input id="salarioMesReferencia" type="number" min="0" step="0.01" placeholder="Salário deste mês">
+          <button class="btn btn-green" type="button" onclick="salvarSalarioMesReferencia()">Salvar salário do mês</button>
+          <button class="btn btn-dark" type="button" onclick="irParaMesAnterior()">Mês anterior</button>
+          <button class="btn btn-dark" type="button" onclick="irParaProximoMes()">Próximo mês</button>
+          <button class="btn" type="button" onclick="irParaMesAtual()">Mês atual</button>
+          <button class="btn btn-dark" type="button" onclick="imprimirRelatorioMes()">Imprimir mês</button>
+        </div>
+        <div class="grid-4">
+          <div class="card"><p class="metric-title">Salário do mês escolhido</p><p class="metric-value" id="salarioMesReferenciaCard">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Contas do mês escolhido</p><p class="metric-value" id="totalMesReferenciaCard">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Desconto no salário</p><p class="metric-value metric-red" id="descontoMesReferenciaCard">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Saldo do mês escolhido</p><p class="metric-value" id="saldoMesReferenciaCard">R$ 0,00</p></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h3>Contas abertas do mês</h3><br><div id="listaContasMesReferencia" class="list"></div></div>
+          <div class="card"><h3>Contas pagas do mês</h3><br><div id="listaContasPagasMesReferencia" class="list"></div></div>
+        </div>
+      </section>
+
+      <!-- CONTAS -->
+      <section id="contas" class="tab section hidden">
+        <h2 class="section-title">Lançamentos de contas</h2>
+        <p class="section-desc">Cadastre contas mensais, avulsas, recorrentes, valores cheios, metas ou outras obrigações.</p>
+        <div class="form-grid">
+          <input id="contaNome" type="text" placeholder="Nome da conta">
+          <input id="contaValor" type="number" min="0" step="0.01" placeholder="Valor">
+          <input id="contaData" type="date">
+          <select id="contaTipo">
+            <option value="mensal">Mensal</option>
+            <option value="mensal recorrente">Mensal recorrente</option>
+            <option value="quinzenal">Quinzenal</option>
+            <option value="parcela">Parcela</option>
+            <option value="valor cheio">Valor cheio</option>
+            <option value="meta">Meta</option>
+            <option value="avulso">Avulso</option>
+          </select>
+          <input id="contaCategoria" type="text" placeholder="Categoria" value="Casa">
+          <select id="contaRecorrencia" onchange="alternarCampoQuinzenasConta()">
+            <option value="unica">Sem recorrência</option>
+            <option value="mensal">Recorrência mensal</option>
+            <option value="quinzenal">Recorrência quinzenal</option>
+          </select>
+          <input id="contaDuracao" type="number" min="1" placeholder="Duração em meses">
+          <input id="contaQuinzenas" type="number" min="1" placeholder="Qtd. de quinzenas" class="hidden">
+          <button id="btnConta" class="btn" type="button" onclick="salvarContaFormulario()">Adicionar</button>
+          <button id="btnCancelarConta" class="btn btn-dark hidden" type="button" onclick="limparFormularioConta();renderizar()">Cancelar edição</button>
+        </div>
+        <div class="filters">
+          <input id="buscaConta" type="text" placeholder="Buscar conta ou categoria" oninput="renderizar()">
+          <select id="filtroStatus" onchange="renderizar()">
+            <option value="todos">Todos os status</option>
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+          </select>
+          <select id="filtroTipo" onchange="renderizar()">
+            <option value="todos">Todos os tipos</option>
+            <option value="mensal">Mensal</option>
+            <option value="mensal recorrente">Mensal recorrente</option>
+            <option value="quinzenal">Quinzenal</option>
+            <option value="parcela">Parcela</option>
+            <option value="valor cheio">Valor cheio</option>
+            <option value="meta">Meta</option>
+            <option value="avulso">Avulso</option>
+          </select>
+        </div>
+        <div id="listaContas" class="list"></div>
+      </section>
+
+      <!-- PARCELAS -->
+      <section id="parcelas" class="tab section hidden">
+        <h2 class="section-title">Parcelas</h2>
+        <p class="section-desc">Parcelas entram automaticamente nas contas do mês.</p>
+        <div class="form-grid">
+          <input id="parcelaNome" type="text" placeholder="Nome da compra">
+          <input id="parcelaValor" type="number" min="0" step="0.01" placeholder="Valor da parcela">
+          <input id="parcelaTotal" type="number" min="1" placeholder="Total de parcelas">
+          <input id="parcelaAtual" type="number" min="1" placeholder="Parcela atual" value="1">
+          <input id="parcelaData" type="date">
+          <select id="parcelaFrequencia" onchange="alternarCampoQuinzenas()">
+            <option value="mensal">Mensal</option>
+            <option value="quinzenal">Quinzenal</option>
+          </select>
+          <input id="parcelaQuinzenas" type="number" min="1" placeholder="Qtd. de quinzenas" class="hidden">
+          <input id="parcelaCategoria" type="text" placeholder="Categoria" value="Parcelas">
+          <button id="btnParcela" class="btn" type="button" onclick="adicionarParcela()">Adicionar parcela</button>
+        </div>
+        <div id="listaParcelas" class="list"></div>
+      </section>
+
+      <!-- CARTÃO -->
+      <section id="cartao" class="tab section hidden">
+        <h2 class="section-title">Cartão de crédito</h2>
+        <p class="section-desc">Cadastre o valor cheio da fatura ou compras avulsas.</p>
+        <div class="form-grid">
+          <input id="cartaoNome" type="text" placeholder="Nome do cartão" value="Cartão principal">
+          <input id="cartaoFatura" type="number" min="0" step="0.01" placeholder="Valor cheio da fatura">
+          <input id="cartaoVencimento" type="date">
+          <input id="cartaoLimite" type="number" min="0" step="0.01" placeholder="Limite total" value="5000">
+          <button id="btnCartao" class="btn" type="button" onclick="salvarCartao()">Salvar cartão</button>
+        </div>
+        <div class="form-grid">
+          <input id="compraNome" type="text" placeholder="Nome da compra">
+          <input id="compraValor" type="number" min="0" step="0.01" placeholder="Valor da compra">
+          <input id="compraData" type="date">
+          <input id="compraCategoria" type="text" placeholder="Categoria" value="Cartão">
+          <button id="btnCompra" class="btn btn-green" type="button" onclick="salvarCompraFormulario()">Adicionar compra</button>
+          <button id="btnCancelarCompra" class="btn btn-dark hidden" type="button" onclick="limparFormularioCompra();renderizar()">Cancelar edição</button>
+        </div>
+        <div class="grid-3">
+          <div class="card"><p class="metric-title">Fatura atual</p><p class="metric-value" id="valorFatura">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Limite disponível</p><p class="metric-value" id="limiteDisponivel">R$ 0,00</p></div>
+          <div class="card"><p class="metric-title">Vencimento</p><p class="metric-value" id="vencimentoCartao">--/--/----</p></div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <h3>Lembrete mensal da fatura</h3>
+          <p class="item-meta" style="margin-top:8px">Atualize o valor da fatura todo mês antes de calcular seu saldo.</p>
+          <br>
+          <p class="item-meta">Status: <strong id="statusAtualizacaoCartao">--</strong></p>
+          <p class="item-meta">Última atualização: <strong id="ultimaAtualizacaoCartao">--/--/----</strong></p>
+          <br>
+          <button class="btn btn-green" type="button" onclick="marcarCartaoAtualizado()">Marcar fatura atualizada este mês</button>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <h3>Faturas futuras do cartão</h3>
+          <p class="item-meta" style="margin-top:8px">Lance os valores das faturas futuras, por mês, para projetar gastos até dezembro.</p>
+          <br>
+          <div class="form-grid">
+            <input id="faturaMesReferencia" type="month">
+            <input id="faturaMesValor" type="number" min="0" step="0.01" placeholder="Valor da fatura do mês">
+            <button class="btn btn-green" type="button" onclick="salvarFaturaMes()">Salvar fatura do mês</button>
+            <button class="btn btn-dark" type="button" onclick="preencherMesesAteDezembro()">Gerar meses até dezembro</button>
+            <button class="btn btn-red" type="button" onclick="limparFaturaMesSelecionado()">Limpar mês selecionado</button>
+          </div>
+          <div id="listaFaturasMensais" class="list"></div>
+        </div>
+        <div id="listaCompras" class="list"></div>
+      </section>
+
+      <!-- VALES -->
+      <section id="vales" class="tab section hidden">
+        <h2 class="section-title">Vales &amp; categorias</h2>
+        <p class="section-desc">Cadastre quanto recebeu de vale gasolina/alimentação no mês e veja o saldo conforme você gasta. Os lançamentos entram como contas pagas nas categorias Combustível e Alimentação.</p>
+
+        <div class="form-grid" style="margin-bottom:18px">
+          <input id="valesMesReferencia" type="month" onchange="renderizarVales()">
+          <button class="btn btn-dark" type="button" onclick="alterarMesVales(-1)">Mês anterior</button>
+          <button class="btn btn-dark" type="button" onclick="alterarMesVales(1)">Próximo mês</button>
+          <button class="btn" type="button" onclick="irParaMesAtualVales()">Mês atual</button>
+        </div>
+
+        <div class="grid-2">
+          <!-- ===== VALE GASOLINA ===== -->
+          <div class="card">
+            <h3>Vale gasolina</h3>
+            <p class="metric-value" id="vgSaldo" style="margin-top:8px">R$ 0,00</p>
+            <p class="metric-title">Saldo restante do mês</p>
+
+            <div class="grid-2" style="margin-top:14px;margin-bottom:8px;gap:8px">
+              <div><p class="metric-title">Recebido</p><p class="amount" id="vgRecebido">R$ 0,00</p></div>
+              <div><p class="metric-title">Gasto em combustível</p><p class="amount" id="vgGasto">R$ 0,00</p></div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns:1fr auto;margin-top:10px">
+              <input id="vgValor" type="number" min="0" step="0.01" placeholder="Quanto recebeu de VG no mês">
+              <button class="btn" type="button" onclick="salvarValeGasolina()">Salvar</button>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+
+            <h3 style="margin-bottom:10px">Registrar abastecimento</h3>
+            <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+              <input id="abastNome" type="text" placeholder="Posto / nota" value="Posto">
+              <input id="abastValor" type="number" min="0" step="0.01" placeholder="Valor">
+              <input id="abastData" type="date">
+              <input id="abastLitros" type="number" min="0" step="0.01" placeholder="Litros (opc)">
+              <input id="abastKm" type="number" min="0" placeholder="KM rodados (opc)">
+              <button class="btn btn-green" type="button" onclick="adicionarAbastecimento()">+ Abastecimento</button>
+            </div>
+
+            <h3 style="margin:18px 0 10px">Abastecimentos do mês</h3>
+            <div id="listaAbastecimentos" class="list"></div>
+          </div>
+
+          <!-- ===== VALE ALIMENTAÇÃO ===== -->
+          <div class="card">
+            <h3>Vale alimentação</h3>
+            <p class="metric-value" id="vaSaldo" style="margin-top:8px">R$ 0,00</p>
+            <p class="metric-title">Saldo restante do mês</p>
+
+            <div class="grid-2" style="margin-top:14px;margin-bottom:8px;gap:8px">
+              <div><p class="metric-title">Recebido</p><p class="amount" id="vaRecebido">R$ 0,00</p></div>
+              <div><p class="metric-title">Gasto em alimentação</p><p class="amount" id="vaGasto">R$ 0,00</p></div>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns:1fr auto;margin-top:10px">
+              <input id="vaValor" type="number" min="0" step="0.01" placeholder="Quanto recebeu de VA no mês">
+              <button class="btn" type="button" onclick="salvarValeAlimentacao()">Salvar</button>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+
+            <h3 style="margin-bottom:10px">Registrar alimentação</h3>
+            <div class="form-grid" style="grid-template-columns:repeat(3,1fr)">
+              <input id="alimNome" type="text" placeholder="Onde gastou" value="Mercado">
+              <input id="alimValor" type="number" min="0" step="0.01" placeholder="Valor">
+              <input id="alimData" type="date">
+              <select id="alimTipo">
+                <option value="Mercado">Mercado</option>
+                <option value="Restaurante">Restaurante</option>
+                <option value="Lanche">Lanche</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Padaria">Padaria</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <button class="btn btn-green" type="button" onclick="adicionarAlimentacao()" style="grid-column:span 2">+ Alimentação</button>
+            </div>
+
+            <h3 style="margin:18px 0 10px">Alimentação do mês</h3>
+            <div id="listaAlimentacao" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- METAS -->
+      <section id="metas" class="tab section hidden">
+        <h2 class="section-title">Metas</h2>
+        <p class="section-desc">Planeje viagem, reserva, quitação de dívidas e compras importantes.</p>
+        <div class="form-grid">
+          <input id="metaNome" type="text" placeholder="Nome da meta">
+          <input id="metaAlvo" type="number" min="0" step="0.01" placeholder="Valor alvo">
+          <input id="metaGuardado" type="number" min="0" step="0.01" placeholder="Valor guardado">
+          <input id="metaPrazo" type="date">
+          <select id="metaPrioridade">
+            <option value="alta">Alta</option>
+            <option value="média">Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
+          <button id="btnMeta" class="btn" type="button" onclick="salvarMetaFormulario()">Adicionar meta</button>
+          <button id="btnCancelarMeta" class="btn btn-dark hidden" type="button" onclick="limparFormularioMeta();renderizar()">Cancelar edição</button>
+        </div>
+        <div id="listaMetas" class="grid-2"></div>
+      </section>
+
+      <!-- PRIORIDADES -->
+      <section id="prioridades" class="tab section hidden">
+        <h2 class="section-title">Prioridades</h2>
+        <p class="section-desc">Organização automática por urgência.</p>
+        <div id="listaPrioridades"></div>
+      </section>
+
+      <!-- IA -->
+      <section id="ia" class="tab section hidden">
+        <h2 class="section-title">IA Anti-Sufoco</h2>
+        <p class="section-desc">Simulação inteligente com base em contas, hábitos e metas.</p>
+        <div class="grid-2">
+          <div class="card ia-box"><h3>Análise do mês</h3><br><div id="analiseIA"></div></div>
+          <div class="card ia-box"><h3>Plano simples sugerido</h3><br><div id="planoIA"></div></div>
+        </div>
+      </section>
+
+      <!-- BACKUP -->
+      <section id="backup" class="tab section hidden">
+        <h2 class="section-title">Backup e dados</h2>
+        <p class="section-desc">Configure uma pasta sincronizada (Google Drive ou Dropbox local) para o app salvar backup automático. Os dados ficam no seu aparelho — o backup é o seu seguro.</p>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Pasta de backup automático</h3>
+          <p class="item-meta" style="margin-top:8px">O app gravará um arquivo <code>backup-financas.json</code> nessa pasta sempre que você fizer alterações. Se a pasta estiver dentro do Google Drive ou Dropbox local, sincroniza sozinho.</p>
+          <br>
+          <p class="item-meta">Status: <strong id="statusPastaBackup2">não configurada</strong></p>
+          <p class="item-meta">Última gravação: <strong id="ultimaGravacaoBackup">—</strong></p>
+          <br>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-green" type="button" onclick="escolherPastaBackup()">Escolher pasta de backup</button>
+            <button class="btn btn-dark" type="button" onclick="gravarBackupAgora()">Gravar backup agora</button>
+            <button class="btn btn-red" type="button" onclick="esquecerPastaBackup()">Desconectar pasta</button>
+          </div>
+          <p class="item-meta" style="margin-top:10px" id="avisoFSCompat"></p>
+        </div>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Backup manual</h3>
+          <p class="item-meta" style="margin-top:8px">Use isto pra exportar/importar entre dispositivos ou se preferir não conectar pasta.</p>
+          <br>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" type="button" onclick="exportarBackupArquivo()">Exportar backup (.json)</button>
+            <button class="btn btn-dark" type="button" onclick="document.getElementById('arquivoImportarBackup').click()" title="Substitui tudo pelo conteúdo do arquivo">Importar (substitui tudo)</button>
+            <input id="arquivoImportarBackup" type="file" accept="application/json,.json" class="hidden" onchange="importarBackupArquivo(event)">
+            <button class="btn btn-green" type="button" onclick="document.getElementById('arquivoMesclarBackup').click()" title="Adiciona o que não existe, sem apagar nada">Mesclar arquivo (sem apagar)</button>
+            <input id="arquivoMesclarBackup" type="file" accept="application/json,.json" class="hidden" onchange="importarBackupArquivoComoMerge(event)">
+            <button class="btn btn-dark" type="button" onclick="colarJSON()">Colar JSON (substituir)</button>
+            <button class="btn btn-dark" type="button" onclick="mesclarDoClipboard()">Mesclar do clipboard</button>
+            <button class="btn btn-dark" type="button" onclick="restaurarExemplos()">Restaurar exemplos</button>
+            <button class="btn btn-red" type="button" onclick="limparTudo()">Limpar todos os dados</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px">
+          <h3>Histórico de versões (snapshots automáticos)</h3>
+          <p class="item-meta" style="margin-top:8px">O app salva um snapshot a cada 6 horas de uso. Até 30 versões anteriores ficam guardadas — você pode restaurar qualquer uma se algo der errado.</p>
+          <br>
+          <div id="listaSnapshots" class="list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Instalar como app no celular</h3>
+          <p class="item-meta" style="margin-top:8px"><strong>Android (Chrome):</strong> menu (⋮) → "Adicionar à tela inicial" / "Instalar app".</p>
+          <p class="item-meta"><strong>iPhone (Safari):</strong> botão compartilhar (□↑) → "Adicionar à Tela de Início".</p>
+          <p class="item-meta">Depois disso, o ícone vira um app independente, abre em tela cheia e funciona offline.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button id="btnInstalarPWA" class="btn btn-green" type="button" onclick="instalarPWA()">Instalar app</button>
+  <div id="toastWrap" class="toast-wrap" aria-live="polite"></div>
+
+  <script src="./db.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
