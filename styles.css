@@ -714,6 +714,157 @@ select:focus-visible {
   .ia-resumo-valor { margin-top: 0; font-size: 16px; }
 }
 
+/* ===== METAS (cards dinâmicos com anel) ===== */
+.meta-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex; flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: border-color .2s, transform .2s;
+}
+.meta-card::before {
+  content: ""; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: var(--grad-1);
+}
+.meta-card.completa { border-color: var(--green); }
+.meta-card.completa::before { background: var(--grad-3); }
+.meta-card-top {
+  display: flex; justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.meta-info { flex: 1; min-width: 0; }
+.meta-nome {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  word-break: break-word;
+}
+.meta-tags {
+  display: flex; gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.meta-prioridade {
+  display: inline-block;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+}
+.meta-prioridade.alta { color: var(--red); background: var(--red-soft-bg); border: 1px solid var(--red-soft-border); }
+.meta-prioridade\.média, .meta-prioridade.média { color: var(--yellow); background: var(--yellow-soft-bg); border: 1px solid var(--yellow-soft-border); }
+.meta-prioridade.baixa { color: var(--primary); background: var(--badge-bg); border: 1px solid var(--border); }
+.meta-prazo {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--badge-bg);
+  border: 1px solid var(--border);
+}
+.meta-prazo.atrasado { color: var(--red); background: var(--red-soft-bg); border-color: var(--red-soft-border); }
+.meta-ring {
+  width: 96px; height: 96px;
+  position: relative;
+  flex-shrink: 0;
+}
+.meta-ring svg { width: 100%; height: 100%; }
+.meta-ring-label {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.meta-pct {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 22px; font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.meta-pct-lbl {
+  font-size: 9px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.meta-numbers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.meta-numbers > div {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.meta-numbers .lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted2);
+  font-weight: 600;
+}
+.meta-numbers .val {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  word-break: break-word;
+}
+.meta-dica {
+  background: var(--card2);
+  border-left: 3px solid var(--primary);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.meta-dica strong { color: var(--text); }
+.meta-dica.atrasada {
+  background: var(--red-soft-bg);
+  border-left-color: var(--red);
+  color: var(--red);
+}
+.meta-completa {
+  background: var(--green-soft-bg);
+  border-left: 3px solid var(--green);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--green);
+  font-weight: 700;
+  text-align: center;
+}
+.meta-actions {
+  display: flex; gap: 6px;
+  flex-wrap: wrap;
+}
+@media (max-width: 650px) {
+  .meta-numbers { grid-template-columns: 1fr; gap: 6px; }
+  .meta-numbers > div {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+}
+
 /* ===== HOJE (aba estratégica) ===== */
 .hero-card {
   background: var(--card);
@@ -1422,6 +1573,46 @@ select:focus-visible {
   fill: var(--muted2);
   text-anchor: middle;
   text-transform: capitalize;
+}
+
+.chart-linha-resumo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.chart-resumo-item {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.chart-resumo-item .lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted2);
+  font-weight: 600;
+}
+.chart-resumo-item .val {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+@media (max-width: 650px) {
+  .chart-linha-resumo {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .chart-resumo-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 }
 
 @media (max-width: 650px) {

@@ -319,6 +319,10 @@
           <button id="btnConta" class="btn" type="button" onclick="salvarContaFormulario()">Adicionar</button>
           <button id="btnCancelarConta" class="btn btn-dark hidden" type="button" onclick="limparFormularioConta();renderizar()">Cancelar edição</button>
         </div>
+        <label id="lblAtualizarGrupo" class="hidden" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:14px;padding:10px 12px;background:var(--card2);border-radius:8px;border-left:3px solid var(--primary);cursor:pointer">
+          <input id="chkAtualizarGrupo" type="checkbox" style="width:auto">
+          Aplicar a TODAS as <strong id="lblNumParcelas">0</strong> parcelas deste grupo (atualiza nome, valor e categoria de todas — não a data)
+        </label>
         <div class="filters">
           <input id="buscaConta" type="text" placeholder="Buscar nome" oninput="renderizar()">
           <select id="filtroCategoria" onchange="renderizar()">
@@ -582,11 +586,20 @@
         </div>
 
         <div class="card">
-          <div class="card-header-flex">
-            <h3>Saldo dos últimos 6 meses</h3>
-            <span class="grupo-total" id="saldoMedia">Média: R$ 0,00</span>
+          <div class="card-header-flex" style="flex-wrap:wrap;gap:10px">
+            <h3 id="chartLinhaTitulo">Saldo histórico</h3>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <select id="periodoGraficoLinha" onchange="renderizarGraficos()" aria-label="Período do gráfico" style="width:auto">
+                <option value="3">Últimos 3 meses</option>
+                <option value="6" selected>Últimos 6 meses</option>
+                <option value="12">Últimos 12 meses</option>
+                <option value="24">Últimos 24 meses</option>
+              </select>
+              <span class="grupo-total" id="saldoMedia">Média: R$ 0,00</span>
+            </div>
           </div>
           <div id="chartLinha" class="chart-linha" style="margin-top:14px"></div>
+          <div id="chartLinhaResumo" class="chart-linha-resumo"></div>
         </div>
       </section>
 

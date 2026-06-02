@@ -77,6 +77,7 @@ async function migrarSchema() {
 }
 
 let contaEditandoId = null;
+let editandoGrupoId = null; // grupo da conta em edição (null se conta sem grupo)
 let compraEditandoId = null;
 let metaEditandoId = null;
 let habitoEditandoId = null;
@@ -929,14 +930,31 @@ function atualizarConta() {
   const data = $("contaData").value;
   const categoria = normalizarCategoria($("contaCategoria").value || "Outros");
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
-  // Edição só altera campos básicos — tipo/recorrência ficam intactos
-  contas = contas.map(function (i) {
-    return String(i.id) === String(contaEditandoId)
-      ? Object.assign({}, i, { nome: nome, valor: valor, data: data, categoria: categoria })
-      : i;
-  });
-  limparFormularioConta(); salvar(); renderizar();
-  toast("Conta atualizada.", "success");
+  const aplicarGrupo = editandoGrupoId && $("chkAtualizarGrupo") && $("chkAtualizarGrupo").checked;
+  if (aplicarGrupo) {
+    // Atualiza TODAS as parcelas do mesmo grupo: nome base, valor e categoria.
+    // A data fica intacta (cada parcela mantém sua própria data).
+    let atualizadas = 0;
+    contas = contas.map(function (c) {
+      if (c.recorrencia && c.recorrencia.grupo === editandoGrupoId) {
+        const m = (c.nome || "").match(/\((\d+)\/(\d+)\)\s*$/);
+        const novoNome = m ? nome + " (" + m[1] + "/" + m[2] + ")" : nome;
+        atualizadas++;
+        return Object.assign({}, c, { nome: novoNome, valor: valor, categoria: categoria });
+      }
+      return c;
+    });
+    limparFormularioConta(); salvar(); renderizar();
+    toast(atualizadas + " parcelas do grupo atualizadas.", "success", 4000);
+  } else {
+    contas = contas.map(function (i) {
+      return String(i.id) === String(contaEditandoId)
+        ? Object.assign({}, i, { nome: nome, valor: valor, data: data, categoria: categoria })
+        : i;
+    });
+    limparFormularioConta(); salvar(); renderizar();
+    toast("Conta atualizada.", "success");
+  }
 }
 function atualizarCampoQuantasConta() {
   const freq = $("contaFrequencia") ? $("contaFrequencia").value : "unica";
@@ -952,6 +970,7 @@ function atualizarCampoQuantasConta() {
 }
 function limparFormularioConta() {
   contaEditandoId = null;
+  editandoGrupoId = null;
   if ($("contaNome")) $("contaNome").value = "";
   if ($("contaValor")) $("contaValor").value = "";
   if ($("contaData")) $("contaData").value = hoje;
@@ -961,6 +980,8 @@ function limparFormularioConta() {
   atualizarCampoQuantasConta();
   if ($("btnConta")) $("btnConta").innerText = "Adicionar";
   if ($("btnCancelarConta")) $("btnCancelarConta").classList.add("hidden");
+  if ($("lblAtualizarGrupo")) $("lblAtualizarGrupo").classList.add("hidden");
+  if ($("chkAtualizarGrupo")) $("chkAtualizarGrupo").checked = false;
 }
 // Mantida pra compat com chamadas antigas
 function alternarCampoQuinzenasConta() { atualizarCampoQuantasConta(); }
@@ -1278,14 +1299,28 @@ function editarConta(idv) {
   const c = contas.find(function (i) { return String(i.id) === String(idv); });
   if (!c) return;
   contaEditandoId = idv;
-  $("contaNome").value = c.nome;
+  editandoGrupoId = (c.recorrencia && c.recorrencia.grupo) || null;
+  // Remove o "(X/Y)" do nome quando há grupo — fica mais limpo pra editar nome base
+  const nomeBase = editandoGrupoId ? c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim() : c.nome;
+  $("contaNome").value = nomeBase;
   $("contaValor").value = c.valor;
   $("contaData").value = c.data;
   $("contaCategoria").value = c.categoria || "Outros";
-  // Em edição, mostra como pagamento único (edita só essa parcela)
   if ($("contaFrequencia")) $("contaFrequencia").value = "unica";
   if ($("contaQuantas")) $("contaQuantas").value = "";
   atualizarCampoQuantasConta();
+  // Checkbox "aplicar a todas do grupo"
+  const lbl = $("lblAtualizarGrupo");
+  const chk = $("chkAtualizarGrupo");
+  if (editandoGrupoId && lbl && chk) {
+    const irmas = contas.filter(function (x) { return x.recorrencia && x.recorrencia.grupo === editandoGrupoId; }).length;
+    if ($("lblNumParcelas")) $("lblNumParcelas").innerText = irmas;
+    lbl.classList.remove("hidden");
+    chk.checked = false;
+  } else if (lbl) {
+    lbl.classList.add("hidden");
+    if (chk) chk.checked = false;
+  }
   $("btnConta").innerText = "Salvar edição";
   $("btnCancelarConta").classList.remove("hidden");
   openTabPorId("contas");
@@ -1646,21 +1681,70 @@ function renderizarInterno() {
 
   if ($("listaMetas")) {
     $("listaMetas").innerHTML = metas.length ? metas.map(function (m) {
-      const p = Math.min(100, Math.round(Number(m.guardado || 0) / Number(m.alvo || 1) * 100));
-      const falta = Number(m.alvo || 0) - Number(m.guardado || 0);
-      return '<div class="card"><h3>' + escHtml(m.nome) + '</h3>'
-           + '<p class="item-meta">Prazo: ' + dataBR(m.prazo) + ' • Prioridade: ' + escHtml(m.prioridade) + '</p>'
-           + '<div class="progress"><div class="progress-bar" style="width:' + p + '%"></div></div>'
-           + '<p class="item-meta">Progresso: ' + p + '%</p><br>'
-           + '<p>Alvo: <strong>' + dinheiro(m.alvo) + '</strong></p>'
-           + '<p>Guardado: <strong>' + dinheiro(m.guardado) + '</strong></p>'
-           + '<p>Falta: <strong>' + dinheiro(falta) + '</strong></p><br>'
-           + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
-           + '<button class="btn btn-small btn-green" onclick="adicionarValorMeta(\'' + m.id + '\')" title="Adicionar (ou retirar) valor guardado sem editar">+ R$ Guardar</button>'
-           + '<button class="btn btn-small btn-dark" onclick="editarMeta(\'' + m.id + '\')">Editar</button>'
-           + '<button class="btn btn-small btn-red" onclick="excluirMeta(\'' + m.id + '\')">Excluir</button>'
-           + '</div></div>';
-    }).join("") : '<p class="empty">Nenhuma meta cadastrada.</p>';
+      const alvo = Number(m.alvo || 0);
+      const guardado = Number(m.guardado || 0);
+      const falta = Math.max(0, alvo - guardado);
+      const pct = alvo > 0 ? Math.min(100, Math.round(guardado / alvo * 100)) : 0;
+      const completa = pct >= 100;
+      const dias = m.prazo ? diasAte(m.prazo) : 0;
+      const mesesAteFim = Math.max(1, Math.ceil(dias / 30));
+      const porMes = (dias > 0 && falta > 0) ? falta / mesesAteFim : 0;
+      const prio = m.prioridade || "média";
+      const idSafe = String(m.id).replace(/[^a-z0-9_-]/gi, "");
+      // SVG anel
+      const r = 50, cx = 60, cy = 60, sw = 9;
+      const C = 2 * Math.PI * r;
+      const off = C * (1 - pct / 100);
+      // Cores por prioridade
+      const corA = prio === "alta" ? "#ef4444" : prio === "média" ? "#f59e0b" : "#22c55e";
+      const corB = prio === "alta" ? "#ec4899" : prio === "média" ? "#ef4444" : "#06b6d4";
+
+      const diasLbl = !m.prazo ? "" :
+        dias > 0 ? dias + " dia" + (dias === 1 ? "" : "s") + " restantes" :
+        dias === 0 ? "vence hoje" :
+        Math.abs(dias) + " dia" + (Math.abs(dias) === 1 ? "" : "s") + " atrasada";
+
+      return '<div class="meta-card' + (completa ? ' completa' : '') + '">'
+        + '<div class="meta-card-top">'
+        +   '<div class="meta-info">'
+        +     '<h3 class="meta-nome">' + escHtml(m.nome) + '</h3>'
+        +     '<div class="meta-tags">'
+        +       '<span class="meta-prioridade ' + prio + '">' + escHtml(prio) + '</span>'
+        +       (diasLbl ? '<span class="meta-prazo' + (dias < 0 && !completa ? ' atrasado' : '') + '">' + escHtml(diasLbl) + '</span>' : '')
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="meta-ring">'
+        +     '<svg viewBox="0 0 120 120">'
+        +       '<defs><linearGradient id="gradMeta_' + idSafe + '" x1="0" y1="0" x2="1" y2="1">'
+        +         '<stop offset="0%" stop-color="' + corA + '"/>'
+        +         '<stop offset="100%" stop-color="' + corB + '"/>'
+        +       '</linearGradient></defs>'
+        +       '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--progress-bg)" stroke-width="' + sw + '"/>'
+        +       '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="url(#gradMeta_' + idSafe + ')" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>'
+        +     '</svg>'
+        +     '<div class="meta-ring-label">'
+        +       '<div class="meta-pct">' + pct + '%</div>'
+        +       '<div class="meta-pct-lbl">guardado</div>'
+        +     '</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="meta-numbers">'
+        +   '<div><span class="lbl">Guardado</span><span class="val metric-green">' + dinheiro(guardado) + '</span></div>'
+        +   '<div><span class="lbl">Alvo</span><span class="val">' + dinheiro(alvo) + '</span></div>'
+        +   '<div><span class="lbl">Falta</span><span class="val ' + (falta > 0 ? "metric-red" : "metric-green") + '">' + dinheiro(falta) + '</span></div>'
+        + '</div>'
+        + (completa
+            ? '<div class="meta-completa">Meta atingida. Boa!</div>'
+            : (porMes > 0
+                ? '<div class="meta-dica">Pra atingir até <strong>' + dataBR(m.prazo) + '</strong>, guarde <strong>' + dinheiro(porMes) + '/mês</strong>.</div>'
+                : (dias < 0 ? '<div class="meta-dica atrasada">Prazo já passou. Reajuste o prazo ou guarde de uma vez.</div>' : '')))
+        + '<div class="meta-actions">'
+        +   '<button class="btn btn-small btn-green" onclick="adicionarValorMeta(\'' + m.id + '\')" title="Adicionar (ou retirar) valor guardado">+ R$ Guardar</button>'
+        +   '<button class="btn btn-small btn-dark" onclick="editarMeta(\'' + m.id + '\')">Editar</button>'
+        +   '<button class="btn btn-small btn-red" onclick="excluirMeta(\'' + m.id + '\')">Excluir</button>'
+        + '</div>'
+        + '</div>';
+    }).join("") : '<p class="empty">Nenhuma meta cadastrada. Crie uma pra começar a guardar pra algo.</p>';
   }
 
   if ($("listaPrioridades")) {
@@ -2633,8 +2717,8 @@ function renderizarBarras(gastos) {
 function renderizarLinha(historico) {
   const wrap = $("chartLinha");
   if (!wrap) return;
-  if (!historico.length) { wrap.innerHTML = '<p class="empty">Sem histórico.</p>'; return; }
-  const W = 600, H = 200, padL = 50, padR = 14, padT = 14, padB = 28;
+  if (!historico.length) { wrap.innerHTML = '<p class="empty">Sem histórico ainda.</p>'; return; }
+  const W = 640, H = 220, padL = 60, padR = 18, padT = 18, padB = 32;
   const innerW = W - padL - padR;
   const innerH = H - padT - padB;
   const saldos = historico.map(function (h) { return h.saldo; });
@@ -2666,31 +2750,49 @@ function renderizarLinha(historico) {
   let pontosSVG = "";
   historico.forEach(function (h, i) {
     const x = xAt(i), y = yAt(h.saldo);
-    pontosSVG += '<circle cx="' + x + '" cy="' + y + '" r="4" class="ponto" style="stroke:' + (h.saldo >= 0 ? 'var(--green)' : 'var(--red)') + '"/>';
-    pontosSVG += '<text x="' + x + '" y="' + (H - padB + 16) + '" class="mes-label">' + escHtml(h.mes) + '</text>';
-    // Valor acima/abaixo do ponto
-    const labelY = h.saldo >= 0 ? y - 10 : y + 16;
+    const cor = h.saldo >= 0 ? 'var(--green)' : 'var(--red)';
+    pontosSVG += '<circle cx="' + x + '" cy="' + y + '" r="5" fill="var(--card)" stroke="' + cor + '" stroke-width="2.5"><title>' + escHtml(h.mes) + ': ' + dinheiro(h.saldo) + '</title></circle>';
+    pontosSVG += '<text x="' + x + '" y="' + (H - padB + 18) + '" class="mes-label">' + escHtml(h.mes) + '</text>';
+    // Valor acima/abaixo do ponto (só mostra em extremos quando histórico longo)
+    const ehExtremo = i === 0 || i === historico.length - 1 || h.saldo === Math.max.apply(null, saldos) || h.saldo === Math.min.apply(null, saldos);
+    if (historico.length <= 6 || ehExtremo) {
+    const labelY = h.saldo >= 0 ? y - 12 : y + 18;
     pontosSVG += '<text x="' + x + '" y="' + labelY + '" class="ponto-label">' + dinheiro(h.saldo).replace("R$ ", "") + '</text>';
+    }
   });
 
   const media = saldos.reduce(function (s, v) { return s + v; }, 0) / saldos.length;
+  const mesesPositivos = saldos.filter(function (s) { return s >= 0; }).length;
+  const maxS2 = Math.max.apply(null, saldos), minS2 = Math.min.apply(null, saldos);
   if ($("saldoMedia")) $("saldoMedia").innerText = "Média: " + dinheiro(media);
+  if ($("chartLinhaResumo")) {
+    $("chartLinhaResumo").innerHTML =
+      '<div class="chart-resumo-item"><span class="lbl">Meses positivos</span><span class="val metric-green">' + mesesPositivos + ' / ' + historico.length + '</span></div>'
+      + '<div class="chart-resumo-item"><span class="lbl">Melhor mês</span><span class="val">' + dinheiro(maxS2) + '</span></div>'
+      + '<div class="chart-resumo-item"><span class="lbl">Pior mês</span><span class="val">' + dinheiro(minS2) + '</span></div>';
+  }
+  if ($("chartLinhaTitulo")) {
+    $("chartLinhaTitulo").innerText = "Saldo dos últimos " + historico.length + " meses";
+  }
 
   wrap.innerHTML =
     '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
     + '<defs>'
-    + '<linearGradient id="gradLinha" x1="0" y1="0" x2="1" y2="0">'
-    +   '<stop offset="0%" stop-color="#6366f1"/>'
-    +   '<stop offset="100%" stop-color="#22c55e"/>'
+    + '<linearGradient id="gradLinhaFG" x1="0" y1="0" x2="1" y2="0">'
+    +   '<stop offset="0%" stop-color="#22c55e"/>'
+    +   '<stop offset="100%" stop-color="#06b6d4"/>'
     + '</linearGradient>'
-    + '<linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1">'
-    +   '<stop offset="0%" stop-color="#6366f1" stop-opacity="0.4"/>'
-    +   '<stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>'
+    + '<linearGradient id="gradAreaPos" x1="0" y1="0" x2="0" y2="1">'
+    +   '<stop offset="0%" stop-color="#22c55e" stop-opacity="0.30"/>'
+    +   '<stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>'
     + '</linearGradient>'
+    + '<clipPath id="clipPositivo"><rect x="' + padL + '" y="' + padT + '" width="' + innerW + '" height="' + Math.max(0, y0 - padT) + '"/></clipPath>'
+    + '<clipPath id="clipNegativo"><rect x="' + padL + '" y="' + y0 + '" width="' + innerW + '" height="' + Math.max(0, padT + innerH - y0) + '"/></clipPath>'
     + '</defs>'
     + grid
-    + '<polygon points="' + areaPontos + '" class="linha-area"/>'
-    + '<polyline points="' + pontos + '" class="linha-fg"/>'
+    + '<polygon points="' + areaPontos + '" fill="url(#gradAreaPos)" clip-path="url(#clipPositivo)"/>'
+    + '<polygon points="' + areaPontos + '" fill="var(--red)" fill-opacity="0.18" clip-path="url(#clipNegativo)"/>'
+    + '<polyline points="' + pontos + '" fill="none" stroke="url(#gradLinhaFG)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
     + pontosSVG
     + '</svg>';
 }
@@ -2701,7 +2803,8 @@ function renderizarGraficos() {
   const gastos = gastosPorCategoriaDoMes(chave);
   renderizarPizza(gastos);
   renderizarBarras(gastos);
-  renderizarLinha(saldoHistoricoMensal(6));
+  const periodo = $("periodoGraficoLinha") ? Number($("periodoGraficoLinha").value || 6) : 6;
+  renderizarLinha(saldoHistoricoMensal(periodo));
 }
 
 /* ===========================================================
