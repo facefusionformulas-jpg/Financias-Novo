@@ -1,0 +1,13 @@
+{
+  "name": "financas-app",
+  "version": "2.3.0",
+  "description": "App pessoal de finanças, rotina e metas (PWA, offline-first)",
+  "private": true,
+  "scripts": {
+    "test": "node test/run.js"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "fake-indexeddb": "^6.0.0"
+  }
+}

@@ -30,6 +30,51 @@ const CATEGORIAS_PADRAO = [
   "Doação", "Outros"
 ];
 
+/**
+ * Versão do schema de dados.
+ * Bumpe quando alterar a forma como os dados são armazenados
+ * (ex: novos campos obrigatórios, renomeações, mudança de tipo).
+ * Adicione lógica de migração em `migrarSchema()`.
+ */
+const SCHEMA_VERSION = 2;
+
+/**
+ * Aplica migrações sequenciais até trazer os dados pra SCHEMA_VERSION atual.
+ * Roda uma vez após `carregarTudo()`. Idempotente — pode rodar de novo sem dano.
+ * @returns {Promise<boolean>} true se aplicou alguma migração
+ */
+async function migrarSchema() {
+  let versao = 1;
+  try {
+    const v = await dbGet("_schema_version");
+    if (typeof v === "number") versao = v;
+  } catch (e) {}
+  let aplicou = false;
+
+  if (versao < 2) {
+    // Migração 1→2: adiciona campo `adiada` em todas as contas (default false),
+    // normaliza categorias e garante campos de seguranca novos.
+    contas = contas.map(function (c) {
+      const novo = Object.assign({}, c);
+      if (novo.adiada === undefined) novo.adiada = false;
+      if (novo.categoria) novo.categoria = normalizarCategoria(novo.categoria);
+      return novo;
+    });
+    if (!seguranca.notificacoesAtivas) seguranca.notificacoesAtivas = false;
+    if (!seguranca.diasAntesNotificar) seguranca.diasAntesNotificar = 3;
+    aplicou = true;
+  }
+
+  // Próxima migração entraria aqui: if (versao < 3) { ... }
+
+  if (aplicou) {
+    salvar();
+    console.log("[schema] Migrado para v" + SCHEMA_VERSION);
+  }
+  await dbSet("_schema_version", SCHEMA_VERSION);
+  return aplicou;
+}
+
 let contaEditandoId = null;
 let compraEditandoId = null;
 let metaEditandoId = null;
@@ -73,14 +118,19 @@ window.addEventListener("unhandledrejection", function (e) {
 /* ===========================================================
    Helpers genéricos
    =========================================================== */
+/** Atalho pra getElementById. @param {string} id @returns {HTMLElement|null} */
 function $(id) { return document.getElementById(id); }
+/** Gera ID único compacto (~13 chars). @returns {string} */
 function idNovo() { return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2); }
+/** Escapa HTML pra prevenir XSS em strings injetadas em innerHTML. @param {*} s @returns {string} */
 function escHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
   });
 }
+/** Formata número como R$ pt-BR. @param {number|string} v @returns {string} */
 function dinheiro(v) { return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+/** Converte ISO date (AAAA-MM-DD) pra DD/MM/AAAA. @param {string} d @returns {string} */
 function dataBR(d) { return d ? new Date(d + "T00:00:00").toLocaleDateString("pt-BR") : "--/--/----"; }
 function adicionarMeses(data, meses) {
   const b = new Date(data + "T00:00:00"), dia = b.getDate(), n = new Date(b);
@@ -936,9 +986,15 @@ function alternarAdiada(idv) {
 /* ===========================================================
    Categorias padronizadas
    =========================================================== */
+/**
+ * Normaliza nome de categoria: trim + title case com preservação de stopwords.
+ * Garante que "MOTO", "moto", "Moto" sejam todos "Moto" (anti-duplicata).
+ * @param {string} cat
+ * @returns {string}
+ * @example normalizarCategoria("CARRO de luxo") // "Carro de Luxo"
+ */
 function normalizarCategoria(cat) {
   if (!cat) return "Outros";
-  // Aplica title case nas palavras (preservando "de", "do", etc.)
   const stop = new Set(["de", "do", "da", "dos", "das", "e"]);
   return String(cat).trim().toLowerCase().split(/\s+/).map(function (w, i) {
     if (i > 0 && stop.has(w)) return w;
@@ -3231,6 +3287,7 @@ async function iniciar() {
     // Migra dados do localStorage do app antigo, se houver
     await migrarLocalStorageSeNecessario();
     await carregarTudo();
+    await migrarSchema();
     // Recupera handle da pasta de backup, se existir
     try {
       const handle = await dbGet("_backup_pasta_handle");
@@ -3357,3 +3414,10 @@ window.adiarSelecionadas = adiarSelecionadas;
 window.excluirSelecionadas = excluirSelecionadas;
 window.alternarNotificacoes = alternarNotificacoes;
 window.salvarDiasAntes = salvarDiasAntes;
+// Expostos só pra testes (não usados na UI)
+window.normalizarCategoria = normalizarCategoria;
+window.escHtml = escHtml;
+window.dinheiro = dinheiro;
+window.dataBR = dataBR;
+window.adicionarMeses = adicionarMeses;
+window.adicionarDias = adicionarDias;
