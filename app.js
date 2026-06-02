@@ -889,64 +889,80 @@ function adicionarConta() {
   const nome = $("contaNome").value.trim();
   const valor = Number($("contaValor").value);
   const data = $("contaData").value;
-  const tipo = $("contaTipo").value;
   const categoria = normalizarCategoria($("contaCategoria").value || "Outros");
-  const rec = $("contaRecorrencia").value;
-  const dur = Number($("contaDuracao").value || 1);
+  const freq = $("contaFrequencia").value;
+  const quantas = freq === "unica" ? 1 : Math.max(1, Number($("contaQuantas").value || 1));
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
-  if (rec === "mensal") {
-    if (dur < 1) return toast("Informe a duração da recorrência em meses.", "warn");
-    const grupo = idNovo();
-    for (let i = 0; i < dur; i++) {
-      contas.push({
-        id: idNovo(), nome: nome + " (" + (i + 1) + "/" + dur + ")",
-        valor: valor, data: adicionarMeses(data, i),
-        tipo: "mensal recorrente", categoria: categoria, status: "pendente",
-        origem: "recorrencia",
-        recorrencia: { grupo: grupo, parcelaAtual: i + 1, totalParcelas: dur, frequencia: "mensal" }
-      });
-    }
-  } else if (rec === "quinzenal") {
-    const total = Number(($("contaQuinzenas") && $("contaQuinzenas").value) || 0);
-    if (!total || total < 1) return toast("Informe quantas quinzenas deseja gerar.", "warn");
-    const grupo = idNovo();
-    for (let i = 0; i < total; i++) {
-      contas.push({
-        id: idNovo(), nome: nome + " (" + (i + 1) + "/" + total + ")",
-        valor: valor, data: adicionarDias(data, i * 15),
-        tipo: "quinzenal", categoria: categoria, status: "pendente",
-        origem: "recorrencia",
-        recorrencia: { grupo: grupo, parcelaAtual: i + 1, totalParcelas: total, frequencia: "quinzenal" }
-      });
-    }
+
+  if (freq === "unica") {
+    contas.push({
+      id: idNovo(), nome: nome, valor: valor, data: data,
+      tipo: "avulso", categoria: categoria, status: "pendente", origem: "manual"
+    });
   } else {
-    contas.push({ id: idNovo(), nome: nome, valor: valor, data: data, tipo: tipo, categoria: categoria, status: "pendente", origem: "manual" });
+    // Parcelas mensais ou quinzenais
+    const grupo = idNovo();
+    const passoFn = freq === "mensal" ? function (i) { return adicionarMeses(data, i); }
+                                       : function (i) { return adicionarDias(data, i * 15); };
+    const tipoConta = freq === "mensal" ? "mensal recorrente" : "quinzenal";
+    for (let i = 0; i < quantas; i++) {
+      contas.push({
+        id: idNovo(),
+        nome: quantas === 1 ? nome : nome + " (" + (i + 1) + "/" + quantas + ")",
+        valor: valor,
+        data: passoFn(i),
+        tipo: tipoConta,
+        categoria: categoria,
+        status: "pendente",
+        origem: quantas > 1 ? "recorrencia" : "manual",
+        recorrencia: quantas > 1 ? { grupo: grupo, parcelaAtual: i + 1, totalParcelas: quantas, frequencia: freq } : undefined
+      });
+    }
   }
   limparFormularioConta(); salvar(); renderizar();
-  toast("Conta adicionada.", "success");
+  toast(quantas > 1 ? quantas + " parcelas adicionadas." : "Conta adicionada.", "success");
 }
 function atualizarConta() {
-  const nome = $("contaNome").value.trim(), valor = Number($("contaValor").value),
-    data = $("contaData").value, tipo = $("contaTipo").value,
-    categoria = normalizarCategoria($("contaCategoria").value || "Outros");
+  const nome = $("contaNome").value.trim();
+  const valor = Number($("contaValor").value);
+  const data = $("contaData").value;
+  const categoria = normalizarCategoria($("contaCategoria").value || "Outros");
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
+  // Edição só altera campos básicos — tipo/recorrência ficam intactos
   contas = contas.map(function (i) {
     return String(i.id) === String(contaEditandoId)
-      ? Object.assign({}, i, { nome: nome, valor: valor, data: data, tipo: tipo, categoria: categoria })
+      ? Object.assign({}, i, { nome: nome, valor: valor, data: data, categoria: categoria })
       : i;
   });
   limparFormularioConta(); salvar(); renderizar();
+  toast("Conta atualizada.", "success");
+}
+function atualizarCampoQuantasConta() {
+  const freq = $("contaFrequencia") ? $("contaFrequencia").value : "unica";
+  const qInput = $("contaQuantas");
+  if (!qInput) return;
+  if (freq === "unica") {
+    qInput.classList.add("hidden");
+    qInput.value = "";
+  } else {
+    qInput.classList.remove("hidden");
+    if (!qInput.value) qInput.value = "1";
+  }
 }
 function limparFormularioConta() {
   contaEditandoId = null;
-  $("contaNome").value = ""; $("contaValor").value = ""; $("contaData").value = hoje;
-  $("contaTipo").value = "mensal"; $("contaCategoria").value = "Casa";
-  $("contaRecorrencia").value = "unica"; $("contaDuracao").value = "";
-  if ($("contaQuinzenas")) $("contaQuinzenas").value = "";
-  alternarCampoQuinzenasConta();
-  $("btnConta").innerText = "Adicionar";
-  $("btnCancelarConta").classList.add("hidden");
+  if ($("contaNome")) $("contaNome").value = "";
+  if ($("contaValor")) $("contaValor").value = "";
+  if ($("contaData")) $("contaData").value = hoje;
+  if ($("contaCategoria")) $("contaCategoria").value = "Casa";
+  if ($("contaFrequencia")) $("contaFrequencia").value = "unica";
+  if ($("contaQuantas")) $("contaQuantas").value = "";
+  atualizarCampoQuantasConta();
+  if ($("btnConta")) $("btnConta").innerText = "Adicionar";
+  if ($("btnCancelarConta")) $("btnCancelarConta").classList.add("hidden");
 }
+// Mantida pra compat com chamadas antigas
+function alternarCampoQuinzenasConta() { atualizarCampoQuantasConta(); }
 
 function adicionarParcela() {
   const nome = $("parcelaNome").value.trim(),
@@ -1261,14 +1277,18 @@ function editarConta(idv) {
   const c = contas.find(function (i) { return String(i.id) === String(idv); });
   if (!c) return;
   contaEditandoId = idv;
-  $("contaNome").value = c.nome; $("contaValor").value = c.valor;
+  $("contaNome").value = c.nome;
+  $("contaValor").value = c.valor;
   $("contaData").value = c.data;
-  $("contaTipo").value = Array.from($("contaTipo").options).some(function (o) { return o.value === c.tipo; }) ? c.tipo : "mensal";
-  $("contaCategoria").value = c.categoria || "Geral";
-  $("contaRecorrencia").value = "unica"; $("contaDuracao").value = "";
+  $("contaCategoria").value = c.categoria || "Outros";
+  // Em edição, mostra como pagamento único (edita só essa parcela)
+  if ($("contaFrequencia")) $("contaFrequencia").value = "unica";
+  if ($("contaQuantas")) $("contaQuantas").value = "";
+  atualizarCampoQuantasConta();
   $("btnConta").innerText = "Salvar edição";
   $("btnCancelarConta").classList.remove("hidden");
-  openTabPorId("contas"); window.scrollTo({ top: 0, behavior: "smooth" });
+  openTabPorId("contas");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function editarCompra(idv) {
   const c = comprasCartao.find(function (i) { return String(i.id) === String(idv); });
@@ -1549,7 +1569,6 @@ function renderizarInterno() {
 
   if ($("listaContas")) {
     const busca = ($("buscaConta") ? ($("buscaConta").value || "") : "").toLowerCase();
-    const ft = $("filtroTipo") ? ($("filtroTipo").value || "todos") : "todos";
     const fc = $("filtroCategoria") ? ($("filtroCategoria").value || "todos") : "todos";
     // Popula categorias únicas no dropdown (uma vez)
     const selCat = $("filtroCategoria");
@@ -1573,7 +1592,7 @@ function renderizarInterno() {
     const pendentes = lista.filter(function (c) {
       const matchBusca = c.nome.toLowerCase().includes(busca) || (c.categoria || "").toLowerCase().includes(busca);
       const matchCat = fc === "todos" || (c.categoria || "Geral").trim() === fc;
-      return c.status !== "pago" && !c.adiada && matchBusca && matchCat && (ft === "todos" || c.tipo === ft);
+      return c.status !== "pago" && !c.adiada && matchBusca && matchCat;
     }).sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
     const grupos = { vencidas: [], hoje: [], semana: [], mes: [], futuras: [] };
     pendentes.forEach(function (c) {
@@ -3536,6 +3555,7 @@ window.salvarDiasAntes = salvarDiasAntes;
 window.testarNotificacao = testarNotificacao;
 window.alternarModoSelecao = alternarModoSelecao;
 window.adicionarValorMeta = adicionarValorMeta;
+window.atualizarCampoQuantasConta = atualizarCampoQuantasConta;
 // Expostos só pra testes (não usados na UI)
 window.normalizarCategoria = normalizarCategoria;
 window.escHtml = escHtml;

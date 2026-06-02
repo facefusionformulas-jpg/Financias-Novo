@@ -306,26 +306,16 @@
         <h2 class="section-title">Lançamentos de contas</h2>
         <p class="section-desc">Cadastre contas mensais, avulsas, recorrentes, valores cheios, metas ou outras obrigações.</p>
         <div class="form-grid">
-          <input id="contaNome" type="text" placeholder="Nome da conta" required aria-label="Nome da conta">
+          <input id="contaNome" type="text" placeholder="Nome (ex: Internet)" required aria-label="Nome da conta">
           <input id="contaValor" type="number" min="0.01" step="0.01" placeholder="Valor" required aria-label="Valor em reais">
-          <input id="contaData" type="date" required aria-label="Data de vencimento">
-          <select id="contaTipo">
-            <option value="mensal">Mensal</option>
-            <option value="mensal recorrente">Mensal recorrente</option>
-            <option value="quinzenal">Quinzenal</option>
-            <option value="parcela">Parcela</option>
-            <option value="valor cheio">Valor cheio</option>
-            <option value="meta">Meta</option>
-            <option value="avulso">Avulso</option>
-          </select>
+          <input id="contaData" type="date" required aria-label="Data do 1º vencimento">
           <input id="contaCategoria" type="text" placeholder="Categoria" value="Casa" list="categoriasList" autocomplete="off">
-          <select id="contaRecorrencia" onchange="alternarCampoQuinzenasConta()">
-            <option value="unica">Sem recorrência</option>
-            <option value="mensal">Recorrência mensal</option>
-            <option value="quinzenal">Recorrência quinzenal</option>
+          <select id="contaFrequencia" onchange="atualizarCampoQuantasConta()" aria-label="Frequência">
+            <option value="unica">Pagamento único</option>
+            <option value="mensal">Parcelas mensais</option>
+            <option value="quinzenal">Parcelas quinzenais</option>
           </select>
-          <input id="contaDuracao" type="number" min="1" placeholder="Duração em meses">
-          <input id="contaQuinzenas" type="number" min="1" placeholder="Qtd. de quinzenas" class="hidden">
+          <input id="contaQuantas" type="number" min="1" max="120" placeholder="Quantas parcelas?" class="hidden" aria-label="Quantidade de parcelas">
           <button id="btnConta" class="btn" type="button" onclick="salvarContaFormulario()">Adicionar</button>
           <button id="btnCancelarConta" class="btn btn-dark hidden" type="button" onclick="limparFormularioConta();renderizar()">Cancelar edição</button>
         </div>
@@ -333,16 +323,6 @@
           <input id="buscaConta" type="text" placeholder="Buscar nome" oninput="renderizar()">
           <select id="filtroCategoria" onchange="renderizar()">
             <option value="todos">Todas categorias</option>
-          </select>
-          <select id="filtroTipo" onchange="renderizar()">
-            <option value="todos">Todos tipos</option>
-            <option value="mensal">Mensal</option>
-            <option value="mensal recorrente">Mensal recorrente</option>
-            <option value="quinzenal">Quinzenal</option>
-            <option value="parcela">Parcela</option>
-            <option value="valor cheio">Valor cheio</option>
-            <option value="meta">Meta</option>
-            <option value="avulso">Avulso</option>
           </select>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
