@@ -345,6 +345,9 @@
             <option value="avulso">Avulso</option>
           </select>
         </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+          <button id="btnModoSelecao" type="button" class="btn btn-dark btn-small" onclick="alternarModoSelecao()">Selecionar várias</button>
+        </div>
         <div id="listaContas" class="list"></div>
       </section>
 
@@ -676,6 +679,8 @@
             </select>
           </div>
           <p class="item-meta" id="avisoNotificacoes" style="margin-top:8px;color:var(--muted2)"></p>
+          <br>
+          <button class="btn btn-dark btn-small" type="button" onclick="testarNotificacao()">Testar notificação agora</button>
         </div>
 
         <div class="card" style="margin-bottom:14px">

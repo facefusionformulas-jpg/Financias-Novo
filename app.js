@@ -22,6 +22,7 @@ let snapshots = []; // histórico de versões — até 30, gerado automaticament
 let usuario = { nome: "", senhaHash: "", senhaSalt: "", criadoEm: "" };
 let seguranca = { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false, notificacoesAtivas: false, diasAntesNotificar: 3 };
 let contasSelecionadas = new Set(); // ids selecionados para ações em lote
+let modoSelecao = false; // quando ativo, mostra checkboxes nos itens
 
 const CATEGORIAS_PADRAO = [
   "Casa", "Veículo", "Combustível", "Alimentação", "Mercado",
@@ -475,6 +476,21 @@ function salvarDiasAntes() {
   const d = Number($("confDiasAntes").value || 3);
   seguranca.diasAntesNotificar = d;
   salvar();
+}
+async function testarNotificacao() {
+  const ok = await pedirPermissaoNotificacoes();
+  if (!ok) return;
+  try {
+    new Notification("Teste de notificação", {
+      body: "Funcionou! Você será avisado dos vencimentos automaticamente.",
+      icon: "./icons/icon-192.png",
+      badge: "./icons/icon-192.png",
+      tag: "financas-teste"
+    });
+    toast("Notificação enviada.", "success");
+  } catch (e) {
+    toast("Falha: " + (e && e.message || e), "error");
+  }
 }
 function verificarENotificar() {
   if (!seguranca.notificacoesAtivas) return;
@@ -959,6 +975,23 @@ function atualizarMeta() {
   });
   limparFormularioMeta(); salvar(); renderizar();
 }
+function adicionarValorMeta(idMeta) {
+  const m = metas.find(function (x) { return String(x.id) === String(idMeta); });
+  if (!m) return;
+  const faltam = Number(m.alvo || 0) - Number(m.guardado || 0);
+  const dica = faltam > 0 ? " (falta " + dinheiro(faltam) + ")" : "";
+  const v = prompt(
+    "Quanto guardar a mais em \"" + m.nome + "\"?" + dica + "\n\nUse vírgula ou ponto. Pode usar negativo pra retirar.",
+    "0"
+  );
+  if (v === null || v.trim() === "") return;
+  const num = Number(String(v).replace(",", ".").trim());
+  if (!isFinite(num) || num === 0) { if (num === 0) return; return toast("Valor inválido.", "warn"); }
+  m.guardado = Math.max(0, Number(m.guardado || 0) + num);
+  salvar(); renderizar();
+  const sinal = num >= 0 ? "+" : "";
+  toast(sinal + dinheiro(num) + " em " + m.nome, "success");
+}
 function limparFormularioMeta() {
   metaEditandoId = null;
   $("metaNome").value = ""; $("metaAlvo").value = "";
@@ -1080,6 +1113,26 @@ function limparSelecao() {
   contasSelecionadas.clear();
   atualizarBarraSelecao();
   renderizar();
+}
+function alternarModoSelecao() {
+  modoSelecao = !modoSelecao;
+  if (!modoSelecao) contasSelecionadas.clear();
+  atualizarBotaoModoSelecao();
+  atualizarBarraSelecao();
+  renderizar();
+}
+function atualizarBotaoModoSelecao() {
+  const btn = $("btnModoSelecao");
+  if (!btn) return;
+  if (modoSelecao) {
+    btn.innerText = "Cancelar seleção";
+    btn.classList.remove("btn-dark");
+    btn.classList.add("btn");
+  } else {
+    btn.innerText = "Selecionar várias";
+    btn.classList.add("btn-dark");
+    btn.classList.remove("btn");
+  }
 }
 function marcarSelecionadasPagas() {
   if (!contasSelecionadas.size) return;
@@ -1256,10 +1309,19 @@ function itemConta(c) {
     ? '<button class="btn btn-small btn-red" onclick="excluirGrupoRecorrencia(\'' + c.recorrencia.grupo + '\', \'' + nomeBase.replace(/'/g, "\\'") + '\')" title="Apagar TODAS as parcelas deste grupo">Apagar grupo</button>'
     : '';
   const isFatura = c.id === "fatura-cartao";
-  const checkbox = isFatura
-    ? ""
-    : '<input type="checkbox" class="item-check" data-id="' + c.id + '" ' + (contasSelecionadas.has(c.id) ? "checked" : "") + ' onchange="toggleSelecaoConta(\'' + c.id + '\')" onclick="event.stopPropagation()" aria-label="Selecionar conta">';
   const selecionada = contasSelecionadas.has(c.id);
+  const checkbox = (modoSelecao && !isFatura)
+    ? '<input type="checkbox" class="item-check" data-id="' + c.id + '" ' + (selecionada ? "checked" : "") + ' onchange="toggleSelecaoConta(\'' + c.id + '\')" onclick="event.stopPropagation()" aria-label="Selecionar conta">'
+    : '';
+  // Em modo seleção, esconde os botões individuais (ficam as ações em lote)
+  const acoesIndividuais = modoSelecao
+    ? ''
+    : '<button class="btn btn-small btn-dark" onclick="marcarPago(\'' + c.id + '\')">' + (c.status === "pago" ? "Reabrir" : "Pagar") + '</button>'
+      + btnAdiar
+      + '<button class="btn btn-small btn-dark" onclick="editarConta(\'' + c.id + '\')">Editar</button>'
+      + '<button class="btn btn-small btn-red" onclick="excluirConta(\'' + c.id + '\')">Excluir</button>'
+      + btnDup
+      + btnGrupo;
   return '<div class="item' + (selecionada ? ' selecionada' : '') + '">'
        + '<div class="item-left">' + checkbox
        + '<div><p class="item-title ' + classe + '">' + escHtml(c.nome) + '</p>'
@@ -1267,12 +1329,7 @@ function itemConta(c) {
        + '<p class="item-meta">Vencimento: ' + dataBR(c.data) + '</p></div>'
        + '</div>'
        + '<div class="item-actions"><span class="amount">' + dinheiro(c.valor) + '</span>'
-       + '<button class="btn btn-small btn-dark" onclick="marcarPago(\'' + c.id + '\')">' + (c.status === "pago" ? "Reabrir" : "Pagar") + '</button>'
-       + btnAdiar
-       + '<button class="btn btn-small btn-dark" onclick="editarConta(\'' + c.id + '\')">Editar</button>'
-       + '<button class="btn btn-small btn-red" onclick="excluirConta(\'' + c.id + '\')">Excluir</button>'
-       + btnDup
-       + btnGrupo
+       + acoesIndividuais
        + '</div></div>';
 }
 
@@ -1513,8 +1570,11 @@ function renderizarInterno() {
            + '<p>Alvo: <strong>' + dinheiro(m.alvo) + '</strong></p>'
            + '<p>Guardado: <strong>' + dinheiro(m.guardado) + '</strong></p>'
            + '<p>Falta: <strong>' + dinheiro(falta) + '</strong></p><br>'
-           + '<button class="btn btn-small btn-dark" onclick="editarMeta(\'' + m.id + '\')">Editar meta</button> '
-           + '<button class="btn btn-small btn-red" onclick="excluirMeta(\'' + m.id + '\')">Excluir meta</button></div>';
+           + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+           + '<button class="btn btn-small btn-green" onclick="adicionarValorMeta(\'' + m.id + '\')" title="Adicionar (ou retirar) valor guardado sem editar">+ R$ Guardar</button>'
+           + '<button class="btn btn-small btn-dark" onclick="editarMeta(\'' + m.id + '\')">Editar</button>'
+           + '<button class="btn btn-small btn-red" onclick="excluirMeta(\'' + m.id + '\')">Excluir</button>'
+           + '</div></div>';
     }).join("") : '<p class="empty">Nenhuma meta cadastrada.</p>';
   }
 
@@ -1549,6 +1609,7 @@ function renderizarInterno() {
   safeCall(renderizarGraficos, "renderizarGraficos");
   safeCall(popularDatalistCategorias, "popularDatalistCategorias");
   safeCall(atualizarBarraSelecao, "atualizarBarraSelecao");
+  safeCall(atualizarBotaoModoSelecao, "atualizarBotaoModoSelecao");
 }
 function safeCall(fn, label) {
   try { fn(); }
@@ -1881,11 +1942,11 @@ function renderizarIA() {
 
   // === Painel "Análise do mês" ===
   let html = '<div style="display:flex;flex-direction:column;gap:14px">';
-  // Resumo em 3 colunas
-  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
-  html += '<div><p class="metric-title">Salário</p><p class="metric-value" style="font-size:18px">' + dinheiro(p.resumo.salario) + '</p></div>';
-  html += '<div><p class="metric-title">Gasto previsto</p><p class="metric-value" style="font-size:18px">' + dinheiro(p.resumo.total) + '</p></div>';
-  html += '<div><p class="metric-title">Saldo</p><p class="metric-value ' + (p.resumo.saldo >= 0 ? 'metric-green' : 'metric-red') + '" style="font-size:18px">' + dinheiro(p.resumo.saldo) + '</p></div>';
+  // Resumo em 3 colunas (com break-word pra não estourar em telas estreitas)
+  html += '<div class="ia-resumo-grid">';
+  html += '<div class="ia-resumo-cell"><p class="metric-title">Salário</p><p class="ia-resumo-valor">' + dinheiro(p.resumo.salario) + '</p></div>';
+  html += '<div class="ia-resumo-cell"><p class="metric-title">Gasto previsto</p><p class="ia-resumo-valor">' + dinheiro(p.resumo.total) + '</p></div>';
+  html += '<div class="ia-resumo-cell"><p class="metric-title">Saldo</p><p class="ia-resumo-valor ' + (p.resumo.saldo >= 0 ? 'metric-green' : 'metric-red') + '">' + dinheiro(p.resumo.saldo) + '</p></div>';
   html += '</div>';
 
   // Alertas
@@ -3414,6 +3475,9 @@ window.adiarSelecionadas = adiarSelecionadas;
 window.excluirSelecionadas = excluirSelecionadas;
 window.alternarNotificacoes = alternarNotificacoes;
 window.salvarDiasAntes = salvarDiasAntes;
+window.testarNotificacao = testarNotificacao;
+window.alternarModoSelecao = alternarModoSelecao;
+window.adicionarValorMeta = adicionarValorMeta;
 // Expostos só pra testes (não usados na UI)
 window.normalizarCategoria = normalizarCategoria;
 window.escHtml = escHtml;

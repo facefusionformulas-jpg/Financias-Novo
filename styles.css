@@ -683,6 +683,37 @@ select:focus-visible {
 .ia-box strong { color: var(--text); font-weight: 600; }
 .ia-box p { margin-bottom: 6px; }
 
+/* Resumo IA — evita sobreposição em mobile */
+.ia-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.ia-resumo-cell { min-width: 0; }
+.ia-resumo-valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.2;
+  margin-top: 4px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .ia-resumo-grid { grid-template-columns: 1fr; gap: 8px; }
+  .ia-resumo-cell {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ia-resumo-cell:last-child { border-bottom: none; }
+  .ia-resumo-cell .metric-title { margin: 0; }
+  .ia-resumo-valor { margin-top: 0; font-size: 16px; }
+}
+
 /* ===== HOJE (aba estratégica) ===== */
 .hero-card {
   background: var(--card);
