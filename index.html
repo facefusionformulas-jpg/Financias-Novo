@@ -506,6 +506,57 @@
         </div>
       </section>
 
+      <!-- LIBERDADE (sub-tab de Análise) -->
+      <section id="liberdade" class="tab section hidden">
+        <h2 class="section-title">Liberdade financeira</h2>
+        <p class="section-desc">Sua saída do buraco visualmente. Quanto falta, quando termina, o que muda se você antecipar.</p>
+
+        <div class="liberdade-hero">
+          <div class="liberdade-hero-top">
+            <div>
+              <p class="metric-title">Liberdade total prevista</p>
+              <p class="liberdade-data" id="libData">—</p>
+              <p class="liberdade-resumo" id="libResumo">—</p>
+            </div>
+            <div class="liberdade-circle-wrap">
+              <div id="libCircle" class="liberdade-circle"></div>
+              <div class="liberdade-circle-label">
+                <div class="pct" id="libPct">0%</div>
+                <div class="lbl">livre</div>
+              </div>
+            </div>
+          </div>
+          <div class="liberdade-barra-wrap">
+            <div class="liberdade-numeros">
+              <div><span class="lbl">Já quitei</span><span class="val metric-green" id="libPago">R$ 0,00</span></div>
+              <div><span class="lbl">Ainda devo</span><span class="val metric-red" id="libDevido">R$ 0,00</span></div>
+              <div><span class="lbl">Parcelas restantes</span><span class="val" id="libRestantes">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div class="card">
+            <h3>Antecipação: e se eu pagar mais por mês?</h3>
+            <p class="item-meta" style="margin-top:6px">Veja em quanto tempo você fica livre se conseguir pagar um valor extra todo mês.</p>
+            <br>
+            <div class="form-grid" style="grid-template-columns:1fr auto">
+              <input id="libExtra" type="number" min="0" step="50" placeholder="Quanto extra por mês? (R$)" oninput="renderizarLiberdade()">
+              <button class="btn btn-dark btn-small" type="button" onclick="document.getElementById('libExtra').value='';renderizarLiberdade()">Limpar</button>
+            </div>
+            <br>
+            <div id="libAntecipacao" class="lib-antecipacao"></div>
+          </div>
+
+          <div class="card">
+            <h3>Suas dívidas — maiores primeiro</h3>
+            <p class="item-meta" style="margin-top:6px">Top 5 grupos de parcelas pelo total que ainda falta pagar.</p>
+            <br>
+            <div id="libTopDividas" class="list"></div>
+          </div>
+        </div>
+      </section>
+
       <!-- GRÁFICOS (sub-tab de Análise) -->
       <section id="graficos" class="tab section hidden">
         <h2 class="section-title">Gráficos</h2>

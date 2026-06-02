@@ -1093,6 +1093,183 @@ select:focus-visible {
   .cal-more { font-size: 8px; }
 }
 
+/* ===== LIBERDADE FINANCEIRA ===== */
+.liberdade-hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.liberdade-hero::before {
+  content: ""; position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: var(--grad-3);
+}
+.liberdade-hero-top {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.liberdade-data {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-top: 4px;
+  text-transform: capitalize;
+  background: var(--grad-3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.liberdade-resumo {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.liberdade-circle-wrap {
+  position: relative;
+  width: 130px; height: 130px;
+  flex-shrink: 0;
+}
+.liberdade-circle { width: 100%; height: 100%; position: relative; }
+.liberdade-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.liberdade-circle .ring-bg { fill: none; stroke: var(--progress-bg); stroke-width: 12; }
+.liberdade-circle .ring-fg {
+  fill: none; stroke: url(#gradLib); stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .5s ease;
+}
+.liberdade-circle-label {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.liberdade-circle-label .pct {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 28px; font-weight: 800;
+  color: var(--green);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.liberdade-circle-label .lbl {
+  font-size: 10px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.liberdade-numeros {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.liberdade-numeros > div {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.liberdade-numeros .lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--muted);
+}
+.liberdade-numeros .val {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.lib-antecipacao {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.lib-antecipacao-linha {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.lib-antecipacao-linha:last-child { border-bottom: none; }
+.lib-antecipacao-linha .label { color: var(--muted); }
+.lib-antecipacao-linha .val {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--text);
+}
+.lib-antecipacao-destaque {
+  background: var(--green-soft-bg);
+  border-left: 3px solid var(--green);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.lib-antecipacao-destaque strong { color: var(--green); }
+
+.lib-divida-item {
+  display: flex; flex-direction: column;
+  padding: 10px 12px;
+  background: var(--card2);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+.lib-divida-top {
+  display: flex; justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.lib-divida-nome { font-weight: 600; color: var(--text); font-size: 14px; }
+.lib-divida-valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700; color: var(--red);
+}
+.lib-divida-info {
+  font-size: 11px; color: var(--muted);
+  display: flex; gap: 10px;
+  flex-wrap: wrap;
+}
+.lib-divida-progress {
+  height: 4px; background: var(--progress-bg);
+  border-radius: 999px; overflow: hidden;
+  margin-top: 8px;
+}
+.lib-divida-progress .bar {
+  height: 100%; background: var(--grad-3);
+  border-radius: 999px;
+}
+
+@media (max-width: 650px) {
+  .liberdade-hero { padding: 16px; }
+  .liberdade-hero-top { flex-direction: column; align-items: flex-start; }
+  .liberdade-data { font-size: 22px; }
+  .liberdade-circle-wrap { margin: 0 auto; }
+  .liberdade-numeros { grid-template-columns: 1fr; gap: 8px; }
+  .liberdade-numeros > div {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .liberdade-numeros .val { font-size: 15px; }
+}
+
 /* ===== GRÁFICOS SVG ===== */
 .chart-pizza-wrap {
   display: grid;

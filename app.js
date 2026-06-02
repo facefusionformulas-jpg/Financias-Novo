@@ -266,9 +266,10 @@ const SUB_TABS = {
     { id: "conquistas",  label: "Conquistas" }
   ],
   analise: [
-    { id: "graficos", label: "Gráficos" },
-    { id: "mesames",  label: "Mês a mês" },
-    { id: "ia",       label: "Plano IA"  }
+    { id: "liberdade", label: "Liberdade" },
+    { id: "graficos",  label: "Gráficos" },
+    { id: "mesames",   label: "Mês a mês" },
+    { id: "ia",        label: "Plano IA" }
   ]
 };
 
@@ -1691,6 +1692,7 @@ function renderizarInterno() {
   safeCall(renderizarSnapshots, "renderizarSnapshots");
   safeCall(renderizarCalendario, "renderizarCalendario");
   safeCall(renderizarGraficos, "renderizarGraficos");
+  safeCall(renderizarLiberdade, "renderizarLiberdade");
   safeCall(popularDatalistCategorias, "popularDatalistCategorias");
   safeCall(atualizarBarraSelecao, "atualizarBarraSelecao");
   safeCall(atualizarBotaoModoSelecao, "atualizarBotaoModoSelecao");
@@ -2365,6 +2367,170 @@ function renderizarDetalheCalendario() {
   }
 
   $("calDetailBody").innerHTML = html;
+}
+
+/* ===========================================================
+   Liberdade financeira — quanto falta pra sair do buraco
+   =========================================================== */
+function mesesEntre(dataIni, dataFim) {
+  try {
+    const a = new Date(dataIni + "T00:00:00");
+    const b = new Date(dataFim + "T00:00:00");
+    return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) + (b.getDate() >= a.getDate() ? 0 : 0);
+  } catch (e) { return 0; }
+}
+
+/**
+ * Calcula o "estado da sua liberdade financeira":
+ * total devido (parcelas pendentes + adiadas + fatura cartão),
+ * total já pago, % livre, data prevista de quitação total.
+ */
+function calcularLiberdade() {
+  const pendentes = contas.filter(function (c) { return c.status !== "pago"; });
+  const pagas = contas.filter(function (c) { return c.status === "pago"; });
+  const fatura = totalCartao();
+
+  const devidoParcelas = pendentes.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+  const totalDevido = devidoParcelas + fatura;
+  const totalPago = pagas.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+  const totalGeral = totalDevido + totalPago;
+  const pctLivre = totalGeral > 0 ? Math.round((totalPago / totalGeral) * 100) : 100;
+
+  // Data da última parcela pendente
+  let dataLib = hoje;
+  pendentes.forEach(function (c) { if (c.data > dataLib) dataLib = c.data; });
+  const mesesAteLib = Math.max(0, mesesEntre(hoje, dataLib));
+  const mensalMedio = mesesAteLib > 0 ? devidoParcelas / mesesAteLib : devidoParcelas;
+
+  // Agrupa por recorrência (e itens avulsos como grupo individual)
+  const grupos = {};
+  pendentes.forEach(function (c) {
+    if (!c.recorrencia || !c.recorrencia.grupo) {
+      grupos[c.id] = {
+        nome: c.nome,
+        valorTotal: Number(c.valor || 0),
+        parcelasRestantes: 1,
+        parcelaValor: c.valor,
+        proximaData: c.data,
+        avulso: true
+      };
+      return;
+    }
+    const g = c.recorrencia.grupo;
+    if (!grupos[g]) {
+      grupos[g] = {
+        nome: c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim(),
+        valorTotal: 0, parcelasRestantes: 0,
+        parcelaValor: c.valor, proximaData: c.data
+      };
+    }
+    grupos[g].valorTotal += Number(c.valor || 0);
+    grupos[g].parcelasRestantes++;
+    if (c.data < grupos[g].proximaData) grupos[g].proximaData = c.data;
+  });
+  if (fatura > 0) {
+    grupos["__cartao__"] = {
+      nome: (cartao.nome || "Cartão") + " (fatura)",
+      valorTotal: fatura,
+      parcelasRestantes: 1,
+      parcelaValor: fatura,
+      proximaData: cartao.vencimento,
+      avulso: true
+    };
+  }
+  const gruposArr = Object.values(grupos).sort(function (a, b) { return b.valorTotal - a.valorTotal; });
+
+  return {
+    totalDevido: totalDevido,
+    totalPago: totalPago,
+    totalGeral: totalGeral,
+    pctLivre: pctLivre,
+    dataLiberdade: dataLib,
+    mesesAteLib: mesesAteLib,
+    mensalMedio: mensalMedio,
+    parcelasRestantes: pendentes.length,
+    grupos: gruposArr
+  };
+}
+
+function renderizarLiberdade() {
+  if (!$("liberdade")) return;
+  const l = calcularLiberdade();
+
+  let dataStr = "—";
+  try {
+    const d = new Date(l.dataLiberdade + "T00:00:00");
+    dataStr = d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  } catch (e) {}
+
+  $("libData").innerText = l.totalDevido > 0 ? dataStr : "Você está livre";
+  $("libResumo").innerText = l.totalDevido > 0
+    ? l.parcelasRestantes + " parcela" + (l.parcelasRestantes === 1 ? "" : "s") + " restante" + (l.parcelasRestantes === 1 ? "" : "s") + " · " + l.mesesAteLib + " mês" + (l.mesesAteLib === 1 ? "" : "es")
+    : "Sem dívidas pendentes. Aproveita pra construir reserva.";
+  $("libPct").innerText = l.pctLivre + "%";
+  $("libPago").innerText = dinheiro(l.totalPago);
+  $("libDevido").innerText = dinheiro(l.totalDevido);
+  $("libRestantes").innerText = l.parcelasRestantes;
+
+  // Círculo SVG (gradient verde→cyan)
+  const r = 55, cx = 65, cy = 65;
+  const C = 2 * Math.PI * r;
+  const off = C * (1 - l.pctLivre / 100);
+  $("libCircle").innerHTML =
+    '<svg viewBox="0 0 130 130">'
+    + '<defs><linearGradient id="gradLib" x1="0" y1="0" x2="1" y2="1">'
+    +   '<stop offset="0%" stop-color="#22c55e"/>'
+    +   '<stop offset="100%" stop-color="#06b6d4"/>'
+    + '</linearGradient></defs>'
+    + '<circle class="ring-bg" cx="' + cx + '" cy="' + cy + '" r="' + r + '"/>'
+    + '<circle class="ring-fg" cx="' + cx + '" cy="' + cy + '" r="' + r + '" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '"/>'
+    + '</svg>';
+
+  // Antecipação
+  const extra = $("libExtra") ? (Number($("libExtra").value) || 0) : 0;
+  let antHtml = "";
+  if (l.totalDevido <= 0) {
+    antHtml = '<p class="empty">Sem dívidas pendentes — nada a antecipar.</p>';
+  } else if (extra > 0 && (l.mensalMedio + extra) > 0) {
+    const novosMeses = Math.max(1, Math.ceil(l.totalDevido / (l.mensalMedio + extra)));
+    const economiaMeses = Math.max(0, l.mesesAteLib - novosMeses);
+    const novaData = new Date(hoje + "T00:00:00");
+    novaData.setMonth(novaData.getMonth() + novosMeses);
+    const novaDataStr = novaData.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    antHtml += '<div class="lib-antecipacao-linha"><span class="label">Pagamento mensal médio hoje</span><span class="val">' + dinheiro(l.mensalMedio) + '</span></div>';
+    antHtml += '<div class="lib-antecipacao-linha"><span class="label">Com extra de ' + dinheiro(extra) + '/mês</span><span class="val metric-green">' + dinheiro(l.mensalMedio + extra) + '</span></div>';
+    antHtml += '<div class="lib-antecipacao-linha"><span class="label">Tempo até liberdade</span><span class="val">' + novosMeses + ' meses (era ' + l.mesesAteLib + ')</span></div>';
+    if (economiaMeses > 0) {
+      antHtml += '<div class="lib-antecipacao-destaque"><strong>Você se livra ' + economiaMeses + ' mês' + (economiaMeses === 1 ? '' : 'es') + ' antes</strong> — em <strong style="text-transform:capitalize">' + novaDataStr + '</strong>.</div>';
+    } else {
+      antHtml += '<div class="lib-antecipacao-destaque">Esse valor não muda a data significativamente. Tente um valor maior.</div>';
+    }
+  } else {
+    antHtml = '<div class="lib-antecipacao-linha"><span class="label">Pagamento mensal médio hoje</span><span class="val">' + dinheiro(l.mensalMedio) + '</span></div>'
+            + '<p class="empty" style="margin-top:10px">Digite acima quanto você conseguiria pagar a mais por mês pra ver o impacto.</p>';
+  }
+  $("libAntecipacao").innerHTML = antHtml;
+
+  // Top 5 dívidas
+  const top = l.grupos.slice(0, 5);
+  if (!top.length) {
+    $("libTopDividas").innerHTML = '<p class="empty">Você não tem dívidas pendentes!</p>';
+  } else {
+    $("libTopDividas").innerHTML = top.map(function (g) {
+      const proxStr = g.proximaData ? dataBR(g.proximaData) : "—";
+      return '<div class="lib-divida-item">'
+        + '<div class="lib-divida-top">'
+        +   '<div class="lib-divida-nome">' + escHtml(g.nome) + '</div>'
+        +   '<div class="lib-divida-valor">' + dinheiro(g.valorTotal) + '</div>'
+        + '</div>'
+        + '<div class="lib-divida-info">'
+        +   '<span>' + g.parcelasRestantes + ' parcela' + (g.parcelasRestantes === 1 ? '' : 's') + '</span>'
+        +   '<span>· ' + dinheiro(g.parcelaValor) + ' cada</span>'
+        +   '<span>· próxima ' + proxStr + '</span>'
+        + '</div>'
+        + '</div>';
+    }).join("");
+  }
 }
 
 /* ===========================================================
@@ -3564,6 +3730,7 @@ window.testarNotificacao = testarNotificacao;
 window.alternarModoSelecao = alternarModoSelecao;
 window.adicionarValorMeta = adicionarValorMeta;
 window.atualizarCampoQuantasConta = atualizarCampoQuantasConta;
+window.renderizarLiberdade = renderizarLiberdade;
 // Expostos só pra testes (não usados na UI)
 window.normalizarCategoria = normalizarCategoria;
 window.escHtml = escHtml;
