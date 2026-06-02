@@ -32,6 +32,37 @@ let pastaBackupHandle = null;
 let ultimaGravacaoBackupStr = "";
 
 /* ===========================================================
+   Captura visual de erros (banner vermelho fixo no topo)
+   =========================================================== */
+function mostrarErroVisual(msg) {
+  try {
+    let bar = document.getElementById("erroVisual");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "erroVisual";
+      bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;padding:10px 14px;font-family:system-ui,sans-serif;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.4)";
+      const span = document.createElement("span");
+      span.id = "erroVisualMsg";
+      bar.appendChild(span);
+      const btn = document.createElement("button");
+      btn.innerText = "Fechar";
+      btn.style.cssText = "background:transparent;color:#fff;border:1px solid #fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;flex-shrink:0";
+      btn.onclick = function () { bar.remove(); };
+      bar.appendChild(btn);
+      document.body.appendChild(bar);
+    }
+    document.getElementById("erroVisualMsg").innerText = "⚠ " + msg;
+  } catch (_) { /* nada */ }
+}
+window.addEventListener("error", function (e) {
+  if (e && e.message) mostrarErroVisual("JS: " + e.message + " @ " + (e.filename || "?") + ":" + (e.lineno || "?"));
+});
+window.addEventListener("unhandledrejection", function (e) {
+  const m = e && e.reason && (e.reason.message || e.reason.toString()) || "promise rejection";
+  mostrarErroVisual("Promise: " + m);
+});
+
+/* ===========================================================
    Helpers genéricos
    =========================================================== */
 function $(id) { return document.getElementById(id); }
@@ -958,6 +989,14 @@ function alternarCampoQuinzenas() {
    Render principal (painel + contas + parcelas + cartão + metas + prioridades + IA)
    =========================================================== */
 function renderizar() {
+  try { return renderizarInterno(); }
+  catch (e) {
+    console.error("Erro em renderizar():", e);
+    mostrarErroVisual("Falha ao renderizar: " + (e && e.message || e));
+    throw e;
+  }
+}
+function renderizarInterno() {
   const lista = todasContas(), listaMes = contasDoMesAtual(), proximas = proximasContas(),
     abertas = listaMes.filter(function (c) { return c.status !== "pago"; }),
     pagas = listaMes.filter(function (c) { return c.status === "pago"; });
@@ -1082,14 +1121,21 @@ function renderizar() {
       + planoExtraHabitos();
   }
 
-  renderizarRotina();
-  renderizarConquistas();
-  renderizarHoje();
-  renderizarVales();
-  renderizarMesAMes();
-  renderizarStatusBackup();
-  renderizarSnapshots();
-  renderizarCalendario();
+  safeCall(renderizarRotina, "renderizarRotina");
+  safeCall(renderizarConquistas, "renderizarConquistas");
+  safeCall(renderizarHoje, "renderizarHoje");
+  safeCall(renderizarVales, "renderizarVales");
+  safeCall(renderizarMesAMes, "renderizarMesAMes");
+  safeCall(renderizarStatusBackup, "renderizarStatusBackup");
+  safeCall(renderizarSnapshots, "renderizarSnapshots");
+  safeCall(renderizarCalendario, "renderizarCalendario");
+}
+function safeCall(fn, label) {
+  try { fn(); }
+  catch (e) {
+    console.error("Erro em " + label + ":", e);
+    mostrarErroVisual(label + ": " + (e && e.message || e));
+  }
 }
 
 /* ===========================================================
