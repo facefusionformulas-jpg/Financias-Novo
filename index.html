@@ -329,9 +329,12 @@
           <button id="btnCancelarConta" class="btn btn-dark hidden" type="button" onclick="limparFormularioConta();renderizar()">Cancelar edição</button>
         </div>
         <div class="filters">
-          <input id="buscaConta" type="text" placeholder="Buscar por nome ou categoria" oninput="renderizar()">
+          <input id="buscaConta" type="text" placeholder="Buscar nome" oninput="renderizar()">
+          <select id="filtroCategoria" onchange="renderizar()">
+            <option value="todos">Todas categorias</option>
+          </select>
           <select id="filtroTipo" onchange="renderizar()">
-            <option value="todos">Todos os tipos</option>
+            <option value="todos">Todos tipos</option>
             <option value="mensal">Mensal</option>
             <option value="mensal recorrente">Mensal recorrente</option>
             <option value="quinzenal">Quinzenal</option>
@@ -624,7 +627,10 @@
           <h3>Restaurar dados antigos</h3>
           <p class="item-meta" style="margin-top:8px">Você tem um backup de junho/2026 pronto pra mesclar (181 contas estendidas até ago/2029). Clique pra carregar e mesclar sem apagar nada do que já tem.</p>
           <br>
-          <button id="btnImportarBackupInicial" class="btn btn-green" type="button" onclick="importarBackupInicialRemoto()">Importar meus dados antigos</button>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button id="btnImportarBackupInicial" class="btn btn-green" type="button" onclick="importarBackupInicialRemoto()">Importar meus dados antigos</button>
+            <button id="btnCorrecoesV1" class="btn btn-green" type="button" onclick="aplicarCorrecoesRemotas('correcoes-v1.json')">Aplicar correções de contas (v1)</button>
+          </div>
           <p class="item-meta" id="avisoBackupInicial" style="margin-top:8px;color:var(--muted2)"></p>
         </div>
 

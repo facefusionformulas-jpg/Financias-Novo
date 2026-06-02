@@ -533,6 +533,7 @@ function popularConfigSeguranca() {
     }
   }
   atualizarVisibilidadeBotaoBackupInicial();
+  atualizarVisibilidadeBotaoCorrecoes();
 }
 function salvarNomeConfig() {
   const novo = $("confNome").value.trim();
@@ -823,6 +824,22 @@ function alternarAdiada(idv) {
   salvar(); renderizar();
   toast("Conta movida.", "success");
 }
+function excluirGrupoRecorrencia(grupoId, nomeRef) {
+  if (!grupoId) return;
+  const matches = contas.filter(function (c) { return c.recorrencia && c.recorrencia.grupo === grupoId; });
+  if (!matches.length) return toast("Grupo não encontrado.", "warn");
+  const total = matches.length;
+  const valorTotal = matches.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+  const pagas = matches.filter(function (c) { return c.status === "pago"; }).length;
+  let msg = "Apagar TODAS as " + total + " parcelas de \"" + (nomeRef || "este grupo") + "\"";
+  if (pagas) msg += "\n(" + pagas + " já estão marcadas como pagas)";
+  msg += "?\nTotal: " + valorTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  msg += "\n\nEssa ação não tem volta — só dá pra recuperar restaurando um snapshot.";
+  if (!confirm(msg)) return;
+  contas = contas.filter(function (c) { return !(c.recorrencia && c.recorrencia.grupo === grupoId); });
+  salvar(); renderizar();
+  toast(total + " parcelas removidas.", "warn", 4000);
+}
 function excluirConta(idv) {
   if (idv === "fatura-cartao") return toast("A fatura do cartão é gerada automaticamente.", "warn");
   contas = contas.filter(function (c) { return String(c.id) !== String(idv); });
@@ -940,6 +957,11 @@ function itemConta(c) {
   const btnAdiar = podeAdiar
     ? '<button class="btn btn-small btn-dark" onclick="alternarAdiada(\'' + c.id + '\')" title="' + (c.adiada ? "Voltar pra A pagar" : "Adiar pra lembrar depois") + '">' + (c.adiada ? "Reativar" : "Adiar") + '</button>'
     : '';
+  const temGrupo = c.recorrencia && c.recorrencia.grupo;
+  const nomeBase = c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim();
+  const btnGrupo = temGrupo
+    ? '<button class="btn btn-small btn-red" onclick="excluirGrupoRecorrencia(\'' + c.recorrencia.grupo + '\', \'' + nomeBase.replace(/'/g,"\\'") + '\')" title="Apagar TODAS as parcelas deste grupo">Apagar grupo</button>'
+    : '';
   return '<div class="item"><div><p class="item-title ' + classe + '">' + escHtml(c.nome) + '</p>'
        + '<p class="item-meta"><span class="badge">' + escHtml(c.tipo) + '</span><span class="badge">' + escHtml(c.categoria) + '</span><span class="badge ' + bc + '">' + escHtml(label) + '</span></p>'
        + '<p class="item-meta">Vencimento: ' + dataBR(c.data) + '</p></div>'
@@ -948,6 +970,7 @@ function itemConta(c) {
        + btnAdiar
        + '<button class="btn btn-small btn-dark" onclick="editarConta(\'' + c.id + '\')">Editar</button>'
        + '<button class="btn btn-small btn-red" onclick="excluirConta(\'' + c.id + '\')">Excluir</button>'
+       + btnGrupo
        + '</div></div>';
 }
 
@@ -1103,10 +1126,30 @@ function renderizarInterno() {
   if ($("listaContas")) {
     const busca = ($("buscaConta") ? ($("buscaConta").value || "") : "").toLowerCase();
     const ft = $("filtroTipo") ? ($("filtroTipo").value || "todos") : "todos";
+    const fc = $("filtroCategoria") ? ($("filtroCategoria").value || "todos") : "todos";
+    // Popula categorias únicas no dropdown (uma vez)
+    const selCat = $("filtroCategoria");
+    if (selCat) {
+      const cats = Array.from(new Set(contas.map(function (c) { return (c.categoria || "Geral").trim(); }).filter(Boolean))).sort();
+      const valorAtual = selCat.value;
+      if (selCat.options.length - 1 !== cats.length) {
+        // limpa e repopula
+        while (selCat.options.length > 1) selCat.remove(1);
+        cats.forEach(function (cat) {
+          const opt = document.createElement("option");
+          opt.value = cat; opt.innerText = cat;
+          selCat.appendChild(opt);
+        });
+        if (valorAtual && Array.from(selCat.options).some(function(o){return o.value === valorAtual;})) {
+          selCat.value = valorAtual;
+        }
+      }
+    }
     // Aba "A pagar" mostra só pendentes NÃO adiadas, agrupado por urgência
     const pendentes = lista.filter(function (c) {
       const matchBusca = c.nome.toLowerCase().includes(busca) || (c.categoria || "").toLowerCase().includes(busca);
-      return c.status !== "pago" && !c.adiada && matchBusca && (ft === "todos" || c.tipo === ft);
+      const matchCat = fc === "todos" || (c.categoria || "Geral").trim() === fc;
+      return c.status !== "pago" && !c.adiada && matchBusca && matchCat && (ft === "todos" || c.tipo === ft);
     }).sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
     const grupos = { vencidas: [], hoje: [], semana: [], mes: [], futuras: [] };
     pendentes.forEach(function (c) {
@@ -2038,6 +2081,63 @@ function importarBackupArquivoComoMerge(evento) {
   leitor.readAsText(arquivo);
 }
 
+async function aplicarCorrecoesRemotas(arquivo) {
+  arquivo = arquivo || "correcoes-v1.json";
+  const id = arquivo.replace(/\.json$/, "");
+  if (!seguranca.correcoesAplicadas) seguranca.correcoesAplicadas = {};
+  if (seguranca.correcoesAplicadas[id]) {
+    if (!confirm("Correções '" + id + "' já foram aplicadas em " + new Date(seguranca.correcoesAplicadas[id]).toLocaleString("pt-BR") + ". Aplicar de novo?")) return;
+  }
+  try {
+    const resp = await fetch("./imports/" + arquivo + "?t=" + Date.now(), { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const c = await resp.json();
+    let removidas = 0, atualizadas = 0, adicionadas = 0;
+    if (Array.isArray(c.remover) && c.remover.length) {
+      const ids = new Set(c.remover.map(String));
+      const antes = contas.length;
+      contas = contas.filter(function (x) { return !ids.has(String(x.id)); });
+      removidas = antes - contas.length;
+    }
+    if (Array.isArray(c.atualizar)) {
+      c.atualizar.forEach(function (u) {
+        const idx = contas.findIndex(function (x) { return String(x.id) === String(u.id); });
+        if (idx >= 0 && u.changes) {
+          contas[idx] = Object.assign({}, contas[idx], u.changes);
+          atualizadas++;
+        }
+      });
+    }
+    if (Array.isArray(c.adicionar)) {
+      const existentes = new Set(contas.map(function (x) { return String(x.id); }));
+      c.adicionar.forEach(function (n) {
+        if (n && n.id && !existentes.has(String(n.id))) { contas.push(n); adicionadas++; }
+      });
+    }
+    seguranca.correcoesAplicadas[id] = new Date().toISOString();
+    salvar(); renderizar();
+    toast("Correções aplicadas: −" + removidas + " removidas, +" + adicionadas + " novas, ~" + atualizadas + " atualizadas.", "success", 5000);
+    atualizarVisibilidadeBotaoCorrecoes();
+  } catch (e) {
+    toast("Falha: " + (e && e.message || e), "error");
+    console.warn(e);
+  }
+}
+function atualizarVisibilidadeBotaoCorrecoes() {
+  const btn = $("btnCorrecoesV1");
+  if (!btn) return;
+  const aplicada = seguranca.correcoesAplicadas && seguranca.correcoesAplicadas["correcoes-v1"];
+  if (aplicada) {
+    btn.innerText = "Correções v1 aplicadas (reaplicar)";
+    btn.classList.remove("btn-green");
+    btn.classList.add("btn-dark");
+  } else {
+    btn.innerText = "Aplicar correções de contas (v1)";
+    btn.classList.remove("btn-dark");
+    btn.classList.add("btn-green");
+  }
+}
+
 async function importarBackupInicialRemoto() {
   if (seguranca.backupInicialImportado) {
     if (!confirm("Você já importou esse backup antes. Mesclar de novo? Itens que já foram adicionados serão ignorados (deduplica por id).")) return;
@@ -2584,3 +2684,5 @@ window.fecharSidebar = fecharSidebar;
 window.atualizarNomeSidebar = atualizarNomeSidebar;
 window.bloquearAgora = bloquearAgora;
 window.alternarAdiada = alternarAdiada;
+window.aplicarCorrecoesRemotas = aplicarCorrecoesRemotas;
+window.excluirGrupoRecorrencia = excluirGrupoRecorrencia;

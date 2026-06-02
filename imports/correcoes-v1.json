@@ -1,0 +1,94 @@
+{
+  "id": "correcoes-v1",
+  "data": "2026-06-03",
+  "descricao": "Correções de BAU (4× R$152 começando mai/2026), CELULAR plano (2× R$178 mais antigas atrasadas), MERCADO (R$1227/6 = R$204,50 por parcela). Remove os antigos quinzenais de celular e ajusta os valores do mercado das 6 parcelas originais.",
+  "remover": [
+    "id_mpfofmt5_dz86hplpha",
+    "id_mpfofmt5_qolfjj93n3n",
+    "id_mpfofmt5_r5q577s1vtl",
+    "id_mpfofmt5_sbql4nhftf",
+    "id_mpcp93h5_hb6sakgjx7",
+    "id_mpcp93h5_wpxh1map2ve",
+    "id_mpcp93h5_zlhoh8x2hum",
+    "id_mpcp93h5_3465rcdzg1l",
+    "id_mpcp93h5_wz6yxrf3jah",
+    "id_mpcp93h5_acre5zqyymq",
+    "id_mpcp93h5_lp4uun97kw"
+  ],
+  "atualizar": [
+    { "id": "id_mpfogyq5_pe8yh1a8op8", "changes": { "valor": 204.50 } },
+    { "id": "id_mpfogyq6_f5g6iwaqb7",  "changes": { "valor": 204.50 } },
+    { "id": "id_mpfogyq6_lpgwivth5t",  "changes": { "valor": 204.50 } },
+    { "id": "id_mpfogyq6_5bwcbkvw8v",  "changes": { "valor": 204.50 } },
+    { "id": "id_mpfogyq6_sbefc30e0b",  "changes": { "valor": 204.50 } },
+    { "id": "id_mpfogyq6_o7z7z9efgx",  "changes": { "valor": 204.50 } }
+  ],
+  "adicionar": [
+    {
+      "id": "id_corr_bau_1",
+      "nome": "BAU (1/4)",
+      "valor": 152,
+      "data": "2026-05-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_bau_grupo", "parcelaAtual": 1, "totalParcelas": 4, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_bau_2",
+      "nome": "BAU (2/4)",
+      "valor": 152,
+      "data": "2026-06-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_bau_grupo", "parcelaAtual": 2, "totalParcelas": 4, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_bau_3",
+      "nome": "BAU (3/4)",
+      "valor": 152,
+      "data": "2026-07-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_bau_grupo", "parcelaAtual": 3, "totalParcelas": 4, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_bau_4",
+      "nome": "BAU (4/4)",
+      "valor": 152,
+      "data": "2026-08-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_bau_grupo", "parcelaAtual": 4, "totalParcelas": 4, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_cel_1",
+      "nome": "CELULAR plano (1/2)",
+      "valor": 178,
+      "data": "2026-04-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_cel_grupo", "parcelaAtual": 1, "totalParcelas": 2, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_cel_2",
+      "nome": "CELULAR plano (2/2)",
+      "valor": 178,
+      "data": "2026-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_cel_grupo", "parcelaAtual": 2, "totalParcelas": 2, "frequencia": "mensal" }
+    }
+  ]
+}
