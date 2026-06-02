@@ -4,7 +4,7 @@
 // Pra forçar atualização total: bumpe o número da versão abaixo.
 "use strict";
 
-const VERSION = "v7";
+const VERSION = "v8";
 const CACHE = "financas-" + VERSION;
 
 const ASSETS = [
@@ -43,11 +43,16 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Permite que o app peça pra ativar a nova versão
+// Permite que o app peça pra ativar a nova versão ou consultar a versão
 self.addEventListener("message", (e) => {
   if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
-  if (e.data && e.data.type === "GET_VERSION" && e.source) {
-    e.source.postMessage({ type: "VERSION", version: VERSION });
+  if (e.data && e.data.type === "GET_VERSION") {
+    // Responde pelo MessageChannel port se houver; senão pelo source
+    if (e.ports && e.ports[0]) {
+      e.ports[0].postMessage({ type: "VERSION", version: VERSION });
+    } else if (e.source && typeof e.source.postMessage === "function") {
+      e.source.postMessage({ type: "VERSION", version: VERSION });
+    }
   }
 });
 

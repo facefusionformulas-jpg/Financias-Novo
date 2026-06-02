@@ -2231,6 +2231,11 @@ function abrirConfig() {
   renderizarStatusBackup();
   renderizarSnapshots();
   popularConfigSeguranca();
+  // Re-consulta versão do SW toda vez que o modal abre
+  if (_swRegistration) pedirVersaoSW(_swRegistration);
+  else if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+    pedirVersaoSW({ active: navigator.serviceWorker.controller });
+  }
 }
 function fecharConfig() {
   const m = $("modalConfig");
@@ -2278,17 +2283,15 @@ function registrarSW() {
     });
     // Checa atualização a cada 30 minutos
     setInterval(function () { reg.update().catch(function () {}); }, 30 * 60 * 1000);
-    // Pede versão do SW
-    if (reg.active) {
-      const ch = new MessageChannel();
-      ch.port1.onmessage = function (e) {
-        if (e.data && e.data.type === "VERSION") {
-          const v = $("modalConfigVersao");
-          if (v) v.innerText = "SW " + e.data.version;
-        }
-      };
-      reg.active.postMessage({ type: "GET_VERSION" }, [ch.port2]);
-    }
+    // Pede versão do SW (com timeout — SWs antigos não respondem)
+    pedirVersaoSW(reg);
+    // Listener global pra responses sem MessageChannel
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      if (e.data && e.data.type === "VERSION") {
+        const v = $("modalConfigVersao");
+        if (v) v.innerText = "SW " + e.data.version;
+      }
+    });
   }).catch(function (e) {
     console.warn("Service worker não registrado:", e);
   });
@@ -2306,6 +2309,37 @@ function mostrarBannerAtualizacao() {
     + '<button class="btn btn-small btn-dark" type="button" onclick="document.getElementById(\'bannerUpdate\').remove()">Depois</button>';
   document.body.appendChild(banner);
 }
+function pedirVersaoSW(reg) {
+  const alvo = (reg && reg.active) || navigator.serviceWorker.controller;
+  if (!alvo) {
+    const v = $("modalConfigVersao");
+    if (v) v.innerText = "SW não ativado";
+    return;
+  }
+  let respondeu = false;
+  try {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = function (e) {
+      respondeu = true;
+      if (e.data && e.data.type === "VERSION") {
+        const v = $("modalConfigVersao");
+        if (v) v.innerText = "SW " + e.data.version;
+      }
+    };
+    alvo.postMessage({ type: "GET_VERSION" }, [ch.port2]);
+    // Sem port — também envia broadcast pra ser pego pelo listener global
+    alvo.postMessage({ type: "GET_VERSION" });
+    setTimeout(function () {
+      if (!respondeu) {
+        const v = $("modalConfigVersao");
+        if (v && v.innerText.indexOf("SW ") !== 0) v.innerText = "SW antigo (atualize)";
+      }
+    }, 1500);
+  } catch (e) {
+    console.warn("Erro pedindo versão SW:", e);
+  }
+}
+
 function aplicarAtualizacao() {
   if (_swNovoEsperando) {
     _swNovoEsperando.postMessage({ type: "SKIP_WAITING" });
