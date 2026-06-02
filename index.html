@@ -344,6 +344,13 @@
         <div id="listaContas" class="list"></div>
       </section>
 
+      <!-- CONTAS ADIADAS (sub-tab de Finanças) -->
+      <section id="contasadiadas" class="tab section hidden">
+        <h2 class="section-title">Contas adiadas</h2>
+        <p class="section-desc">Contas que você marcou pra lembrar mas adiou pagar. Elas saem do grupo de "A pagar" pra não atrapalhar — mas continuam aqui pra você não esquecer.</p>
+        <div id="listaContasAdiadas" class="list"></div>
+      </section>
+
       <!-- CONTAS PAGAS (sub-tab de Finanças) -->
       <section id="contaspagas" class="tab section hidden">
         <h2 class="section-title">Contas pagas</h2>
@@ -594,6 +601,8 @@
             </label>
           </p>
           <p class="item-meta" id="avisoBiometria" style="color:var(--muted2)"></p>
+          <br>
+          <button class="btn btn-dark btn-small" type="button" onclick="bloquearAgora()" id="btnBloquearAgora">Bloquear app agora</button>
         </div>
 
         <div class="card" style="margin-bottom:14px">
@@ -688,9 +697,14 @@
       <input id="bloqueioSenha" type="password" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarDesbloquearComSenha()">
       <p id="bloqueioErro" class="lock-hint" style="color:var(--red);min-height:18px"></p>
 
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin:8px 0 12px;cursor:pointer">
+        <input id="manterConectado" type="checkbox" checked style="width:auto">
+        Manter conectado por 30 dias neste dispositivo
+      </label>
+
       <div style="display:flex;gap:8px;margin-top:6px">
         <button class="btn" type="button" onclick="tentarDesbloquearComSenha()" style="flex:1">Desbloquear</button>
-        <button id="btnBioDesbloquear" class="btn btn-dark hidden" type="button" onclick="desbloquearComBiometria()">Usar biometria</button>
+        <button id="btnBioDesbloquear" class="btn btn-dark hidden" type="button" onclick="desbloquearComBiometria()">Biometria</button>
       </div>
     </div>
   </div>

@@ -196,10 +196,11 @@ function toast(msg, tipo, ms) {
 // Mapa: aba principal → lista de sub-tabs
 const SUB_TABS = {
   financas: [
-    { id: "contas",       label: "A pagar",  countId: "badgeApagar" },
-    { id: "contaspagas",  label: "Pagas",    countId: "badgePagas"  },
-    { id: "cartao",       label: "Cartão" },
-    { id: "vales",        label: "Vales"  }
+    { id: "contas",         label: "A pagar",  countId: "badgeApagar" },
+    { id: "contasadiadas",  label: "Adiadas",  countId: "badgeAdiadas" },
+    { id: "contaspagas",    label: "Pagas",    countId: "badgePagas"  },
+    { id: "cartao",         label: "Cartão" },
+    { id: "vales",          label: "Vales"  }
   ],
   metas: [
     { id: "metas-lista", label: "Metas" },
@@ -336,6 +337,46 @@ function bloqueioPrecisaSerMostrado() {
   return !!(seguranca.bloqueioAtivo && usuario.senhaHash);
 }
 
+// Sessão ativa: sessionStorage (dura enquanto aba existe) + localStorage (manter conectado X dias)
+function sessaoAtiva() {
+  try {
+    if (sessionStorage.getItem("financas_sessao") === "ativa") return true;
+    const persist = localStorage.getItem("financas_manter_conectado");
+    if (persist) {
+      const dados = JSON.parse(persist);
+      if (dados && dados.ate && new Date(dados.ate) > new Date()) {
+        sessionStorage.setItem("financas_sessao", "ativa");
+        return true;
+      } else {
+        localStorage.removeItem("financas_manter_conectado");
+      }
+    }
+  } catch (e) {}
+  return false;
+}
+function marcarSessaoAtiva(manterConectado) {
+  try {
+    sessionStorage.setItem("financas_sessao", "ativa");
+    if (manterConectado) {
+      const ate = new Date();
+      ate.setDate(ate.getDate() + 30);
+      localStorage.setItem("financas_manter_conectado", JSON.stringify({ ate: ate.toISOString() }));
+    }
+  } catch (e) {}
+}
+function encerrarSessao() {
+  try {
+    sessionStorage.removeItem("financas_sessao");
+    localStorage.removeItem("financas_manter_conectado");
+  } catch (e) {}
+}
+function bloquearAgora() {
+  if (!usuario.senhaHash) { toast("Defina uma senha antes nas configurações.", "warn"); return; }
+  encerrarSessao();
+  fecharConfig();
+  verificarBloqueioAoAbrir(true);
+}
+
 function mostrarOverlay(id) {
   const el = $(id); if (el) el.classList.remove("hidden");
 }
@@ -371,6 +412,8 @@ async function tentarDesbloquearComSenha() {
   if (!senha) return;
   const hash = await hashSenha(senha, usuario.senhaSalt);
   if (hash === usuario.senhaHash) {
+    const manter = $("manterConectado") ? !!$("manterConectado").checked : true;
+    marcarSessaoAtiva(manter);
     $("bloqueioSenha").value = "";
     $("bloqueioErro").innerText = "";
     esconderOverlay("bloqueioOverlay");
@@ -381,13 +424,13 @@ async function tentarDesbloquearComSenha() {
   }
 }
 
-function verificarBloqueioAoAbrir() {
+function verificarBloqueioAoAbrir(forcar) {
   if (!bloqueioPrecisaSerMostrado()) return;
+  if (!forcar && sessaoAtiva()) return; // já desbloqueado nesta sessão / dispositivo lembrado
   $("bloqueioSaudacao").innerText = usuario.nome ? "Olá, " + usuario.nome : "Bloqueado";
   mostrarOverlay("bloqueioOverlay");
   if (seguranca.biometriaCredId) {
     $("btnBioDesbloquear").classList.remove("hidden");
-    // Tenta automaticamente após pequeno delay (pra UX dar tempo de carregar)
     setTimeout(function () { desbloquearComBiometria(true); }, 300);
   } else {
     $("btnBioDesbloquear").classList.add("hidden");
@@ -447,6 +490,8 @@ async function desbloquearComBiometria(automatico) {
       }
     });
     if (assertion) {
+      const manter = $("manterConectado") ? !!$("manterConectado").checked : true;
+      marcarSessaoAtiva(manter);
       $("bloqueioSenha").value = "";
       $("bloqueioErro").innerText = "";
       esconderOverlay("bloqueioOverlay");
@@ -758,9 +803,17 @@ function limparFormularioMeta() {
 function marcarPago(idv) {
   if (idv === "fatura-cartao") return toast("Edite a fatura na aba Cartão.", "warn");
   contas = contas.map(function (c) {
-    return String(c.id) === String(idv) ? Object.assign({}, c, { status: c.status === "pago" ? "pendente" : "pago" }) : c;
+    return String(c.id) === String(idv) ? Object.assign({}, c, { status: c.status === "pago" ? "pendente" : "pago", adiada: false }) : c;
   });
   salvar(); renderizar();
+}
+function alternarAdiada(idv) {
+  if (idv === "fatura-cartao") return toast("A fatura do cartão é gerada automaticamente.", "warn");
+  contas = contas.map(function (c) {
+    return String(c.id) === String(idv) ? Object.assign({}, c, { adiada: !c.adiada }) : c;
+  });
+  salvar(); renderizar();
+  toast("Conta movida.", "success");
 }
 function excluirConta(idv) {
   if (idv === "fatura-cartao") return toast("A fatura do cartão é gerada automaticamente.", "warn");
@@ -804,6 +857,23 @@ function editarMeta(idv) {
   $("btnMeta").innerText = "Salvar meta";
   $("btnCancelarMeta").classList.remove("hidden");
   openTabPorId("metas"); window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderizarContasAdiadas() {
+  if (!$("listaContasAdiadas")) return;
+  const adiadas = contas.filter(function (c) { return c.adiada && c.status !== "pago"; })
+    .sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
+  if (!adiadas.length) {
+    $("listaContasAdiadas").innerHTML = '<p class="empty">Nenhuma conta adiada. Quando você não conseguir pagar uma conta agora, toca em "Adiar" na lista — ela aparece aqui pra você não esquecer.</p>';
+  } else {
+    const total = adiadas.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+    $("listaContasAdiadas").innerHTML =
+      '<div class="grupo-contas">'
+      + '<div class="grupo-header"><span class="grupo-titulo metric-red">' + adiadas.length + ' conta(s) adiada(s)</span><span class="grupo-total">' + dinheiro(total) + '</span></div>'
+      + '<div class="list">' + adiadas.map(itemConta).join("") + '</div>'
+      + '</div>';
+  }
+  if ($("badgeAdiadas")) $("badgeAdiadas").innerText = adiadas.length;
 }
 
 function renderizarContasPagas() {
@@ -852,16 +922,22 @@ function renderizarContasPagas() {
 
 function itemConta(c) {
   const classe = c.status === "pago" ? "paid" : "";
-  const label = urgencia(c);
+  const label = c.adiada ? "Adiada" : urgencia(c);
   let bc = "";
-  if (label.indexOf("Vencida") === 0) bc = "badge-red";
-  if (label === "Vence hoje" || label === "Vence amanhã" || (label.indexOf("Vence em") === 0 && diasAte(c.data) <= 7)) bc = "badge-yellow";
-  if (label === "Pago") bc = "badge-green";
+  if (label === "Adiada") bc = "badge-yellow";
+  else if (label.indexOf("Vencida") === 0) bc = "badge-red";
+  else if (label === "Vence hoje" || label === "Vence amanhã" || (label.indexOf("Vence em") === 0 && diasAte(c.data) <= 7)) bc = "badge-yellow";
+  else if (label === "Pago") bc = "badge-green";
+  const podeAdiar = c.status !== "pago" && c.id !== "fatura-cartao";
+  const btnAdiar = podeAdiar
+    ? '<button class="btn btn-small btn-dark" onclick="alternarAdiada(\'' + c.id + '\')" title="' + (c.adiada ? "Voltar pra A pagar" : "Adiar pra lembrar depois") + '">' + (c.adiada ? "Reativar" : "Adiar") + '</button>'
+    : '';
   return '<div class="item"><div><p class="item-title ' + classe + '">' + escHtml(c.nome) + '</p>'
        + '<p class="item-meta"><span class="badge">' + escHtml(c.tipo) + '</span><span class="badge">' + escHtml(c.categoria) + '</span><span class="badge ' + bc + '">' + escHtml(label) + '</span></p>'
        + '<p class="item-meta">Vencimento: ' + dataBR(c.data) + '</p></div>'
        + '<div class="item-actions"><span class="amount">' + dinheiro(c.valor) + '</span>'
        + '<button class="btn btn-small btn-dark" onclick="marcarPago(\'' + c.id + '\')">' + (c.status === "pago" ? "Reabrir" : "Pagar") + '</button>'
+       + btnAdiar
        + '<button class="btn btn-small btn-dark" onclick="editarConta(\'' + c.id + '\')">Editar</button>'
        + '<button class="btn btn-small btn-red" onclick="excluirConta(\'' + c.id + '\')">Excluir</button>'
        + '</div></div>';
@@ -1019,10 +1095,10 @@ function renderizarInterno() {
   if ($("listaContas")) {
     const busca = ($("buscaConta") ? ($("buscaConta").value || "") : "").toLowerCase();
     const ft = $("filtroTipo") ? ($("filtroTipo").value || "todos") : "todos";
-    // Aba "A pagar" mostra só pendentes, agrupado por urgência
+    // Aba "A pagar" mostra só pendentes NÃO adiadas, agrupado por urgência
     const pendentes = lista.filter(function (c) {
       const matchBusca = c.nome.toLowerCase().includes(busca) || (c.categoria || "").toLowerCase().includes(busca);
-      return c.status !== "pago" && matchBusca && (ft === "todos" || c.tipo === ft);
+      return c.status !== "pago" && !c.adiada && matchBusca && (ft === "todos" || c.tipo === ft);
     }).sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
     const grupos = { vencidas: [], hoje: [], semana: [], mes: [], futuras: [] };
     pendentes.forEach(function (c) {
@@ -1049,6 +1125,7 @@ function renderizarInterno() {
     if ($("badgeApagar")) $("badgeApagar").innerText = pendentes.length;
   }
 
+  renderizarContasAdiadas();
   renderizarContasPagas();
 
   if ($("listaParcelas")) {
@@ -1744,9 +1821,9 @@ function renderizarHoje() {
   barra.style.width = Math.min(100, pctComp) + "%";
   barra.classList.toggle("alerta", pctComp >= 90);
 
-  // Card de ação: contas vencendo em ≤7 dias
-  const urgentes = proximasContas().filter(function (c) { return c.status !== "pago" && diasAte(c.data) <= 7; });
-  const vencidas = todasContas().filter(function (c) { return c.status !== "pago" && diasAte(c.data) < 0; });
+  // Card de ação: contas vencendo em ≤7 dias (ignora adiadas)
+  const urgentes = proximasContas().filter(function (c) { return c.status !== "pago" && !c.adiada && diasAte(c.data) <= 7; });
+  const vencidas = todasContas().filter(function (c) { return c.status !== "pago" && !c.adiada && diasAte(c.data) < 0; });
   const cardAcao = $("cardAcao");
   cardAcao.classList.remove("urgente", "tudo-em-dia");
   if (vencidas.length) {
@@ -2497,3 +2574,5 @@ window.importarBackupInicialRemoto = importarBackupInicialRemoto;
 window.toggleSidebar = toggleSidebar;
 window.fecharSidebar = fecharSidebar;
 window.atualizarNomeSidebar = atualizarNomeSidebar;
+window.bloquearAgora = bloquearAgora;
+window.alternarAdiada = alternarAdiada;
