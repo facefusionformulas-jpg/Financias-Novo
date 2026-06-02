@@ -317,7 +317,7 @@
             <option value="meta">Meta</option>
             <option value="avulso">Avulso</option>
           </select>
-          <input id="contaCategoria" type="text" placeholder="Categoria" value="Casa">
+          <input id="contaCategoria" type="text" placeholder="Categoria" value="Casa" list="categoriasList" autocomplete="off">
           <select id="contaRecorrencia" onchange="alternarCampoQuinzenasConta()">
             <option value="unica">Sem recorrência</option>
             <option value="mensal">Recorrência mensal</option>
@@ -382,7 +382,7 @@
             <option value="quinzenal">Quinzenal</option>
           </select>
           <input id="parcelaQuinzenas" type="number" min="1" placeholder="Qtd. de quinzenas" class="hidden">
-          <input id="parcelaCategoria" type="text" placeholder="Categoria" value="Parcelas">
+          <input id="parcelaCategoria" type="text" placeholder="Categoria" value="Parcelas" list="categoriasList" autocomplete="off">
           <button id="btnParcela" class="btn" type="button" onclick="adicionarParcela()">Adicionar parcela</button>
         </div>
         <div id="listaParcelas" class="list"></div>
@@ -403,7 +403,7 @@
           <input id="compraNome" type="text" placeholder="Nome da compra">
           <input id="compraValor" type="number" min="0" step="0.01" placeholder="Valor da compra">
           <input id="compraData" type="date">
-          <input id="compraCategoria" type="text" placeholder="Categoria" value="Cartão">
+          <input id="compraCategoria" type="text" placeholder="Categoria" value="Cartão" list="categoriasList" autocomplete="off">
           <button id="btnCompra" class="btn btn-green" type="button" onclick="salvarCompraFormulario()">Adicionar compra</button>
           <button id="btnCancelarCompra" class="btn btn-dark hidden" type="button" onclick="limparFormularioCompra();renderizar()">Cancelar edição</button>
         </div>
@@ -597,6 +597,20 @@
 
     <!-- Overlay pra fechar sidebar em mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="fecharSidebar()"></div>
+  </div>
+
+  <!-- Datalist de categorias padronizadas (compartilhado por todos os campos de categoria) -->
+  <datalist id="categoriasList"></datalist>
+
+  <!-- Barra fixa de ações em lote (aparece quando há contas selecionadas) -->
+  <div id="barraSelecao" class="barra-selecao hidden" role="toolbar" aria-label="Ações em lote">
+    <span class="sel-count" id="selCount">0 selecionadas</span>
+    <div class="sel-actions">
+      <button class="btn btn-small btn-green" type="button" onclick="marcarSelecionadasPagas()">Marcar pagas</button>
+      <button class="btn btn-small btn-dark" type="button" onclick="adiarSelecionadas()">Adiar</button>
+      <button class="btn btn-small btn-red" type="button" onclick="excluirSelecionadas()">Excluir</button>
+      <button class="btn btn-small btn-dark" type="button" onclick="limparSelecao()" aria-label="Cancelar seleção">Cancelar</button>
+    </div>
   </div>
 
   <!-- Modal de configurações e backup (engrenagem no header) -->

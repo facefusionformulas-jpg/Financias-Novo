@@ -21,6 +21,14 @@ let conquistasDesbloqueadas = {};
 let snapshots = []; // histórico de versões — até 30, gerado automaticamente
 let usuario = { nome: "", senhaHash: "", senhaSalt: "", criadoEm: "" };
 let seguranca = { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false };
+let contasSelecionadas = new Set(); // ids selecionados para ações em lote
+
+const CATEGORIAS_PADRAO = [
+  "Casa", "Veículo", "Combustível", "Alimentação", "Mercado",
+  "Saúde", "Educação", "Lazer", "Vestuário", "Empréstimo",
+  "Cartão", "Telecom", "Investimento", "Trabalho", "Imposto",
+  "Doação", "Outros"
+];
 
 let contaEditandoId = null;
 let compraEditandoId = null;
@@ -651,7 +659,7 @@ function adicionarConta() {
   const valor = Number($("contaValor").value);
   const data = $("contaData").value;
   const tipo = $("contaTipo").value;
-  const categoria = $("contaCategoria").value.trim() || "Geral";
+  const categoria = normalizarCategoria($("contaCategoria").value || "Outros");
   const rec = $("contaRecorrencia").value;
   const dur = Number($("contaDuracao").value || 1);
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
@@ -689,7 +697,7 @@ function adicionarConta() {
 function atualizarConta() {
   const nome = $("contaNome").value.trim(), valor = Number($("contaValor").value),
     data = $("contaData").value, tipo = $("contaTipo").value,
-    categoria = $("contaCategoria").value.trim() || "Geral";
+    categoria = normalizarCategoria($("contaCategoria").value || "Outros");
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
   contas = contas.map(function (i) {
     return String(i.id) === String(contaEditandoId)
@@ -716,7 +724,7 @@ function adicionarParcela() {
     atual = $("parcelaAtual").value,
     data = $("parcelaData").value,
     frequencia = $("parcelaFrequencia").value,
-    categoria = $("parcelaCategoria").value.trim() || "Parcelas",
+    categoria = normalizarCategoria($("parcelaCategoria").value || "Parcelas"),
     qtdQuinzenas = Number(($("parcelaQuinzenas") && $("parcelaQuinzenas").value) || 0);
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data da parcela.", "warn");
   if (frequencia === "quinzenal") {
@@ -758,14 +766,14 @@ function salvarCartao() {
 function salvarCompraFormulario() { compraEditandoId ? atualizarCompra() : adicionarCompra(); }
 function adicionarCompra() {
   const nome = $("compraNome").value.trim(), valor = Number($("compraValor").value),
-    data = $("compraData").value, categoria = $("compraCategoria").value.trim() || "Cartão";
+    data = $("compraData").value, categoria = normalizarCategoria($("compraCategoria").value || "Cartão");
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data da compra.", "warn");
   comprasCartao.push({ id: idNovo(), nome: nome, valor: valor, data: data, categoria: categoria });
   limparFormularioCompra(); salvar(); renderizar();
 }
 function atualizarCompra() {
   const nome = $("compraNome").value.trim(), valor = Number($("compraValor").value),
-    data = $("compraData").value, categoria = $("compraCategoria").value.trim() || "Cartão";
+    data = $("compraData").value, categoria = normalizarCategoria($("compraCategoria").value || "Cartão");
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data da compra.", "warn");
   comprasCartao = comprasCartao.map(function (i) {
     return String(i.id) === String(compraEditandoId)
@@ -825,6 +833,131 @@ function alternarAdiada(idv) {
   salvar(); renderizar();
   toast("Conta movida.", "success");
 }
+/* ===========================================================
+   Categorias padronizadas
+   =========================================================== */
+function normalizarCategoria(cat) {
+  if (!cat) return "Outros";
+  // Aplica title case nas palavras (preservando "de", "do", etc.)
+  const stop = new Set(["de", "do", "da", "dos", "das", "e"]);
+  return String(cat).trim().toLowerCase().split(/\s+/).map(function (w, i) {
+    if (i > 0 && stop.has(w)) return w;
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(" ");
+}
+function popularDatalistCategorias() {
+  const dl = $("categoriasList");
+  if (!dl) return;
+  const usadas = Array.from(new Set(contas.map(function (c) { return normalizarCategoria(c.categoria); }))).filter(Boolean);
+  const todas = Array.from(new Set([].concat(CATEGORIAS_PADRAO, usadas))).sort(function (a, b) {
+    return a.localeCompare(b, "pt-BR");
+  });
+  dl.innerHTML = todas.map(function (c) { return '<option value="' + escHtml(c) + '"></option>'; }).join("");
+}
+
+/* ===========================================================
+   Duplicar grupo de recorrência
+   =========================================================== */
+function duplicarGrupoRecorrencia(grupoId, nomeRef) {
+  if (!grupoId) return;
+  const parcelas = contas.filter(function (c) { return c.recorrencia && c.recorrencia.grupo === grupoId; });
+  if (!parcelas.length) return toast("Grupo não encontrado.", "warn");
+  parcelas.sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
+  const ultima = parcelas[parcelas.length - 1];
+  const sugestao = adicionarMeses(ultima.data, 1);
+  const dataInicio = prompt(
+    "Duplicar \"" + (nomeRef || "este grupo") + "\" (" + parcelas.length + " parcelas).\n\nData de início da nova série (AAAA-MM-DD):",
+    sugestao
+  );
+  if (!dataInicio || !/^\d{4}-\d{2}-\d{2}$/.test(dataInicio)) {
+    if (dataInicio !== null) toast("Data inválida. Use AAAA-MM-DD.", "warn");
+    return;
+  }
+  const novoGrupo = idNovo();
+  const freq = (ultima.recorrencia && ultima.recorrencia.frequencia) || "mensal";
+  const total = parcelas.length;
+  const nomeBase = (nomeRef || ultima.nome).replace(/\s*\(\d+\/\d+\)\s*$/, "").trim();
+  for (let i = 0; i < total; i++) {
+    const data = freq === "quinzenal" ? adicionarDias(dataInicio, i * 15) : adicionarMeses(dataInicio, i);
+    contas.push({
+      id: idNovo(),
+      nome: nomeBase + " (" + (i + 1) + "/" + total + ")",
+      valor: ultima.valor,
+      data: data,
+      tipo: freq === "quinzenal" ? "quinzenal" : "mensal recorrente",
+      categoria: normalizarCategoria(ultima.categoria),
+      status: "pendente",
+      origem: "recorrencia",
+      recorrencia: { grupo: novoGrupo, parcelaAtual: i + 1, totalParcelas: total, frequencia: freq }
+    });
+  }
+  salvar(); renderizar();
+  toast(total + " parcelas duplicadas começando " + dataBR(dataInicio), "success", 4000);
+}
+
+/* ===========================================================
+   Seleção em lote (marcar pagas, adiar, excluir)
+   =========================================================== */
+function toggleSelecaoConta(id) {
+  if (contasSelecionadas.has(id)) contasSelecionadas.delete(id);
+  else contasSelecionadas.add(id);
+  atualizarBarraSelecao();
+  // Atualiza só o item visualmente (sem re-render completo)
+  const items = document.querySelectorAll('.item-check[data-id="' + id + '"]');
+  items.forEach(function (el) {
+    const item = el.closest(".item");
+    if (item) item.classList.toggle("selecionada", contasSelecionadas.has(id));
+  });
+}
+function atualizarBarraSelecao() {
+  const barra = $("barraSelecao");
+  if (!barra) return;
+  const n = contasSelecionadas.size;
+  if (n === 0) {
+    barra.classList.add("hidden");
+  } else {
+    barra.classList.remove("hidden");
+    $("selCount").innerText = n + " selecionada" + (n === 1 ? "" : "s");
+  }
+}
+function limparSelecao() {
+  contasSelecionadas.clear();
+  atualizarBarraSelecao();
+  renderizar();
+}
+function marcarSelecionadasPagas() {
+  if (!contasSelecionadas.size) return;
+  const ids = new Set(contasSelecionadas);
+  contas = contas.map(function (c) {
+    return ids.has(c.id) ? Object.assign({}, c, { status: "pago", adiada: false }) : c;
+  });
+  const n = ids.size;
+  contasSelecionadas.clear();
+  salvar(); renderizar();
+  toast(n + " conta(s) marcada(s) como pagas.", "success");
+}
+function adiarSelecionadas() {
+  if (!contasSelecionadas.size) return;
+  const ids = new Set(contasSelecionadas);
+  contas = contas.map(function (c) {
+    return (ids.has(c.id) && c.status !== "pago") ? Object.assign({}, c, { adiada: true }) : c;
+  });
+  const n = ids.size;
+  contasSelecionadas.clear();
+  salvar(); renderizar();
+  toast(n + " conta(s) adiada(s).", "success");
+}
+function excluirSelecionadas() {
+  if (!contasSelecionadas.size) return;
+  const n = contasSelecionadas.size;
+  if (!confirm("Excluir " + n + " conta(s)? Não tem volta.")) return;
+  const ids = new Set(contasSelecionadas);
+  contas = contas.filter(function (c) { return !ids.has(c.id); });
+  contasSelecionadas.clear();
+  salvar(); renderizar();
+  toast(n + " conta(s) excluída(s).", "warn");
+}
+
 function excluirGrupoRecorrencia(grupoId, nomeRef) {
   if (!grupoId) return;
   const matches = contas.filter(function (c) { return c.recorrencia && c.recorrencia.grupo === grupoId; });
@@ -960,17 +1093,29 @@ function itemConta(c) {
     : '';
   const temGrupo = c.recorrencia && c.recorrencia.grupo;
   const nomeBase = c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim();
-  const btnGrupo = temGrupo
-    ? '<button class="btn btn-small btn-red" onclick="excluirGrupoRecorrencia(\'' + c.recorrencia.grupo + '\', \'' + nomeBase.replace(/'/g,"\\'") + '\')" title="Apagar TODAS as parcelas deste grupo">Apagar grupo</button>'
+  const btnDup = temGrupo
+    ? '<button class="btn btn-small btn-dark" onclick="duplicarGrupoRecorrencia(\'' + c.recorrencia.grupo + '\', \'' + nomeBase.replace(/'/g, "\\'") + '\')" title="Duplicar grupo de recorrência inteiro">Duplicar grupo</button>'
     : '';
-  return '<div class="item"><div><p class="item-title ' + classe + '">' + escHtml(c.nome) + '</p>'
+  const btnGrupo = temGrupo
+    ? '<button class="btn btn-small btn-red" onclick="excluirGrupoRecorrencia(\'' + c.recorrencia.grupo + '\', \'' + nomeBase.replace(/'/g, "\\'") + '\')" title="Apagar TODAS as parcelas deste grupo">Apagar grupo</button>'
+    : '';
+  const isFatura = c.id === "fatura-cartao";
+  const checkbox = isFatura
+    ? ""
+    : '<input type="checkbox" class="item-check" data-id="' + c.id + '" ' + (contasSelecionadas.has(c.id) ? "checked" : "") + ' onchange="toggleSelecaoConta(\'' + c.id + '\')" onclick="event.stopPropagation()" aria-label="Selecionar conta">';
+  const selecionada = contasSelecionadas.has(c.id);
+  return '<div class="item' + (selecionada ? ' selecionada' : '') + '">'
+       + '<div class="item-left">' + checkbox
+       + '<div><p class="item-title ' + classe + '">' + escHtml(c.nome) + '</p>'
        + '<p class="item-meta"><span class="badge">' + escHtml(c.tipo) + '</span><span class="badge">' + escHtml(c.categoria) + '</span><span class="badge ' + bc + '">' + escHtml(label) + '</span></p>'
        + '<p class="item-meta">Vencimento: ' + dataBR(c.data) + '</p></div>'
+       + '</div>'
        + '<div class="item-actions"><span class="amount">' + dinheiro(c.valor) + '</span>'
        + '<button class="btn btn-small btn-dark" onclick="marcarPago(\'' + c.id + '\')">' + (c.status === "pago" ? "Reabrir" : "Pagar") + '</button>'
        + btnAdiar
        + '<button class="btn btn-small btn-dark" onclick="editarConta(\'' + c.id + '\')">Editar</button>'
        + '<button class="btn btn-small btn-red" onclick="excluirConta(\'' + c.id + '\')">Excluir</button>'
+       + btnDup
        + btnGrupo
        + '</div></div>';
 }
@@ -1246,6 +1391,8 @@ function renderizarInterno() {
   safeCall(renderizarSnapshots, "renderizarSnapshots");
   safeCall(renderizarCalendario, "renderizarCalendario");
   safeCall(renderizarGraficos, "renderizarGraficos");
+  safeCall(popularDatalistCategorias, "popularDatalistCategorias");
+  safeCall(atualizarBarraSelecao, "atualizarBarraSelecao");
 }
 function safeCall(fn, label) {
   try { fn(); }
@@ -3099,3 +3246,9 @@ window.bloquearAgora = bloquearAgora;
 window.alternarAdiada = alternarAdiada;
 window.aplicarCorrecoesRemotas = aplicarCorrecoesRemotas;
 window.excluirGrupoRecorrencia = excluirGrupoRecorrencia;
+window.duplicarGrupoRecorrencia = duplicarGrupoRecorrencia;
+window.toggleSelecaoConta = toggleSelecaoConta;
+window.limparSelecao = limparSelecao;
+window.marcarSelecionadasPagas = marcarSelecionadasPagas;
+window.adiarSelecionadas = adiarSelecionadas;
+window.excluirSelecionadas = excluirSelecionadas;

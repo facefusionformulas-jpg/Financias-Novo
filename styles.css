@@ -505,6 +505,68 @@ input[type="color"] { padding: 4px; height: 38px; }
   gap: 12px; align-items: center;
   transition: border-color .15s, background-color .15s;
 }
+.item.selecionada {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+  border-color: var(--primary);
+}
+.item-check {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  appearance: none; -webkit-appearance: none;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--input-bg);
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+  transition: background-color .15s, border-color .15s;
+}
+.item-check:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.item-check:checked::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: var(--on-primary);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+.item-left {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 0;
+}
+
+/* ===== Barra de ações em lote ===== */
+.barra-selecao {
+  position: fixed;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  z-index: 9998;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 8px 8px 8px 18px;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.5);
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px;
+  max-width: calc(100vw - 28px);
+}
+.barra-selecao.hidden { display: none !important; }
+.barra-selecao .sel-count {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.barra-selecao .sel-actions {
+  display: flex; gap: 6px;
+  flex-wrap: wrap;
+}
+@media (max-width: 650px) {
+  .barra-selecao { padding: 6px 6px 6px 14px; gap: 8px; font-size: 12px; }
+  .barra-selecao .btn-small { padding: 5px 8px; font-size: 11px; }
+}
 .item:hover { background: var(--card2); }
 .item-title { font-weight: 600; color: var(--text); font-size: 14px; }
 .item-meta { color: var(--muted); font-size: 12px; margin-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
