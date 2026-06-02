@@ -2969,15 +2969,8 @@ function atualizarVisibilidadeBotaoCorrecoes() {
   const btn = $("btnCorrecoesV1");
   if (!btn) return;
   const aplicada = seguranca.correcoesAplicadas && seguranca.correcoesAplicadas["correcoes-v1"];
-  if (aplicada) {
-    btn.innerText = "Correções v1 aplicadas (reaplicar)";
-    btn.classList.remove("btn-green");
-    btn.classList.add("btn-dark");
-  } else {
-    btn.innerText = "Aplicar correções de contas (v1)";
-    btn.classList.remove("btn-dark");
-    btn.classList.add("btn-green");
-  }
+  btn.innerText = aplicada ? "Correções v1 aplicadas" : "Aplicar correções v1";
+  btn.disabled = !!aplicada;
 }
 
 async function importarBackupInicialRemoto() {

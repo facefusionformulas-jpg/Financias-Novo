@@ -684,46 +684,43 @@
         </div>
 
         <div class="card" style="margin-bottom:14px">
-          <h3>Pasta de backup automático</h3>
-          <p class="item-meta" style="margin-top:8px">O app gravará um arquivo <code>backup-financas.json</code> nessa pasta sempre que você fizer alterações. Se a pasta estiver dentro do Google Drive ou Dropbox local, sincroniza sozinho.</p>
+          <h3>Backup automático na nuvem</h3>
+          <p class="item-meta" style="margin-top:8px">Escolha uma pasta dentro do Google Drive ou Dropbox local — o app grava um arquivo lá toda vez que você muda algo.</p>
           <br>
-          <p class="item-meta">Status: <strong id="statusPastaBackup2">não configurada</strong></p>
-          <p class="item-meta">Última gravação: <strong id="ultimaGravacaoBackup">—</strong></p>
+          <p class="item-meta">Pasta: <strong id="statusPastaBackup2">não configurada</strong> · Última gravação: <strong id="ultimaGravacaoBackup">—</strong></p>
           <br>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-green" type="button" onclick="escolherPastaBackup()">Escolher pasta de backup</button>
-            <button class="btn btn-dark" type="button" onclick="gravarBackupAgora()">Gravar backup agora</button>
-            <button class="btn btn-red" type="button" onclick="esquecerPastaBackup()">Desconectar pasta</button>
+            <button class="btn btn-green" type="button" onclick="escolherPastaBackup()">Configurar pasta</button>
+            <button class="btn btn-dark btn-small" type="button" onclick="gravarBackupAgora()">Gravar agora</button>
+            <button class="btn btn-dark btn-small" type="button" onclick="esquecerPastaBackup()">Desconectar</button>
           </div>
           <p class="item-meta" style="margin-top:10px" id="avisoFSCompat"></p>
         </div>
 
-        <div class="card" style="margin-bottom:14px;border-left:3px solid var(--green)">
-          <h3>Restaurar dados antigos</h3>
-          <p class="item-meta" style="margin-top:8px">Você tem um backup de junho/2026 pronto pra mesclar (181 contas estendidas até ago/2029). Clique pra carregar e mesclar sem apagar nada do que já tem.</p>
-          <br>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <button id="btnImportarBackupInicial" class="btn btn-green" type="button" onclick="importarBackupInicialRemoto()">Importar meus dados antigos</button>
-            <button id="btnCorrecoesV1" class="btn btn-green" type="button" onclick="aplicarCorrecoesRemotas('correcoes-v1.json')">Aplicar correções de contas (v1)</button>
-          </div>
-          <p class="item-meta" id="avisoBackupInicial" style="margin-top:8px;color:var(--muted2)"></p>
-        </div>
-
         <div class="card" style="margin-bottom:14px">
-          <h3>Backup manual</h3>
-          <p class="item-meta" style="margin-top:8px">Use isto pra mover dados entre dispositivos ou pra ter uma cópia de segurança.</p>
+          <h3>Backup dos seus dados</h3>
+          <p class="item-meta" style="margin-top:8px">Salve uma cópia ou restaure de um arquivo. Recomendado: exporte 1× por mês.</p>
           <br>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" type="button" onclick="exportarBackupArquivo()">Exportar backup (.json)</button>
-            <button class="btn btn-dark" type="button" onclick="document.getElementById('arquivoImportarBackup').click()" title="Substitui tudo pelo conteúdo do arquivo">Importar (substitui tudo)</button>
+            <button class="btn btn-green" type="button" onclick="exportarBackupArquivo()">Exportar backup</button>
+            <button class="btn btn-dark" type="button" onclick="document.getElementById('arquivoImportarBackup').click()">Importar arquivo</button>
             <input id="arquivoImportarBackup" type="file" accept="application/json,.json" class="hidden" onchange="importarBackupArquivo(event)">
-            <button class="btn btn-green" type="button" onclick="document.getElementById('arquivoMesclarBackup').click()" title="Adiciona o que não existe, sem apagar nada">Mesclar arquivo (sem apagar)</button>
-            <input id="arquivoMesclarBackup" type="file" accept="application/json,.json" class="hidden" onchange="importarBackupArquivoComoMerge(event)">
-            <button class="btn btn-dark" type="button" onclick="colarJSON()">Colar JSON (substituir)</button>
-            <button class="btn btn-dark" type="button" onclick="mesclarDoClipboard()">Mesclar do clipboard</button>
-            <button class="btn btn-dark" type="button" onclick="restaurarExemplos()">Restaurar exemplos</button>
-            <button class="btn btn-red" type="button" onclick="limparTudo()">Limpar todos os dados</button>
           </div>
+
+          <details style="margin-top:14px">
+            <summary style="cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Opções avançadas</summary>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+              <button class="btn btn-dark btn-small" type="button" onclick="document.getElementById('arquivoMesclarBackup').click()" title="Adiciona itens novos sem apagar nada">Mesclar arquivo</button>
+              <input id="arquivoMesclarBackup" type="file" accept="application/json,.json" class="hidden" onchange="importarBackupArquivoComoMerge(event)">
+              <button class="btn btn-dark btn-small" type="button" onclick="colarJSON()">Colar JSON</button>
+              <button class="btn btn-dark btn-small" type="button" onclick="mesclarDoClipboard()">Mesclar do clipboard</button>
+              <button id="btnImportarBackupInicial" class="btn btn-dark btn-small" type="button" onclick="importarBackupInicialRemoto()" style="display:none">Importar dados antigos</button>
+              <button id="btnCorrecoesV1" class="btn btn-dark btn-small" type="button" onclick="aplicarCorrecoesRemotas('correcoes-v1.json')">Aplicar correções v1</button>
+              <button class="btn btn-dark btn-small" type="button" onclick="restaurarExemplos()">Restaurar exemplos</button>
+              <button class="btn btn-red btn-small" type="button" onclick="limparTudo()">Limpar tudo</button>
+            </div>
+            <p class="item-meta" id="avisoBackupInicial" style="margin-top:8px;color:var(--muted2)"></p>
+          </details>
         </div>
 
         <div class="card" style="margin-bottom:14px">
