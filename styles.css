@@ -337,6 +337,54 @@ nav button.active {
   box-shadow: var(--shadow-soft);
 }
 
+/* ===== Sub-tabs (barra horizontal dentro de Finanças/Metas/Análise) ===== */
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.sub-tabs::-webkit-scrollbar { height: 4px; }
+.sub-tabs::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+.sub-tab-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; color: var(--muted);
+  border: 1px solid transparent;
+  padding: 8px 14px; border-radius: 8px;
+  font-family: inherit; font-weight: 600; font-size: 13px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.sub-tab-btn:hover { background: var(--hover-bg); color: var(--text); }
+.sub-tab-btn.active {
+  background: var(--card2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.badge-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px;
+  background: var(--card2);
+  color: var(--muted);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px; font-weight: 700;
+  border-radius: 999px;
+  padding: 0 5px;
+}
+.sub-tab-btn.active .badge-count {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
 /* ===== Sections ===== */
 .section {
   background: var(--paper); border: 1px solid var(--border);
@@ -477,6 +525,32 @@ input[type="color"] { padding: 4px; height: 38px; }
 
 .paid { opacity: 0.55; text-decoration: line-through; }
 
+/* ===== Grupo de contas (Vencidas, Hoje, etc) ===== */
+.grupo-contas {
+  margin-bottom: 18px;
+}
+.grupo-contas:last-child { margin-bottom: 0; }
+.grupo-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 4px 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.grupo-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.grupo-total {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Progress ===== */
 .progress {
   width: 100%; height: 6px;
@@ -490,6 +564,112 @@ input[type="color"] { padding: 4px; height: 38px; }
 .ia-box { line-height: 1.7; color: var(--muted); font-size: 13px; }
 .ia-box strong { color: var(--text); font-weight: 600; }
 .ia-box p { margin-bottom: 6px; }
+
+/* ===== HOJE (aba estratégica) ===== */
+.hero-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: ""; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: var(--grad-1);
+}
+.hero-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.hero-saud h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0;
+}
+.hero-data {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+  text-transform: capitalize;
+}
+.hero-saldo { text-align: right; }
+.hero-saldo-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.hero-saldo-valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+}
+.hero-saldo-valor.metric-green { color: var(--green); }
+.hero-saldo-valor.metric-red { color: var(--red); }
+
+.hero-barra-wrap { display: flex; flex-direction: column; gap: 6px; }
+.hero-barra-texto {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.hero-barra-texto strong { color: var(--text); font-weight: 700; }
+.hero-barra-numeros {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+.hero-barra {
+  width: 100%; height: 8px;
+  background: var(--progress-bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.hero-barra-fg {
+  height: 100%;
+  background: var(--grad-1);
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+.hero-barra-fg.alerta { background: var(--grad-4); }
+
+/* Card de ação prioritária */
+.card-acao {
+  border-left: 3px solid var(--yellow);
+}
+.card-acao.urgente {
+  border-left-color: var(--red);
+}
+.card-acao.tudo-em-dia {
+  border-left-color: var(--green);
+}
+
+.card-header-flex {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 8px;
+}
+
+.mini-card { padding: 14px; }
+.mini-card .metric-value { font-size: 20px; }
+
+@media (max-width: 650px) {
+  .hero-header { flex-direction: column; align-items: stretch; }
+  .hero-saldo { text-align: left; }
+  .hero-saldo-valor { font-size: 24px; }
+  .hero-saud h1 { font-size: 20px; }
+}
 
 /* ===== HÁBITOS / ROTINA ===== */
 .habit-card {
@@ -735,11 +915,24 @@ input[type="color"] { padding: 4px; height: 38px; }
 .cal-subtitle:first-child { margin-top: 0; }
 
 @media (max-width: 650px) {
-  .cal-day { padding: 4px; min-height: 44px; }
+  .cal-day {
+    aspect-ratio: 1 / 1.25;
+    padding: 5px;
+    min-height: 56px;
+    border-radius: 6px;
+  }
   .cal-day .cal-num { font-size: 11px; }
-  .cal-day .cal-dots { gap: 2px; }
+  .cal-day .cal-dots {
+    gap: 3px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
   .cal-dot { width: 5px; height: 5px; }
-  .cal-legend { font-size: 10px; gap: 10px; }
+  .cal-habit-flag { width: 6px; height: 6px; top: 4px; right: 4px; }
+  .cal-legend { font-size: 10px; gap: 8px; }
+  .cal-grid { gap: 3px; }
+  .cal-wd { font-size: 10px; padding: 2px 0; }
+  .cal-more { font-size: 9px; }
 }
 
 /* ===== Toast ===== */

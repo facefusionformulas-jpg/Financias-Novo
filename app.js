@@ -162,19 +162,87 @@ function toast(msg, tipo, ms) {
 /* ===========================================================
    Navegação
    =========================================================== */
+// Mapa: aba principal → lista de sub-tabs
+const SUB_TABS = {
+  financas: [
+    { id: "contas",       label: "A pagar",  countId: "badgeApagar" },
+    { id: "contaspagas",  label: "Pagas",    countId: "badgePagas"  },
+    { id: "cartao",       label: "Cartão" },
+    { id: "vales",        label: "Vales"  }
+  ],
+  metas: [
+    { id: "metas-lista", label: "Metas" },
+    { id: "conquistas",  label: "Conquistas" }
+  ],
+  analise: [
+    { id: "mesames", label: "Mês a mês" },
+    { id: "ia",      label: "Plano IA"  }
+  ]
+};
+
 function openTab(id, btn) {
+  // Esconde todas as sections
   document.querySelectorAll(".tab").forEach(function (t) { t.classList.add("hidden"); });
-  $(id).classList.remove("hidden");
+
+  // Atualiza sidebar
   document.querySelectorAll(".sidebar-nav .sidebar-item").forEach(function (b) { b.classList.remove("active"); });
   if (btn) btn.classList.add("active");
   if (window.innerWidth <= 900) fecharSidebar();
+
   // Atualiza título mobile
   const titulo = btn ? (btn.querySelector("span") ? btn.querySelector("span").innerText : "Painel") : "Painel";
   const mt = document.querySelector(".mobile-title");
   if (mt) mt.innerText = titulo;
+
+  // Aba com sub-tabs?
+  if (SUB_TABS[id]) {
+    renderSubTabsBar(id, SUB_TABS[id]);
+    openInner(SUB_TABS[id][0].id);
+  } else {
+    const bar = $("subTabsBar");
+    if (bar) bar.classList.add("hidden");
+    if ($(id)) $(id).classList.remove("hidden");
+  }
+
   renderizar();
 }
+
+function renderSubTabsBar(parentId, subs) {
+  const bar = $("subTabsBar");
+  if (!bar) return;
+  bar.innerHTML = subs.map(function (s) {
+    return '<button class="sub-tab-btn" data-target="' + s.id + '" onclick="openInner(\'' + s.id + '\', this)">'
+      + '<span>' + escHtml(s.label) + '</span>'
+      + (s.countId ? '<span class="badge-count" id="' + s.countId + '">0</span>' : '')
+      + '</button>';
+  }).join("");
+  bar.classList.remove("hidden");
+}
+
+function openInner(id, btn) {
+  // Esconde só sections .tab
+  document.querySelectorAll(".tab").forEach(function (t) { t.classList.add("hidden"); });
+  if ($(id)) $(id).classList.remove("hidden");
+  // Marca sub-tab ativa
+  document.querySelectorAll("#subTabsBar .sub-tab-btn").forEach(function (b) {
+    b.classList.toggle("active", b.getAttribute("data-target") === id);
+  });
+  renderizar();
+}
+
 function openTabPorId(tab) {
+  // Aceita IDs de sub-tabs também
+  for (const parent in SUB_TABS) {
+    if (SUB_TABS[parent].some(function (s) { return s.id === tab; })) {
+      // É uma sub-tab; abre a principal primeiro
+      const btnPrincipal = Array.from(document.querySelectorAll(".sidebar-nav .sidebar-item")).find(function (x) {
+        const oc = x.getAttribute("onclick") || ""; return oc.indexOf("'" + parent + "'") !== -1;
+      });
+      openTab(parent, btnPrincipal);
+      openInner(tab);
+      return;
+    }
+  }
   const b = Array.from(document.querySelectorAll(".sidebar-nav .sidebar-item")).find(function (x) {
     const oc = x.getAttribute("onclick") || ""; return oc.indexOf("'" + tab + "'") !== -1;
   });
@@ -707,6 +775,50 @@ function editarMeta(idv) {
   openTabPorId("metas"); window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function renderizarContasPagas() {
+  if (!$("listaContasPagas")) return;
+  const pagas = contas.filter(function (c) { return c.status === "pago"; })
+    .sort(function (a, b) { return new Date(b.data) - new Date(a.data); });
+  // Popula select de meses (uma vez)
+  const sel = $("filtroMesPagas");
+  if (sel && sel.options.length <= 1) {
+    const meses = Array.from(new Set(pagas.map(function (c) { return chaveMesDaData(c.data); }))).sort().reverse();
+    meses.forEach(function (m) {
+      const opt = document.createElement("option");
+      opt.value = m; opt.innerText = nomeMes(m);
+      sel.appendChild(opt);
+    });
+  }
+  const busca = ($("buscaPagas") ? ($("buscaPagas").value || "") : "").toLowerCase();
+  const filtroMes = $("filtroMesPagas") ? $("filtroMesPagas").value || "todos" : "todos";
+  const filtradas = pagas.filter(function (c) {
+    const matchBusca = c.nome.toLowerCase().includes(busca) || (c.categoria || "").toLowerCase().includes(busca);
+    const matchMes = filtroMes === "todos" || chaveMesDaData(c.data) === filtroMes;
+    return matchBusca && matchMes;
+  });
+  if (!filtradas.length) {
+    $("listaContasPagas").innerHTML = '<p class="empty">Nenhuma conta paga ainda.</p>';
+  } else {
+    // Agrupa por mês
+    const porMes = {};
+    filtradas.forEach(function (c) {
+      const m = chaveMesDaData(c.data);
+      if (!porMes[m]) porMes[m] = [];
+      porMes[m].push(c);
+    });
+    let html = "";
+    Object.keys(porMes).sort().reverse().forEach(function (m) {
+      const total = porMes[m].reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+      html += '<div class="grupo-contas">'
+            + '<div class="grupo-header"><span class="grupo-titulo">' + nomeMes(m) + ' · ' + porMes[m].length + '</span><span class="grupo-total metric-green">' + dinheiro(total) + '</span></div>'
+            + '<div class="list">' + porMes[m].map(itemConta).join("") + '</div>'
+            + '</div>';
+    });
+    $("listaContasPagas").innerHTML = html;
+  }
+  if ($("badgePagas")) $("badgePagas").innerText = pagas.length;
+}
+
 function itemConta(c) {
   const classe = c.status === "pago" ? "paid" : "";
   const label = urgencia(c);
@@ -866,14 +978,39 @@ function renderizar() {
   }
 
   if ($("listaContas")) {
-    const busca = ($("buscaConta").value || "").toLowerCase();
-    const fs = $("filtroStatus").value || "todos", ft = $("filtroTipo").value || "todos";
-    const filtradas = lista.filter(function (c) {
+    const busca = ($("buscaConta") ? ($("buscaConta").value || "") : "").toLowerCase();
+    const ft = $("filtroTipo") ? ($("filtroTipo").value || "todos") : "todos";
+    // Aba "A pagar" mostra só pendentes, agrupado por urgência
+    const pendentes = lista.filter(function (c) {
       const matchBusca = c.nome.toLowerCase().includes(busca) || (c.categoria || "").toLowerCase().includes(busca);
-      return matchBusca && (fs === "todos" || c.status === fs) && (ft === "todos" || c.tipo === ft);
+      return c.status !== "pago" && matchBusca && (ft === "todos" || c.tipo === ft);
+    }).sort(function (a, b) { return new Date(a.data) - new Date(b.data); });
+    const grupos = { vencidas: [], hoje: [], semana: [], mes: [], futuras: [] };
+    pendentes.forEach(function (c) {
+      const d = diasAte(c.data);
+      if (d < 0) grupos.vencidas.push(c);
+      else if (d === 0) grupos.hoje.push(c);
+      else if (d <= 7) grupos.semana.push(c);
+      else if (mesmoMesAtual(c.data)) grupos.mes.push(c);
+      else grupos.futuras.push(c);
     });
-    $("listaContas").innerHTML = filtradas.length ? filtradas.map(itemConta).join("") : '<p class="empty">Nenhuma conta encontrada.</p>';
+    const titulos = { vencidas: "Vencidas", hoje: "Vence hoje", semana: "Próximos 7 dias", mes: "Ainda este mês", futuras: "Meses seguintes" };
+    const classesT = { vencidas: "metric-red", hoje: "metric-red", semana: "", mes: "", futuras: "" };
+    let html = "";
+    ["vencidas", "hoje", "semana", "mes", "futuras"].forEach(function (g) {
+      if (grupos[g].length) {
+        const total = grupos[g].reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+        html += '<div class="grupo-contas">'
+              + '<div class="grupo-header"><span class="grupo-titulo ' + classesT[g] + '">' + titulos[g] + ' · ' + grupos[g].length + '</span><span class="grupo-total">' + dinheiro(total) + '</span></div>'
+              + '<div class="list">' + grupos[g].map(itemConta).join("") + '</div>'
+              + '</div>';
+      }
+    });
+    $("listaContas").innerHTML = html || '<p class="empty">Nenhuma conta pendente. Tudo em dia.</p>';
+    if ($("badgeApagar")) $("badgeApagar").innerText = pendentes.length;
   }
+
+  renderizarContasPagas();
 
   if ($("listaParcelas")) {
     const parcelas = lista.filter(function (c) { return c.origem === "parcela"; });
@@ -1262,7 +1399,8 @@ function contasNoDia(iso) {
 }
 function celulaDiaCalendario(iso, numDia, outside) {
   const cs = contasNoDia(iso);
-  const dots = cs.slice(0, 6).map(function (c) {
+  const maxDots = (window.innerWidth <= 650) ? 3 : 6;
+  const dots = cs.slice(0, maxDots).map(function (c) {
     let classe = "gray";
     if (c.status === "pago") classe = "green";
     else {
@@ -1272,7 +1410,7 @@ function celulaDiaCalendario(iso, numDia, outside) {
     }
     return '<span class="cal-dot ' + classe + '" title="' + escHtml(c.nome) + ' — ' + dinheiro(c.valor) + '"></span>';
   }).join("");
-  const sobra = cs.length > 6 ? '<span class="cal-more">+' + (cs.length - 6) + '</span>' : '';
+  const sobra = cs.length > maxDots ? '<span class="cal-more">+' + (cs.length - maxDots) + '</span>' : '';
 
   const todosHabitos = habitos.length > 0 && habitos.every(function (h) { return bateuMetaNoDia(h.id, iso); });
 
@@ -1518,41 +1656,127 @@ function linhaHabitoCompacta(h) {
     + '<button class="btn btn-small btn-dark" onclick="definirHabitoHoje(\'' + h.id + '\',' + p.meta + ')">OK</button>'
     + '</div></div>';
 }
+function proximoGrupoRecorrenciaAQuitar() {
+  // Agrupa contas por recorrencia.grupo e calcula faltam-pra-quitar
+  const grupos = {};
+  contas.forEach(function (c) {
+    if (!c.recorrencia || !c.recorrencia.grupo) return;
+    const g = c.recorrencia.grupo;
+    if (!grupos[g]) grupos[g] = { nome: c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim(), total: c.recorrencia.totalParcelas || 0, pagas: 0, pendentes: 0, proximaData: null, valorParcela: c.valor };
+    if (c.status === "pago") grupos[g].pagas++;
+    else {
+      grupos[g].pendentes++;
+      const d = new Date(c.data + "T00:00:00");
+      if (!grupos[g].proximaData || d < grupos[g].proximaData) grupos[g].proximaData = d;
+    }
+  });
+  // Filtra: tem pendentes (>0) e total > 0
+  const arr = Object.keys(grupos).map(function (k) { return Object.assign({ id: k }, grupos[k]); })
+    .filter(function (g) { return g.pendentes > 0 && g.total > 0; });
+  if (!arr.length) return null;
+  // Ordena: menos pendentes primeiro (mais perto de quitar)
+  arr.sort(function (a, b) { return a.pendentes - b.pendentes; });
+  return arr[0];
+}
+
 function renderizarHoje() {
   if (!$("hoje")) return;
+
+  // Saudação
   $("hojeSaudacao").innerText = saudacaoHora() + (usuario.nome ? ", " + usuario.nome : "") + "!";
-  $("hojeData").innerText = "Hoje é " + dataHojeExtenso() + ".";
+  $("hojeData").innerText = dataHojeExtenso();
+
+  // Hero: saldo previsto, % comprometido, barra
+  const s = helperSaldoMes(chaveMesAtual());
+  $("heroSaldo").innerText = dinheiro(s.saldo);
+  $("heroSaldo").className = "hero-saldo-valor " + (s.saldo >= 0 ? "metric-green" : "metric-red");
+  const pctComp = s.salario > 0 ? Math.min(120, Math.round(s.total / s.salario * 100)) : 0;
+  $("heroComprometido").innerText = pctComp + "%";
+  $("heroGasto").innerText = dinheiro(s.total);
+  $("heroSalario").innerText = dinheiro(s.salario);
+  const barra = $("heroBarraFG");
+  barra.style.width = Math.min(100, pctComp) + "%";
+  barra.classList.toggle("alerta", pctComp >= 90);
+
+  // Card de ação: contas vencendo em ≤7 dias
+  const urgentes = proximasContas().filter(function (c) { return c.status !== "pago" && diasAte(c.data) <= 7; });
+  const vencidas = todasContas().filter(function (c) { return c.status !== "pago" && diasAte(c.data) < 0; });
+  const cardAcao = $("cardAcao");
+  cardAcao.classList.remove("urgente", "tudo-em-dia");
+  if (vencidas.length) {
+    cardAcao.classList.add("urgente");
+    $("acaoTitulo").innerText = vencidas.length + " conta(s) vencida(s) — pague já";
+    const total = vencidas.reduce(function (sum, c) { return sum + Number(c.valor || 0); }, 0);
+    $("acaoTotal").innerText = dinheiro(total);
+    $("acoesLista").innerHTML = vencidas.slice(0, 6).map(itemConta).join("");
+  } else if (urgentes.length) {
+    $("acaoTitulo").innerText = urgentes.length + " conta(s) nos próximos 7 dias";
+    const total = urgentes.reduce(function (sum, c) { return sum + Number(c.valor || 0); }, 0);
+    $("acaoTotal").innerText = dinheiro(total);
+    $("acoesLista").innerHTML = urgentes.slice(0, 6).map(itemConta).join("");
+  } else {
+    cardAcao.classList.add("tudo-em-dia");
+    $("acaoTitulo").innerText = "Tudo em dia nos próximos 7 dias";
+    $("acaoTotal").innerText = "";
+    $("acoesLista").innerHTML = '<p class="empty">Não há nada urgente. Aproveita o sossego.</p>';
+  }
+
+  // Rotina
   const totalHab = habitos.length;
   const cumpridos = habitos.filter(function (h) { return bateuMetaNoDia(h.id, hoje); }).length;
-  const pctHab = totalHab ? Math.round(cumpridos / totalHab * 100) : 0;
-  $("hojeScoreHabitos").innerText = pctHab + "%";
-  $("hojeScoreHabitos").className = "metric-value " + (pctHab >= 80 ? "metric-green" : pctHab >= 40 ? "" : "metric-red");
-  const listaMes = contasDoMesAtual();
-  const totalMes = listaMes.length;
-  const pagasMes = listaMes.filter(function (c) { return c.status === "pago"; }).length;
-  const pctContas = totalMes ? Math.round(pagasMes / totalMes * 100) : 0;
-  $("hojeScoreContas").innerText = pctContas + "%";
-  $("hojeScoreContas").className = "metric-value " + (pctContas >= 80 ? "metric-green" : pctContas >= 40 ? "" : "metric-red");
-  if (totalHab) {
-    const menor = Math.min.apply(null, habitos.map(function (h) { return streakAtualHabito(h.id); }));
-    $("hojeStreakCombo").innerText = menor + (menor === 1 ? " dia" : " dias");
-    $("hojeStreakCombo").title = "Menor streak entre seus hábitos (sua corrente é tão forte quanto o elo mais fraco)";
+  $("rotinaScore").innerText = cumpridos + " / " + totalHab;
+  $("hojeHabitos").innerHTML = totalHab
+    ? habitos.map(linhaHabitoCompacta).join("")
+    : '<p class="empty">Cadastre hábitos na aba Rotina.</p>';
+
+  // Próximo marco (recorrência a quitar)
+  const grupo = proximoGrupoRecorrenciaAQuitar();
+  if (grupo) {
+    const pct = grupo.total > 0 ? Math.round(grupo.pagas / grupo.total * 100) : 0;
+    const proxIso = grupo.proximaData.toISOString().slice(0, 10);
+    $("proxMarco").innerHTML =
+      '<div class="item" style="border-left-color:var(--green)">'
+      + '<div><p class="item-title">' + escHtml(grupo.nome) + '</p>'
+      + '<p class="item-meta">Faltam <strong>' + grupo.pendentes + '</strong> de ' + grupo.total + ' parcelas · próxima ' + dataBR(proxIso) + ' (' + dinheiro(grupo.valorParcela) + ')</p>'
+      + '<div class="progress" style="margin:8px 0 0"><div class="progress-bar" style="width:' + pct + '%"></div></div>'
+      + '<p class="item-meta">' + pct + '% concluído</p>'
+      + '</div></div>';
   } else {
-    $("hojeStreakCombo").innerText = "—";
+    // Fallback: próxima conquista
+    const todasC = gerarConquistas();
+    const pendentesC = todasC.filter(function (c) { return !c.desbloqueada && c.alvo > 0; }).sort(function (a, b) { return b.pct - a.pct; });
+    if (pendentesC.length) {
+      const c = pendentesC[0];
+      $("proxMarco").innerHTML = '<div class="item"><div><p class="item-title">' + escHtml(c.titulo) + '</p>'
+        + '<p class="item-meta">' + escHtml(c.desc) + '</p>'
+        + '<div class="progress" style="margin:8px 0 0"><div class="progress-bar" style="width:' + c.pct + '%"></div></div>'
+        + '<p class="item-meta">' + c.atual + ' / ' + c.alvo + '</p></div></div>';
+    } else {
+      $("proxMarco").innerHTML = '<p class="empty">Sem marcos pendentes no momento.</p>';
+    }
   }
-  const s = helperSaldoMes(chaveMesAtual());
-  $("hojeSaldo").innerText = dinheiro(s.saldo);
-  $("hojeSaldo").className = "metric-value " + (s.saldo >= 0 ? "metric-green" : "metric-red");
-  $("hojeHabitos").innerHTML = totalHab ? habitos.map(linhaHabitoCompacta).join("") : '<p class="empty">Cadastre seus hábitos na aba Rotina.</p>';
-  const urgentes = proximasContas().filter(function (c) { return c.status !== "pago" && diasAte(c.data) <= 7; });
-  $("hojeUrgentes").innerHTML = urgentes.length ? urgentes.slice(0, 8).map(itemConta).join("") : '<p class="empty">Nenhuma conta urgente. Boa.</p>';
-  const todasC = gerarConquistas();
-  const pendentes = todasC.filter(function (c) { return !c.desbloqueada && c.alvo > 0; }).sort(function (a, b) { return b.pct - a.pct; }).slice(0, 3);
-  $("hojeProximosMarcos").innerHTML = pendentes.length
-    ? pendentes.map(function (c) {
-        return '<div class="item"><div><p class="item-title">' + escHtml(c.titulo) + '</p><p class="item-meta">' + escHtml(c.desc) + '</p><div class="progress" style="margin:8px 0 0"><div class="progress-bar" style="width:' + c.pct + '%"></div></div><p class="item-meta">' + c.atual + ' / ' + c.alvo + ' (' + c.pct + '%)</p></div></div>';
-      }).join("")
-    : '<p class="empty">Você já desbloqueou tudo o que dava por aqui.</p>';
+
+  // Mini cartão
+  const fatura = totalCartao();
+  const limite = Number(cartao.limite || 0);
+  $("miniCartaoValor").innerText = dinheiro(fatura);
+  $("miniCartaoSub").innerText = limite > 0
+    ? "de " + dinheiro(limite) + " · vence " + dataBR(cartao.vencimento)
+    : "Vence " + dataBR(cartao.vencimento);
+
+  // Mini vales — somatório do saldo (recebido - gasto) do mês
+  const chave = chaveMesAtual();
+  const vgRec = valeDoMes(chave, "gasolina");
+  const vaRec = valeDoMes(chave, "alimentacao");
+  const vgSaldo = vgRec - gastoCategoriaDoMes(chave, "Combustível");
+  const vaSaldo = vaRec - gastoCategoriaDoMes(chave, "Alimentação");
+  if (vgRec || vaRec) {
+    $("miniValesValor").innerText = dinheiro(vgSaldo + vaSaldo);
+    $("miniValesSub").innerText = "VG " + dinheiro(vgSaldo) + " · VA " + dinheiro(vaSaldo);
+  } else {
+    $("miniValesValor").innerText = "—";
+    $("miniValesSub").innerText = "Cadastre seus vales em Finanças → Vales";
+  }
 }
 
 /* ===========================================================
