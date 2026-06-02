@@ -455,6 +455,62 @@ input::placeholder { color: var(--muted2); }
 input:hover, select:hover { border-color: var(--border-strong); }
 input:focus, select:focus { border-color: var(--primary); box-shadow: var(--ring); }
 input[type="color"] { padding: 4px; height: 38px; }
+input:invalid:not(:placeholder-shown):not(:focus) {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 18%, transparent);
+}
+input[type="number"]:invalid:not(:placeholder-shown):not(:focus) {
+  border-color: var(--red);
+}
+
+/* ===== Acessibilidade ===== */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 8px;
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: 10px 16px;
+  border-radius: 8px;
+  z-index: 10001;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: var(--shadow);
+  transition: top .15s;
+}
+.skip-link:focus {
+  top: 8px;
+  outline: 2px solid var(--primary-2);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible,
+.sidebar-item:focus-visible,
+.sub-tab-btn:focus-visible {
+  outline-offset: 1px;
+}
+input:focus-visible,
+select:focus-visible {
+  outline: none; /* já tem box-shadow no :focus */
+}
+.item-check:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* Mensagem de erro inline (futuro: pode ser populada via JS) */
+.input-erro {
+  color: var(--red);
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 500;
+}
 
 /* ===== Botões ===== */
 .btn {

@@ -40,6 +40,7 @@
 </head>
 
 <body>
+  <a href="#hoje" class="skip-link">Pular para o conteúdo principal</a>
   <div class="layout">
 
     <!-- Sidebar -->
@@ -216,8 +217,8 @@
         <p class="section-desc">Cadastre seus hábitos diários. Marque o quanto fez hoje, acompanhe o anel, a sequência e o histórico do mês.</p>
 
         <div class="form-grid">
-          <input id="habitoNome" type="text" placeholder="Nome do hábito (ex: Beber água)">
-          <input id="habitoMeta" type="number" min="1" step="1" placeholder="Meta diária">
+          <input id="habitoNome" type="text" placeholder="Nome do hábito (ex: Beber água)" required aria-label="Nome do hábito">
+          <input id="habitoMeta" type="number" min="1" step="1" placeholder="Meta diária" required aria-label="Meta diária">
           <input id="habitoUnidade" type="text" placeholder="Unidade (copos, min, ...)">
           <input id="habitoCor" type="color" value="#2563eb" title="Cor do hábito">
           <button id="btnHabito" class="btn" type="button" onclick="salvarHabitoFormulario()">Adicionar hábito</button>
@@ -305,9 +306,9 @@
         <h2 class="section-title">Lançamentos de contas</h2>
         <p class="section-desc">Cadastre contas mensais, avulsas, recorrentes, valores cheios, metas ou outras obrigações.</p>
         <div class="form-grid">
-          <input id="contaNome" type="text" placeholder="Nome da conta">
-          <input id="contaValor" type="number" min="0" step="0.01" placeholder="Valor">
-          <input id="contaData" type="date">
+          <input id="contaNome" type="text" placeholder="Nome da conta" required aria-label="Nome da conta">
+          <input id="contaValor" type="number" min="0.01" step="0.01" placeholder="Valor" required aria-label="Valor em reais">
+          <input id="contaData" type="date" required aria-label="Data de vencimento">
           <select id="contaTipo">
             <option value="mensal">Mensal</option>
             <option value="mensal recorrente">Mensal recorrente</option>
@@ -560,10 +561,10 @@
         <h2 class="section-title">Metas financeiras</h2>
         <p class="section-desc">Planeje viagem, reserva, quitação de dívidas e compras importantes.</p>
         <div class="form-grid">
-          <input id="metaNome" type="text" placeholder="Nome da meta">
-          <input id="metaAlvo" type="number" min="0" step="0.01" placeholder="Valor alvo">
-          <input id="metaGuardado" type="number" min="0" step="0.01" placeholder="Valor guardado">
-          <input id="metaPrazo" type="date">
+          <input id="metaNome" type="text" placeholder="Nome da meta" required aria-label="Nome da meta">
+          <input id="metaAlvo" type="number" min="0.01" step="0.01" placeholder="Valor alvo" required aria-label="Valor alvo">
+          <input id="metaGuardado" type="number" min="0" step="0.01" placeholder="Valor guardado" aria-label="Valor já guardado">
+          <input id="metaPrazo" type="date" required aria-label="Prazo da meta">
           <select id="metaPrioridade">
             <option value="alta">Alta</option>
             <option value="média">Média</option>
@@ -653,6 +654,28 @@
           <p class="item-meta" id="avisoBiometria" style="color:var(--muted2)"></p>
           <br>
           <button class="btn btn-dark btn-small" type="button" onclick="bloquearAgora()" id="btnBloquearAgora">Bloquear app agora</button>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <h3>Notificações</h3>
+          <p class="item-meta" style="margin-top:8px">Receba alerta de vencimentos diretamente no celular/computador.</p>
+          <br>
+          <p class="item-meta">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="confNotificacoes" onchange="alternarNotificacoes()" style="width:auto">
+              Notificar contas vencendo
+            </label>
+          </p>
+          <br>
+          <div class="form-grid" style="grid-template-columns:auto 1fr;align-items:center">
+            <label for="confDiasAntes" style="font-size:13px;color:var(--muted)">Avisar com</label>
+            <select id="confDiasAntes" onchange="salvarDiasAntes()">
+              <option value="1">1 dia de antecedência</option>
+              <option value="3" selected>3 dias de antecedência</option>
+              <option value="7">7 dias de antecedência</option>
+            </select>
+          </div>
+          <p class="item-meta" id="avisoNotificacoes" style="margin-top:8px;color:var(--muted2)"></p>
         </div>
 
         <div class="card" style="margin-bottom:14px">

@@ -4,7 +4,7 @@
 // Pra forçar atualização total: bumpe o número da versão abaixo.
 "use strict";
 
-const VERSION = "v13";
+const VERSION = "v14";
 const CACHE = "financas-" + VERSION;
 
 const ASSETS = [

@@ -20,7 +20,7 @@ let registroHabitos = {};
 let conquistasDesbloqueadas = {};
 let snapshots = []; // histórico de versões — até 30, gerado automaticamente
 let usuario = { nome: "", senhaHash: "", senhaSalt: "", criadoEm: "" };
-let seguranca = { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false };
+let seguranca = { bloqueioAtivo: false, biometriaCredId: null, setupPulado: false, notificacoesAtivas: false, diasAntesNotificar: 3 };
 let contasSelecionadas = new Set(); // ids selecionados para ações em lote
 
 const CATEGORIAS_PADRAO = [
@@ -387,6 +387,90 @@ function encerrarSessao() {
     localStorage.removeItem("financas_manter_conectado");
   } catch (e) {}
 }
+/* ===========================================================
+   Notificações nativas (push local) de vencimento
+   =========================================================== */
+function notificacoesSuportadas() {
+  return "Notification" in window;
+}
+async function pedirPermissaoNotificacoes() {
+  if (!notificacoesSuportadas()) {
+    toast("Notificações não suportadas neste navegador.", "warn");
+    return false;
+  }
+  if (Notification.permission === "granted") return true;
+  if (Notification.permission === "denied") {
+    toast("Notificações foram bloqueadas. Ative nas configurações do navegador.", "warn");
+    return false;
+  }
+  const r = await Notification.requestPermission();
+  return r === "granted";
+}
+async function alternarNotificacoes() {
+  const checked = $("confNotificacoes").checked;
+  if (checked) {
+    const ok = await pedirPermissaoNotificacoes();
+    if (!ok) { $("confNotificacoes").checked = false; return; }
+    seguranca.notificacoesAtivas = true;
+    salvar();
+    toast("Notificações ativadas. Você será avisado dos vencimentos.", "success");
+    setTimeout(verificarENotificar, 500);
+  } else {
+    seguranca.notificacoesAtivas = false;
+    salvar();
+    toast("Notificações desativadas.", "warn");
+  }
+}
+function salvarDiasAntes() {
+  const d = Number($("confDiasAntes").value || 3);
+  seguranca.diasAntesNotificar = d;
+  salvar();
+}
+function verificarENotificar() {
+  if (!seguranca.notificacoesAtivas) return;
+  if (!notificacoesSuportadas() || Notification.permission !== "granted") return;
+  const dias = Number(seguranca.diasAntesNotificar || 3);
+  const urgentes = todasContas().filter(function (c) {
+    return c.status !== "pago" && !c.adiada && diasAte(c.data) >= 0 && diasAte(c.data) <= dias;
+  });
+  const vencidas = todasContas().filter(function (c) {
+    return c.status !== "pago" && !c.adiada && diasAte(c.data) < 0;
+  });
+  // Só notifica 1 vez por dia
+  const chave = "notif_disparada_" + hoje;
+  try {
+    if (localStorage.getItem(chave) === "1") return;
+  } catch (e) {}
+  let disparou = false;
+  try {
+    if (vencidas.length) {
+      const total = vencidas.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+      new Notification(vencidas.length + " conta(s) vencida(s)", {
+        body: "Total atrasado: " + dinheiro(total),
+        icon: "./icons/icon-192.png",
+        badge: "./icons/icon-192.png",
+        tag: "financas-vencidas",
+        renotify: true
+      });
+      disparou = true;
+    }
+    if (urgentes.length) {
+      const total = urgentes.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+      new Notification("Contas vencendo em até " + dias + " dia" + (dias === 1 ? "" : "s"), {
+        body: urgentes.length + " conta(s) · " + dinheiro(total),
+        icon: "./icons/icon-192.png",
+        badge: "./icons/icon-192.png",
+        tag: "financas-urgentes",
+        renotify: true
+      });
+      disparou = true;
+    }
+    if (disparou) localStorage.setItem(chave, "1");
+  } catch (e) {
+    console.warn("Falha ao notificar:", e);
+  }
+}
+
 function bloquearAgora() {
   if (!usuario.senhaHash) { toast("Defina uma senha antes nas configurações.", "warn"); return; }
   encerrarSessao();
@@ -543,6 +627,22 @@ function popularConfigSeguranca() {
   }
   atualizarVisibilidadeBotaoBackupInicial();
   atualizarVisibilidadeBotaoCorrecoes();
+  // Notificações
+  if ($("confNotificacoes")) {
+    $("confNotificacoes").checked = !!seguranca.notificacoesAtivas && notificacoesSuportadas() && Notification.permission === "granted";
+  }
+  if ($("confDiasAntes")) $("confDiasAntes").value = String(seguranca.diasAntesNotificar || 3);
+  if ($("avisoNotificacoes")) {
+    if (!notificacoesSuportadas()) {
+      $("avisoNotificacoes").innerText = "Notificações não suportadas neste navegador.";
+    } else if (Notification.permission === "denied") {
+      $("avisoNotificacoes").innerText = "Permissão negada. Ative manualmente nas configurações do navegador.";
+    } else if (seguranca.notificacoesAtivas) {
+      $("avisoNotificacoes").innerText = "Ativo. Você é avisado uma vez por dia quando houver vencimentos.";
+    } else {
+      $("avisoNotificacoes").innerText = "";
+    }
+  }
 }
 function salvarNomeConfig() {
   const novo = $("confNome").value.trim();
@@ -3154,6 +3254,9 @@ async function iniciar() {
       setTimeout(function () { if ($("setupNome")) $("setupNome").focus(); }, 100);
     }
     registrarSW();
+    // Verifica notificações pendentes (uma vez no boot + a cada 60 min)
+    setTimeout(verificarENotificar, 1500);
+    setInterval(verificarENotificar, 60 * 60 * 1000);
   } catch (e) {
     console.error("Erro no init:", e);
     toast("Erro ao iniciar o app. Veja o console.", "error");
@@ -3252,3 +3355,5 @@ window.limparSelecao = limparSelecao;
 window.marcarSelecionadasPagas = marcarSelecionadasPagas;
 window.adiarSelecionadas = adiarSelecionadas;
 window.excluirSelecionadas = excluirSelecionadas;
+window.alternarNotificacoes = alternarNotificacoes;
+window.salvarDiasAntes = salvarDiasAntes;
