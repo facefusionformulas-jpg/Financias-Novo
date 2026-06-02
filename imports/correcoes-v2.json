@@ -1,0 +1,31 @@
+{
+  "id": "correcoes-v2",
+  "data": "2026-06-03",
+  "descricao": "Adiciona PAY JOY (R$ 178 × 2 parcelas, abril e maio/2026 — ambas atrasadas). Substitui a CELULAR plano antiga.",
+  "remover": [],
+  "atualizar": [],
+  "adicionar": [
+    {
+      "id": "id_corr_payjoy_1",
+      "nome": "PAY JOY (1/2)",
+      "valor": 178,
+      "data": "2026-04-01",
+      "tipo": "mensal recorrente",
+      "categoria": "Telecom",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_payjoy_grupo", "parcelaAtual": 1, "totalParcelas": 2, "frequencia": "mensal" }
+    },
+    {
+      "id": "id_corr_payjoy_2",
+      "nome": "PAY JOY (2/2)",
+      "valor": 178,
+      "data": "2026-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "Telecom",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": { "grupo": "id_corr_payjoy_grupo", "parcelaAtual": 2, "totalParcelas": 2, "frequencia": "mensal" }
+    }
+  ]
+}

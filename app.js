@@ -2985,11 +2985,19 @@ async function aplicarCorrecoesRemotas(arquivo) {
   }
 }
 function atualizarVisibilidadeBotaoCorrecoes() {
-  const btn = $("btnCorrecoesV1");
-  if (!btn) return;
-  const aplicada = seguranca.correcoesAplicadas && seguranca.correcoesAplicadas["correcoes-v1"];
-  btn.innerText = aplicada ? "Correções v1 aplicadas" : "Aplicar correções v1";
-  btn.disabled = !!aplicada;
+  const apl = seguranca.correcoesAplicadas || {};
+  const b1 = $("btnCorrecoesV1");
+  if (b1) {
+    const ok = !!apl["correcoes-v1"];
+    b1.innerText = ok ? "Correções v1 aplicadas" : "Aplicar correções v1";
+    b1.disabled = ok;
+  }
+  const b2 = $("btnCorrecoesV2");
+  if (b2) {
+    const ok = !!apl["correcoes-v2"];
+    b2.innerText = ok ? "Pay joy adicionado" : "Aplicar correções v2 (Pay joy)";
+    b2.disabled = ok;
+  }
 }
 
 async function importarBackupInicialRemoto() {
