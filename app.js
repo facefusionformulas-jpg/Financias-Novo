@@ -207,8 +207,9 @@ const SUB_TABS = {
     { id: "conquistas",  label: "Conquistas" }
   ],
   analise: [
-    { id: "mesames", label: "Mês a mês" },
-    { id: "ia",      label: "Plano IA"  }
+    { id: "graficos", label: "Gráficos" },
+    { id: "mesames",  label: "Mês a mês" },
+    { id: "ia",       label: "Plano IA"  }
   ]
 };
 
@@ -1233,21 +1234,8 @@ function renderizarInterno() {
     }).join("") || '<p class="empty">Nenhuma prioridade encontrada.</p>';
   }
 
-  if ($("analiseIA")) {
-    $("analiseIA").innerHTML =
-      '<p>Seu salário informado é <strong>' + dinheiro(salarioMes) + '</strong>.</p>'
-      + '<p>O total das contas com vencimento no mês atual: <strong>' + dinheiro(totalMes) + '</strong>.</p>'
-      + '<p>Contas dos próximos meses ficam cadastradas, mas não entram no desconto deste mês.</p>'
-      + '<p>Após os descontos, o saldo estimado será <strong>' + dinheiro(saldo) + '</strong>.</p>'
-      + analiseExtraVales()
-      + analiseExtraHabitos();
-    $("planoIA").innerHTML =
-      '<p>1. Primeiro cubra contas vencidas e as que têm menos dias até o vencimento.</p>'
-      + '<p>2. Seu salário precisa cobrir <strong>' + dinheiro(totalMes) + '</strong> em contas abertas.</p>'
-      + '<p>3. Se o saldo ficar negativo, reduza compras no cartão ou renegocie vencimentos.</p>'
-      + '<p>4. Se o saldo ficar positivo, direcione parte para metas ou reserva.</p>'
-      + planoExtraHabitos();
-  }
+  // IA Anti-Sufoco agora é função separada e inteligente
+  if ($("analiseIA")) renderizarIA();
 
   safeCall(renderizarRotina, "renderizarRotina");
   safeCall(renderizarConquistas, "renderizarConquistas");
@@ -1257,6 +1245,7 @@ function renderizarInterno() {
   safeCall(renderizarStatusBackup, "renderizarStatusBackup");
   safeCall(renderizarSnapshots, "renderizarSnapshots");
   safeCall(renderizarCalendario, "renderizarCalendario");
+  safeCall(renderizarGraficos, "renderizarGraficos");
 }
 function safeCall(fn, label) {
   try { fn(); }
@@ -1428,6 +1417,259 @@ function renderizarRotina() {
   const maior = habitos.reduce(function (m, h) { const s = streakAtualHabito(h.id); return s > m ? s : m; }, 0);
   $("maiorStreakCard").innerText = maior + (maior === 1 ? " dia" : " dias");
 }
+/* ===========================================================
+   IA Anti-Sufoco (inteligente, com ações)
+   =========================================================== */
+function gerarPlanoIA() {
+  const chave = chaveMesAtual();
+  const s = helperSaldoMes(chave);
+  const pctComp = s.salario > 0 ? (s.total / s.salario * 100) : 0;
+  const alertas = [];
+  const padroes = [];
+  const sugestoes = [];
+
+  // 1. Alertas críticos
+  const vencidas = todasContas().filter(function (c) { return c.status !== "pago" && !c.adiada && diasAte(c.data) < 0; });
+  if (vencidas.length) {
+    const totalVenc = vencidas.reduce(function (sum, c) { return sum + Number(c.valor || 0); }, 0);
+    alertas.push({
+      tipo: "critico",
+      titulo: vencidas.length + " conta(s) vencida(s)",
+      desc: "Total atrasado: " + dinheiro(totalVenc) + ". Pague ou adie pra organizar.",
+      acaoLabel: "Ver A pagar",
+      acaoClick: "openTabPorId('contas')"
+    });
+  }
+  if (s.salario > 0 && s.saldo < 0) {
+    alertas.push({
+      tipo: "critico",
+      titulo: "Saldo previsto negativo este mês",
+      desc: "Você vai gastar " + dinheiro(Math.abs(s.saldo)) + " a mais que o salário. Considere adiar contas não-essenciais.",
+      acaoLabel: "Ver A pagar",
+      acaoClick: "openTabPorId('contas')"
+    });
+  }
+  if (pctComp >= 90 && pctComp < 100) {
+    alertas.push({
+      tipo: "aviso",
+      titulo: pctComp.toFixed(0) + "% do salário comprometido",
+      desc: "Folga muito pequena. Qualquer despesa extra desequilibra o mês."
+    });
+  }
+  const urgentes7 = proximasContas().filter(function (c) { return c.status !== "pago" && !c.adiada && diasAte(c.data) <= 7 && diasAte(c.data) >= 0; });
+  if (urgentes7.length && !vencidas.length) {
+    const totalUrg = urgentes7.reduce(function (sum, c) { return sum + Number(c.valor || 0); }, 0);
+    alertas.push({
+      tipo: "aviso",
+      titulo: urgentes7.length + " conta(s) vencem em até 7 dias",
+      desc: "Total: " + dinheiro(totalUrg) + ". Programe os pagamentos.",
+      acaoLabel: "Ver A pagar",
+      acaoClick: "openTabPorId('contas')"
+    });
+  }
+
+  // 2. Padrões: compromissos pesados (grupos > 20% renda)
+  if (s.salario > 0) {
+    const grupos = {};
+    contas.forEach(function (c) {
+      if (!c.recorrencia || !c.recorrencia.grupo) return;
+      const g = c.recorrencia.grupo;
+      if (!grupos[g]) {
+        grupos[g] = {
+          nome: c.nome.replace(/\s*\(\d+\/\d+\)\s*$/, "").trim(),
+          parcelaValor: c.valor,
+          pendentes: 0,
+          total: c.recorrencia.totalParcelas || 0
+        };
+      }
+      if (c.status !== "pago") grupos[g].pendentes++;
+    });
+    Object.values(grupos).filter(function (g) { return g.pendentes > 0; }).forEach(function (g) {
+      const pct = g.parcelaValor / s.salario * 100;
+      if (pct >= 20) {
+        padroes.push({
+          nome: g.nome,
+          pct: pct,
+          parcelaValor: g.parcelaValor,
+          pendentes: g.pendentes,
+          msg: g.nome + " consome " + pct.toFixed(0) + "% do salário (" + dinheiro(g.parcelaValor) + "/mês, " + g.pendentes + " parcelas restantes)",
+          sugestao: pct >= 40
+            ? "Peso muito alto. Considere refinanciamento ou renegociação."
+            : pct >= 30
+            ? "Peso significativo. Avalie se vale antecipar pra quitar antes."
+            : "Peso moderado. Fique de olho pra não esticar mais."
+        });
+      }
+    });
+    padroes.sort(function (a, b) { return b.pct - a.pct; });
+  }
+
+  // 3. Sugestões positivas / ações
+  if (s.salario > 0 && s.saldo > 0) {
+    sugestoes.push({
+      tipo: "positivo",
+      titulo: "Sobra de " + dinheiro(s.saldo) + " este mês",
+      desc: "Destine parte pra meta ou reserva — antes que vire compra impulsiva.",
+      acaoLabel: "Ir pras Metas",
+      acaoClick: "openTabPorId('metas-lista')"
+    });
+  }
+  if (habitos.length) {
+    const cumpridos = habitos.filter(function (h) { return bateuMetaNoDia(h.id, hoje); }).length;
+    if (cumpridos === habitos.length) {
+      sugestoes.push({
+        tipo: "positivo",
+        titulo: "Dia perfeito de rotina",
+        desc: "Você bateu todas as metas hoje. Mantém o ritmo."
+      });
+    } else if (cumpridos > 0) {
+      sugestoes.push({
+        tipo: "info",
+        titulo: "Faltam " + (habitos.length - cumpridos) + " hábito(s) pra fechar o dia",
+        desc: "Cada pequena ação conta. Comece pelo mais fácil.",
+        acaoLabel: "Ir pra Rotina",
+        acaoClick: "openTabPorId('rotina')"
+      });
+    }
+  }
+  const chaveCart = chaveMesAtual();
+  const vgRec = valeDoMes(chaveCart, "gasolina");
+  const vaRec = valeDoMes(chaveCart, "alimentacao");
+  if (vgRec || vaRec) {
+    const vgSaldo = vgRec - gastoCategoriaDoMes(chaveCart, "Combustível");
+    const vaSaldo = vaRec - gastoCategoriaDoMes(chaveCart, "Alimentação");
+    if (vgSaldo < 0 || vaSaldo < 0) {
+      sugestoes.push({
+        tipo: "info",
+        titulo: "Vale estourou",
+        desc: (vgSaldo < 0 ? "VG: " + dinheiro(Math.abs(vgSaldo)) + " além do recebido. " : "") + (vaSaldo < 0 ? "VA: " + dinheiro(Math.abs(vaSaldo)) + " além do recebido." : ""),
+        acaoLabel: "Ver Vales",
+        acaoClick: "openTabPorId('vales')"
+      });
+    }
+  }
+
+  // 4. Projeção até dezembro
+  const mesAtualNum = new Date(hoje + "T00:00:00").getMonth();
+  const mesesAteFim = 12 - mesAtualNum - 1;
+  let projecao = null;
+  if (s.salario > 0 && mesesAteFim > 0) {
+    let saldoAcum = 0;
+    let mesesPos = 0;
+    const detalhes = [];
+    for (let i = 1; i <= mesesAteFim; i++) {
+      const d = new Date(hoje + "T00:00:00");
+      d.setMonth(d.getMonth() + i);
+      const ch = d.toISOString().slice(0, 7);
+      const sm = helperSaldoMes(ch);
+      saldoAcum += sm.saldo;
+      if (sm.saldo >= 0) mesesPos++;
+      detalhes.push({ chave: ch, saldo: sm.saldo });
+    }
+    projecao = { mesesAteFim: mesesAteFim, saldoAcum: saldoAcum, mesesPos: mesesPos, detalhes: detalhes };
+  }
+
+  return { resumo: s, pctComp: pctComp, alertas: alertas, padroes: padroes, sugestoes: sugestoes, projecao: projecao };
+}
+
+function renderizarIA() {
+  if (!$("analiseIA")) return;
+  const p = gerarPlanoIA();
+
+  // === Painel "Análise do mês" ===
+  let html = '<div style="display:flex;flex-direction:column;gap:14px">';
+  // Resumo em 3 colunas
+  html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
+  html += '<div><p class="metric-title">Salário</p><p class="metric-value" style="font-size:18px">' + dinheiro(p.resumo.salario) + '</p></div>';
+  html += '<div><p class="metric-title">Gasto previsto</p><p class="metric-value" style="font-size:18px">' + dinheiro(p.resumo.total) + '</p></div>';
+  html += '<div><p class="metric-title">Saldo</p><p class="metric-value ' + (p.resumo.saldo >= 0 ? 'metric-green' : 'metric-red') + '" style="font-size:18px">' + dinheiro(p.resumo.saldo) + '</p></div>';
+  html += '</div>';
+
+  // Alertas
+  if (p.alertas.length) {
+    html += '<div><h4 style="font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:8px">Alertas</h4>';
+    html += '<div style="display:flex;flex-direction:column;gap:8px">';
+    p.alertas.forEach(function (a) {
+      const cor = a.tipo === "critico" ? "var(--red)" : "var(--yellow)";
+      const bg = a.tipo === "critico" ? "var(--red-soft-bg)" : "var(--yellow-soft-bg)";
+      html += '<div style="border-left:3px solid ' + cor + ';background:' + bg + ';border-radius:6px;padding:10px 12px">';
+      html += '<strong style="color:var(--text)">' + escHtml(a.titulo) + '</strong>';
+      html += '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + escHtml(a.desc) + '</div>';
+      if (a.acaoLabel) {
+        html += '<button class="btn btn-small btn-dark" style="margin-top:8px" onclick="' + a.acaoClick + '">' + escHtml(a.acaoLabel) + '</button>';
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  } else {
+    html += '<div style="padding:10px 12px;background:var(--green-soft-bg);border-left:3px solid var(--green);border-radius:6px;font-size:13px"><strong style="color:var(--green)">Sem alertas críticos.</strong> Tudo sob controle por agora.</div>';
+  }
+
+  // Padrões pesados
+  if (p.padroes.length) {
+    html += '<div><h4 style="font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:8px">Compromissos pesados</h4>';
+    html += '<div style="display:flex;flex-direction:column;gap:6px">';
+    p.padroes.forEach(function (pad) {
+      html += '<div style="padding:8px 10px;background:var(--card2);border-radius:6px;font-size:12px">';
+      html += '<div style="color:var(--text)"><strong>' + escHtml(pad.nome) + '</strong> · ' + pad.pct.toFixed(0) + '% da renda</div>';
+      html += '<div style="color:var(--muted);margin-top:2px">' + escHtml(pad.sugestao) + '</div>';
+      html += '<div class="progress" style="margin-top:6px;height:4px"><div class="progress-bar" style="width:' + Math.min(100, pad.pct) + '%;background:' + (pad.pct >= 40 ? 'var(--red)' : pad.pct >= 30 ? 'var(--yellow)' : 'var(--primary)') + '"></div></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+  $("analiseIA").innerHTML = html;
+
+  // === Painel "Plano sugerido" ===
+  let plano = '<div style="display:flex;flex-direction:column;gap:12px">';
+
+  // Sugestões
+  if (p.sugestoes.length) {
+    plano += '<div><h4 style="font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:8px">Sugestões</h4>';
+    plano += '<div style="display:flex;flex-direction:column;gap:6px">';
+    p.sugestoes.forEach(function (s) {
+      const cor = s.tipo === "positivo" ? "var(--green)" : "var(--primary)";
+      const bg = s.tipo === "positivo" ? "var(--green-soft-bg)" : "var(--card2)";
+      plano += '<div style="padding:10px 12px;background:' + bg + ';border-left:3px solid ' + cor + ';border-radius:6px;font-size:13px">';
+      plano += '<strong>' + escHtml(s.titulo) + '</strong>';
+      plano += '<div style="color:var(--muted);font-size:12px;margin-top:3px">' + escHtml(s.desc) + '</div>';
+      if (s.acaoLabel) {
+        plano += '<button class="btn btn-small btn-dark" style="margin-top:6px" onclick="' + s.acaoClick + '">' + escHtml(s.acaoLabel) + '</button>';
+      }
+      plano += '</div>';
+    });
+    plano += '</div></div>';
+  }
+
+  // Projeção
+  if (p.projecao) {
+    plano += '<div><h4 style="font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:8px">Projeção até dezembro</h4>';
+    plano += '<div style="padding:12px;background:var(--card2);border-radius:8px">';
+    plano += '<div style="font-size:13px">Saldo acumulado nos próximos <strong>' + p.projecao.mesesAteFim + ' meses</strong>:</div>';
+    plano += '<div class="' + (p.projecao.saldoAcum >= 0 ? "metric-green" : "metric-red") + '" style="font-family:JetBrains Mono,monospace;font-size:22px;font-weight:700;margin-top:6px">' + dinheiro(p.projecao.saldoAcum) + '</div>';
+    plano += '<div style="font-size:12px;color:var(--muted);margin-top:4px"><strong>' + p.projecao.mesesPos + '</strong> de ' + p.projecao.mesesAteFim + ' meses devem ficar positivos.</div>';
+    plano += '</div></div>';
+  }
+
+  // Top 3 prioridades agora
+  plano += '<div><h4 style="font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em;margin-bottom:8px">Foco da semana</h4>';
+  const prioridades = [];
+  if (p.alertas.find(function (a) { return a.titulo.indexOf("vencida") >= 0; })) prioridades.push("Pagar ou adiar contas vencidas");
+  if (p.resumo.saldo < 0) prioridades.push("Revisar gastos pra fechar o mês no zero");
+  if (p.padroes.length) prioridades.push("Avaliar " + p.padroes[0].nome + " (maior peso na renda)");
+  if (habitos.length && habitos.filter(function (h) { return bateuMetaNoDia(h.id, hoje); }).length < habitos.length) prioridades.push("Fechar a rotina do dia");
+  if (p.resumo.saldo > 0) prioridades.push("Guardar parte da sobra pra meta/reserva");
+  if (!prioridades.length) prioridades.push("Cadastrar mais dados pro app sugerir ações melhores");
+  plano += '<ol style="margin:0 0 0 18px;line-height:1.7;font-size:13px;color:var(--text)">';
+  prioridades.slice(0, 4).forEach(function (pr) { plano += '<li>' + escHtml(pr) + '</li>'; });
+  plano += '</ol></div>';
+
+  plano += '</div>';
+  $("planoIA").innerHTML = plano;
+}
+
 function analiseExtraHabitos() {
   if (!habitos.length) return "";
   const maior = habitos.reduce(function (m, h) { const s = streakAtualHabito(h.id); return s > m ? s : m; }, 0);
@@ -1675,6 +1917,177 @@ function renderizarDetalheCalendario() {
   }
 
   $("calDetailBody").innerHTML = html;
+}
+
+/* ===========================================================
+   Gráficos (pizza, linha, barras) — SVG puro, sem dependência
+   =========================================================== */
+const CORES_CHART = [
+  "#6366f1", "#06b6d4", "#22c55e", "#f59e0b", "#ec4899",
+  "#8b5cf6", "#10b981", "#f97316", "#3b82f6", "#a855f7",
+  "#14b8a6", "#ef4444", "#eab308", "#84cc16", "#0ea5e9"
+];
+function corCategoria(idx) { return CORES_CHART[idx % CORES_CHART.length]; }
+
+function gastosPorCategoriaDoMes(chave) {
+  // Soma TODAS as contas (pagas e pendentes) do mês por categoria
+  const out = {};
+  todasContas().forEach(function (c) {
+    if (chaveMesDaData(c.data) !== chave) return;
+    const cat = (c.categoria || "Sem categoria").trim();
+    out[cat] = (out[cat] || 0) + Number(c.valor || 0);
+  });
+  // Adiciona faturas manuais como categoria "Cartão fatura"
+  if (faturaDoMes(chave) > 0) {
+    const cat = "Cartão fatura";
+    out[cat] = (out[cat] || 0) + faturaDoMes(chave);
+  }
+  return out;
+}
+
+function saldoHistoricoMensal(n) {
+  // Retorna últimos n meses, do mais antigo ao mais recente
+  const arr = [];
+  const d = new Date(hoje + "T00:00:00");
+  d.setDate(1);
+  for (let i = n - 1; i >= 0; i--) {
+    const ref = new Date(d);
+    ref.setMonth(ref.getMonth() - i);
+    const chave = ref.toISOString().slice(0, 7);
+    const s = helperSaldoMes(chave);
+    arr.push({ chave: chave, mes: nomeMes(chave).split(" ")[0], salario: s.salario, total: s.total, saldo: s.saldo });
+  }
+  return arr;
+}
+
+function renderizarPizza(gastos) {
+  const wrap = $("chartPizza");
+  if (!wrap) return;
+  const entries = Object.entries(gastos).sort(function (a, b) { return b[1] - a[1]; });
+  const total = entries.reduce(function (s, e) { return s + e[1]; }, 0);
+  if (total <= 0) {
+    wrap.innerHTML = '<p class="empty" style="text-align:center;padding:60px 0">Sem gastos este mês.</p>';
+    $("legendaPizza").innerHTML = "";
+    $("totalCategorias").innerText = "R$ 0,00";
+    return;
+  }
+  $("totalCategorias").innerText = dinheiro(total);
+  const r = 40, cx = 50, cy = 50, sw = 16;
+  const C = 2 * Math.PI * r;
+  let offset = 0;
+  let segments = "";
+  entries.forEach(function (e, i) {
+    const pct = e[1] / total;
+    const len = pct * C;
+    segments += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + corCategoria(i) + '" stroke-width="' + sw + '" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '"></circle>';
+    offset += len;
+  });
+  wrap.innerHTML =
+    '<svg viewBox="0 0 100 100">'
+    + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--progress-bg)" stroke-width="' + sw + '"></circle>'
+    + segments
+    + '</svg>'
+    + '<div class="chart-pizza-center">'
+    + '<div class="total">' + dinheiro(total) + '</div>'
+    + '<div class="label">' + entries.length + ' categorias</div>'
+    + '</div>';
+  // Legenda
+  $("legendaPizza").innerHTML = entries.map(function (e, i) {
+    const pct = (e[1] / total * 100).toFixed(1);
+    return '<div class="chart-legenda-item">'
+      + '<div class="left"><span class="dot-cat" style="background:' + corCategoria(i) + '"></span><span class="nome">' + escHtml(e[0]) + '</span></div>'
+      + '<span class="valor">' + dinheiro(e[1]) + ' · ' + pct + '%</span>'
+      + '</div>';
+  }).join("");
+}
+
+function renderizarBarras(gastos) {
+  const wrap = $("chartBarras");
+  if (!wrap) return;
+  const entries = Object.entries(gastos).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+  if (!entries.length) { wrap.innerHTML = '<p class="empty">Sem gastos este mês.</p>'; return; }
+  const max = entries[0][1];
+  wrap.innerHTML = entries.map(function (e, i) {
+    const pct = (e[1] / max * 100).toFixed(1);
+    return '<div class="barra-item">'
+      + '<div class="barra-label"><span class="nome">' + escHtml(e[0]) + '</span><span class="valor">' + dinheiro(e[1]) + '</span></div>'
+      + '<div class="barra-trilho"><div class="barra-fg" style="width:' + pct + '%;background:' + corCategoria(i) + '"></div></div>'
+      + '</div>';
+  }).join("");
+}
+
+function renderizarLinha(historico) {
+  const wrap = $("chartLinha");
+  if (!wrap) return;
+  if (!historico.length) { wrap.innerHTML = '<p class="empty">Sem histórico.</p>'; return; }
+  const W = 600, H = 200, padL = 50, padR = 14, padT = 14, padB = 28;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+  const saldos = historico.map(function (h) { return h.saldo; });
+  const minS = Math.min.apply(null, saldos.concat([0]));
+  const maxS = Math.max.apply(null, saldos.concat([0]));
+  const range = (maxS - minS) || 1;
+  const stepX = historico.length > 1 ? innerW / (historico.length - 1) : innerW / 2;
+  function xAt(i) { return padL + i * stepX; }
+  function yAt(v) { return padT + innerH - ((v - minS) / range) * innerH; }
+  const y0 = yAt(0);
+
+  // Eixo Y: 4 linhas de grid
+  let grid = "";
+  for (let i = 0; i <= 4; i++) {
+    const v = minS + (range * i / 4);
+    const y = yAt(v);
+    grid += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" class="linha-grid"/>';
+    grid += '<text x="' + (padL - 8) + '" y="' + (y + 3) + '" text-anchor="end" font-size="9" fill="var(--muted2)" font-family="JetBrains Mono">' + dinheiro(v).replace("R$ ", "") + '</text>';
+  }
+  // Linha y=0
+  grid += '<line x1="' + padL + '" y1="' + y0 + '" x2="' + (W - padR) + '" y2="' + y0 + '" class="linha-eixo"/>';
+
+  // Polyline
+  const pontos = historico.map(function (h, i) { return xAt(i) + "," + yAt(h.saldo); }).join(" ");
+  // Polygon pra área
+  const areaPontos = pontos + " " + xAt(historico.length - 1) + "," + y0 + " " + xAt(0) + "," + y0;
+
+  // Pontos + labels
+  let pontosSVG = "";
+  historico.forEach(function (h, i) {
+    const x = xAt(i), y = yAt(h.saldo);
+    pontosSVG += '<circle cx="' + x + '" cy="' + y + '" r="4" class="ponto" style="stroke:' + (h.saldo >= 0 ? 'var(--green)' : 'var(--red)') + '"/>';
+    pontosSVG += '<text x="' + x + '" y="' + (H - padB + 16) + '" class="mes-label">' + escHtml(h.mes) + '</text>';
+    // Valor acima/abaixo do ponto
+    const labelY = h.saldo >= 0 ? y - 10 : y + 16;
+    pontosSVG += '<text x="' + x + '" y="' + labelY + '" class="ponto-label">' + dinheiro(h.saldo).replace("R$ ", "") + '</text>';
+  });
+
+  const media = saldos.reduce(function (s, v) { return s + v; }, 0) / saldos.length;
+  if ($("saldoMedia")) $("saldoMedia").innerText = "Média: " + dinheiro(media);
+
+  wrap.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">'
+    + '<defs>'
+    + '<linearGradient id="gradLinha" x1="0" y1="0" x2="1" y2="0">'
+    +   '<stop offset="0%" stop-color="#6366f1"/>'
+    +   '<stop offset="100%" stop-color="#22c55e"/>'
+    + '</linearGradient>'
+    + '<linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1">'
+    +   '<stop offset="0%" stop-color="#6366f1" stop-opacity="0.4"/>'
+    +   '<stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>'
+    + '</linearGradient>'
+    + '</defs>'
+    + grid
+    + '<polygon points="' + areaPontos + '" class="linha-area"/>'
+    + '<polyline points="' + pontos + '" class="linha-fg"/>'
+    + pontosSVG
+    + '</svg>';
+}
+
+function renderizarGraficos() {
+  if (!$("chartPizza")) return;
+  const chave = chaveMesAtual();
+  const gastos = gastosPorCategoriaDoMes(chave);
+  renderizarPizza(gastos);
+  renderizarBarras(gastos);
+  renderizarLinha(saldoHistoricoMensal(6));
 }
 
 /* ===========================================================

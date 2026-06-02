@@ -522,6 +522,39 @@
         </div>
       </section>
 
+      <!-- GRÁFICOS (sub-tab de Análise) -->
+      <section id="graficos" class="tab section hidden">
+        <h2 class="section-title">Gráficos</h2>
+        <p class="section-desc">Visão visual dos seus gastos. Atualiza automaticamente conforme você adiciona contas.</p>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header-flex">
+              <h3>Gastos por categoria · mês atual</h3>
+              <span class="grupo-total" id="totalCategorias">R$ 0,00</span>
+            </div>
+            <div class="chart-pizza-wrap">
+              <div id="chartPizza" class="chart-pizza"></div>
+              <div id="legendaPizza" class="chart-legenda"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Top 5 categorias</h3>
+            <p class="item-meta" style="margin-top:4px">Onde mais gastou neste mês</p>
+            <div id="chartBarras" class="chart-barras" style="margin-top:12px"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header-flex">
+            <h3>Saldo dos últimos 6 meses</h3>
+            <span class="grupo-total" id="saldoMedia">Média: R$ 0,00</span>
+          </div>
+          <div id="chartLinha" class="chart-linha" style="margin-top:14px"></div>
+        </div>
+      </section>
+
       <!-- METAS LISTA (sub-tab de Metas) -->
       <section id="metas-lista" class="tab section hidden">
         <h2 class="section-title">Metas financeiras</h2>

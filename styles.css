@@ -944,6 +944,166 @@ input[type="color"] { padding: 4px; height: 38px; }
   .cal-more { font-size: 8px; }
 }
 
+/* ===== GRÁFICOS SVG ===== */
+.chart-pizza-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+  margin-top: 12px;
+}
+.chart-pizza {
+  width: 180px;
+  height: 180px;
+  position: relative;
+}
+.chart-pizza svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.chart-pizza-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.chart-pizza-center .total {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.chart-pizza-center .label {
+  font-size: 10px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.chart-legenda {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.chart-legenda-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.chart-legenda-item:last-child { border-bottom: none; }
+.chart-legenda-item .left {
+  display: flex; align-items: center; gap: 6px;
+  min-width: 0; flex: 1;
+}
+.chart-legenda-item .dot-cat {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.chart-legenda-item .nome {
+  color: var(--text);
+  font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.chart-legenda-item .valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.chart-barras {
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+.barra-item .barra-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--muted);
+  margin-bottom: 4px;
+}
+.barra-item .barra-label .nome { color: var(--text); font-weight: 600; }
+.barra-item .barra-label .valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+.barra-item .barra-trilho {
+  height: 8px;
+  background: var(--progress-bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.barra-item .barra-fg {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+
+.chart-linha {
+  width: 100%;
+  height: 200px;
+  position: relative;
+}
+.chart-linha svg { width: 100%; height: 100%; display: block; }
+.chart-linha .linha-eixo {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.chart-linha .linha-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.4;
+}
+.chart-linha .linha-fg {
+  fill: none;
+  stroke: url(#gradLinha);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart-linha .ponto {
+  fill: var(--card);
+  stroke: var(--primary);
+  stroke-width: 2;
+}
+.chart-linha .linha-area {
+  fill: url(#gradArea);
+  opacity: 0.3;
+}
+.chart-linha .ponto-label {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 9px;
+  fill: var(--muted2);
+  text-anchor: middle;
+}
+.chart-linha .mes-label {
+  font-size: 10px;
+  fill: var(--muted2);
+  text-anchor: middle;
+  text-transform: capitalize;
+}
+
+@media (max-width: 650px) {
+  .chart-pizza-wrap { grid-template-columns: 1fr; }
+  .chart-pizza { width: 140px; height: 140px; margin: 0 auto; }
+  .chart-legenda { max-height: none; }
+}
+
 /* ===== Toast ===== */
 .toast-wrap {
   position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
