@@ -132,6 +132,17 @@
           </div>
         </div>
 
+        <!-- Score de saúde financeira -->
+        <div class="card score-card-mini">
+          <div class="score-mini-info">
+            <p class="metric-title">Saúde financeira</p>
+            <p class="metric-value" id="scoreValor">0/100</p>
+            <p class="item-meta" id="scoreFrase">—</p>
+            <p class="item-meta" style="font-size:11px;margin-top:6px"><a href="#" onclick="openTabPorId('liberdade');return false;" style="color:var(--primary);text-decoration:none;font-weight:600">Ver detalhes →</a></p>
+          </div>
+          <div id="scoreRingMini" class="score-ring-mini"></div>
+        </div>
+
         <!-- Ação requerida -->
         <div class="card card-acao" id="cardAcao">
           <div class="card-header-flex">
@@ -537,6 +548,31 @@
               <div><span class="lbl">Parcelas restantes</span><span class="val" id="libRestantes">0</span></div>
             </div>
           </div>
+        </div>
+
+        <!-- Score detalhado -->
+        <div class="card" style="margin-top:14px">
+          <div class="card-header-flex">
+            <h3>Saúde financeira</h3>
+            <div style="text-align:right">
+              <div class="score-total-grande" id="scoreTotalGrande">0</div>
+              <div class="item-meta" id="scoreFraseGrande" style="margin-top:2px">—</div>
+            </div>
+          </div>
+          <div id="scoreBreakdown" class="score-breakdown" style="margin-top:14px"></div>
+        </div>
+
+        <!-- Plano de quitação (Snowball/Avalanche) -->
+        <div class="card" style="margin-top:14px" id="cardEstrategia">
+          <div class="card-header-flex" style="flex-wrap:wrap;gap:10px">
+            <h3>Plano de quitação</h3>
+            <div class="snowball-toggle">
+              <button id="btnSnowball" type="button" class="active" onclick="alternarEstrategia('snowball')">Snowball</button>
+              <button id="btnAvalanche" type="button" onclick="alternarEstrategia('avalanche')">Avalanche</button>
+            </div>
+          </div>
+          <p class="item-meta" id="estrategiaExplicacao" style="margin-top:6px"></p>
+          <div id="planoQuitacaoLista" class="list" style="margin-top:14px"></div>
         </div>
 
         <div class="grid-2" style="margin-top:14px">

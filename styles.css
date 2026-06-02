@@ -714,6 +714,159 @@ select:focus-visible {
   .ia-resumo-valor { margin-top: 0; font-size: 16px; }
 }
 
+/* ===== SCORE DE SAÚDE FINANCEIRA ===== */
+.score-card-mini {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.score-mini-info { flex: 1; min-width: 0; }
+.score-mini-info .metric-value {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+.score-ring-mini {
+  width: 72px; height: 72px;
+  position: relative;
+  flex-shrink: 0;
+}
+.score-ring-mini svg { width: 100%; height: 100%; }
+.score-mini-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.score-mini-label .num {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px; font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+}
+.score-total-grande {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 36px; font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.score-breakdown {
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+.score-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.score-item:last-child { border-bottom: none; }
+.score-item-top {
+  display: flex; justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.score-item-nome { font-weight: 600; color: var(--text); font-size: 13px; }
+.score-item-pts {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--text);
+  font-size: 13px;
+}
+.score-item-bar {
+  height: 6px;
+  background: var(--progress-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.score-item-bar > div {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .25s;
+}
+.score-item-det {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Snowball / Avalanche toggle ===== */
+.snowball-toggle {
+  display: inline-flex;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+.snowball-toggle button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color .15s, color .15s;
+}
+.snowball-toggle button.active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.plano-item {
+  display: flex; flex-direction: column;
+  padding: 12px;
+  background: var(--card2);
+  border-left: 3px solid var(--border);
+  border-radius: 8px;
+}
+.plano-item.foco {
+  border-left-color: var(--green);
+  background: var(--green-soft-bg);
+}
+.plano-item-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 4px;
+}
+.plano-item-pos {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  font-weight: 700;
+  margin-right: 8px;
+}
+.plano-item-nome { font-weight: 700; color: var(--text); flex: 1; }
+.plano-item-valor {
+  font-family: "JetBrains Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700; color: var(--text);
+}
+.plano-item-info {
+  font-size: 11px; color: var(--muted);
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 4px;
+}
+.plano-item-foco-msg {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(34, 197, 94, 0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 600;
+}
+
+@media (max-width: 650px) {
+  .score-card-mini .score-ring-mini { width: 60px; height: 60px; }
+  .score-total-grande { font-size: 28px; }
+}
+
 /* ===== METAS (cards dinâmicos com anel) ===== */
 .meta-card {
   background: var(--card);

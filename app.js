@@ -549,6 +549,67 @@ async function dispararNotificacao(titulo, opts) {
   }
 }
 
+/**
+ * Notificação semanal (domingo) e mensal (dia 1) — motivacional.
+ * Domingo: progresso da liberdade + score. Dia 1: resumo do mês anterior.
+ */
+async function verificarNotificacaoMotivacional() {
+  if (!seguranca.notificacoesAtivas) return;
+  if (!notificacoesSuportadas() || Notification.permission !== "granted") return;
+  const d = new Date();
+  const dow = d.getDay();
+  const dom = d.getDate();
+  const ano = d.getFullYear();
+
+  // Semanal (domingo)
+  if (dow === 0) {
+    const semNum = Math.floor((d - new Date(ano, 0, 1)) / (7 * 86400000));
+    const semKey = "notif_sem_" + ano + "_" + semNum;
+    try {
+      if (localStorage.getItem(semKey) !== "1") {
+        const lib = calcularLiberdade();
+        const score = calcularScoreSaude();
+        let body;
+        if (lib.totalDevido > 0 && lib.grupos.length) {
+          const prox = lib.grupos[0];
+          body = lib.pctLivre + "% livre · Score " + score.total + "/100 · Próximo: " + prox.nome + " (" + prox.parcelasRestantes + " parcelas)";
+        } else {
+          body = "Sem dívidas pendentes! Score " + score.total + "/100";
+        }
+        const ok = await dispararNotificacao("Domingo: como vai a liberdade?", {
+          body: body,
+          icon: "./icons/icon-192.png",
+          badge: "./icons/icon-192.png",
+          tag: "financas-semanal"
+        });
+        if (ok) localStorage.setItem(semKey, "1");
+      }
+    } catch (e) { console.warn("[notif sem]", e); }
+  }
+
+  // Mensal (dia 1 ou 2 — pra cobrir caso fechou app no dia 1)
+  if (dom === 1 || dom === 2) {
+    const mesKey = "notif_mes_" + ano + "_" + d.getMonth();
+    try {
+      if (localStorage.getItem(mesKey) !== "1") {
+        const mesAnt = new Date(d);
+        mesAnt.setMonth(mesAnt.getMonth() - 1);
+        const chaveAnt = mesAnt.toISOString().slice(0, 7);
+        const s = helperSaldoMes(chaveAnt);
+        const nome = nomeMes(chaveAnt);
+        const body = "Salário " + dinheiro(s.salario) + " · Gastos " + dinheiro(s.total) + " · Saldo " + dinheiro(s.saldo);
+        const ok = await dispararNotificacao("Fechamento: " + nome, {
+          body: body,
+          icon: "./icons/icon-192.png",
+          badge: "./icons/icon-192.png",
+          tag: "financas-mensal"
+        });
+        if (ok) localStorage.setItem(mesKey, "1");
+      }
+    } catch (e) { console.warn("[notif mes]", e); }
+  }
+}
+
 async function testarNotificacao() {
   const ok = await pedirPermissaoNotificacoes();
   if (!ok) return;
@@ -886,6 +947,43 @@ function salvarSalario() {
   salvar(); renderizar();
 }
 
+function gastoMensalRecorrenteAtual() {
+  const grupos = {};
+  contas.forEach(function (c) {
+    if (c.recorrencia && c.recorrencia.grupo && c.status !== "pago" && !c.adiada) {
+      if (grupos[c.recorrencia.grupo] === undefined) grupos[c.recorrencia.grupo] = Number(c.valor || 0);
+    }
+  });
+  return Object.values(grupos).reduce(function (s, v) { return s + v; }, 0);
+}
+
+/**
+ * Mostra alerta de "espera" antes de cadastrar parcela pesada.
+ * Retorna true se o usuário confirmou; false se cancelou.
+ */
+function alertaTentacaoSeNecessario(valor, quantas, freq, nome) {
+  if (freq === "unica") return true;
+  const valorMensal = freq === "quinzenal" ? valor * 2 : valor;
+  // Não alerta se for pequeno
+  if (quantas < 4 && valor < 100) return true;
+  const mensalAtual = gastoMensalRecorrenteAtual();
+  const mensalNovo = mensalAtual + valorMensal;
+  const totalCompromisso = valor * quantas;
+  const passouSalario = salarioMes > 0 && mensalNovo > salarioMes;
+  const pctSalario = salarioMes > 0 ? Math.round(mensalNovo / salarioMes * 100) : 0;
+  let msg = "ESPERA — pense antes de confirmar.\n\n";
+  msg += "Suas parcelas mensais hoje somam: " + dinheiro(mensalAtual) + "\n\n";
+  msg += "\"" + nome + "\" vai te comprometer com:\n";
+  msg += "  • " + dinheiro(valor) + " por " + (freq === "mensal" ? "mês" : "quinzena") + "\n";
+  msg += "  • por " + quantas + " " + (freq === "mensal" ? "meses" : "quinzenas") + "\n";
+  msg += "  • total: " + dinheiro(totalCompromisso) + "\n\n";
+  msg += "Novo gasto mensal: " + dinheiro(mensalNovo);
+  if (salarioMes > 0) msg += " (" + pctSalario + "% do salário)";
+  if (passouSalario) msg += "\n\n⚠ Isso ULTRAPASSA seu salário de " + dinheiro(salarioMes);
+  msg += "\n\nTem certeza que vale a pena?";
+  return confirm(msg);
+}
+
 function salvarContaFormulario() { contaEditandoId ? atualizarConta() : adicionarConta(); }
 function adicionarConta() {
   const nome = $("contaNome").value.trim();
@@ -895,6 +993,12 @@ function adicionarConta() {
   const freq = $("contaFrequencia").value;
   const quantas = freq === "unica" ? 1 : Math.max(1, Number($("contaQuantas").value || 1));
   if (!nome || !valor || !data) return toast("Preencha nome, valor e data.", "warn");
+
+  // Alerta de tentação pra parcelas pesadas (não bloqueia, só faz pensar)
+  if (!alertaTentacaoSeNecessario(valor, quantas, freq, nome)) {
+    toast("Cadastro cancelado. Boa decisão.", "warn");
+    return;
+  }
 
   if (freq === "unica") {
     contas.push({
@@ -1777,6 +1881,8 @@ function renderizarInterno() {
   safeCall(renderizarCalendario, "renderizarCalendario");
   safeCall(renderizarGraficos, "renderizarGraficos");
   safeCall(renderizarLiberdade, "renderizarLiberdade");
+  safeCall(renderizarScoreSaude, "renderizarScoreSaude");
+  safeCall(renderizarPlanoQuitacao, "renderizarPlanoQuitacao");
   safeCall(popularDatalistCategorias, "popularDatalistCategorias");
   safeCall(atualizarBarraSelecao, "atualizarBarraSelecao");
   safeCall(atualizarBotaoModoSelecao, "atualizarBotaoModoSelecao");
@@ -2454,6 +2560,142 @@ function renderizarDetalheCalendario() {
 }
 
 /* ===========================================================
+   Score de saúde financeira (0-100)
+   =========================================================== */
+/**
+ * Calcula uma nota de 0-100 baseada em pago em dia, saldo, cartão,
+ * reserva, hábitos e contas vencidas. Cada critério tem peso fixo.
+ */
+function calcularScoreSaude() {
+  const chave = chaveMesAtual();
+  const s = helperSaldoMes(chave);
+  const breakdown = [];
+  let total = 0;
+
+  // 1) Contas pagas em dia (até 30 pts)
+  const listaMes = contasDoMes(chave);
+  const totalMes = listaMes.length;
+  const pagasMes = listaMes.filter(function (c) { return c.status === "pago"; }).length;
+  const pctPago = totalMes ? pagasMes / totalMes : 1; // sem contas no mês = 100% "em dia"
+  const pPago = Math.round(pctPago * 30);
+  breakdown.push({ nome: "Contas pagas em dia", pontos: pPago, max: 30, detalhe: totalMes ? (pagasMes + "/" + totalMes + " — " + Math.round(pctPago * 100) + "%") : "Sem contas neste mês" });
+  total += pPago;
+
+  // 2) Saldo previsto positivo (até 20 pts)
+  let pSaldo = 0;
+  if (s.salario > 0) {
+    if (s.saldo > 0) pSaldo = 20;
+    else if (s.saldo === 0) pSaldo = 10;
+    else pSaldo = 0;
+  }
+  breakdown.push({ nome: "Saldo previsto positivo", pontos: pSaldo, max: 20, detalhe: s.salario > 0 ? dinheiro(s.saldo) : "Cadastre seu salário" });
+  total += pSaldo;
+
+  // 3) Cartão < 70% (até 15 pts)
+  const fatura = totalCartao();
+  const limite = Number(cartao.limite || 0);
+  let pCartao = 0;
+  if (limite > 0) {
+    const uso = fatura / limite;
+    if (uso < 0.5) pCartao = 15;
+    else if (uso < 0.7) pCartao = 10;
+    else if (uso < 0.9) pCartao = 5;
+    else pCartao = 0;
+  } else {
+    pCartao = 15; // sem cartão = sem risco
+  }
+  breakdown.push({ nome: "Cartão sob controle", pontos: pCartao, max: 15, detalhe: limite > 0 ? Math.round(fatura / limite * 100) + "% do limite" : "Sem limite cadastrado" });
+  total += pCartao;
+
+  // 4) Reserva de emergência (até 15 pts)
+  const gastoMensal = s.total || 1;
+  const reservaMeta = metas.find(function (m) { return /reserv/i.test(m.nome || ""); });
+  const reservaValor = reservaMeta ? Number(reservaMeta.guardado || 0) : 0;
+  let pReserva = 0;
+  if (reservaValor >= gastoMensal * 3) pReserva = 15;
+  else if (reservaValor >= gastoMensal) pReserva = 10;
+  else if (reservaValor > 0) pReserva = 5;
+  breakdown.push({ nome: "Reserva de emergência", pontos: pReserva, max: 15, detalhe: reservaMeta ? dinheiro(reservaValor) + " / " + dinheiro(gastoMensal * 3) + " (3 meses)" : "Crie uma meta com nome 'Reserva'" });
+  total += pReserva;
+
+  // 5) Rotina (hábitos) — até 10 pts
+  let pHab = 0;
+  if (habitos.length > 0) {
+    const cumpridos = habitos.filter(function (h) { return bateuMetaNoDia(h.id, hoje); }).length;
+    const pctHab = cumpridos / habitos.length;
+    pHab = Math.round(pctHab * 10);
+    breakdown.push({ nome: "Rotina diária", pontos: pHab, max: 10, detalhe: cumpridos + "/" + habitos.length + " hábitos hoje" });
+  } else {
+    breakdown.push({ nome: "Rotina diária", pontos: 0, max: 10, detalhe: "Cadastre hábitos pra ganhar pontos aqui" });
+  }
+  total += pHab;
+
+  // 6) Sem contas vencidas (até 10 pts)
+  const vencidas = todasContas().filter(function (c) { return c.status !== "pago" && !c.adiada && diasAte(c.data) < 0; });
+  const pVenc = vencidas.length === 0 ? 10 : Math.max(0, 10 - vencidas.length * 2);
+  breakdown.push({ nome: "Sem contas vencidas", pontos: pVenc, max: 10, detalhe: vencidas.length === 0 ? "Zero vencidas" : vencidas.length + " conta(s) vencida(s)" });
+  total += pVenc;
+
+  // Frase resumo
+  let frase = "Crítico — você está em risco";
+  if (total >= 80) frase = "Excelente — caminho de liberdade";
+  else if (total >= 60) frase = "Bom — continue assim";
+  else if (total >= 40) frase = "Regular — ajustes ajudariam";
+
+  return { total: total, breakdown: breakdown, frase: frase };
+}
+
+function corScore(score) {
+  if (score >= 70) return "var(--green)";
+  if (score >= 40) return "var(--yellow)";
+  return "var(--red)";
+}
+
+function renderizarScoreSaude() {
+  const s = calcularScoreSaude();
+  // Card mini no Hoje
+  const wrapMini = $("scoreRingMini");
+  if (wrapMini) {
+    const r = 28, cx = 36, cy = 36, sw = 6;
+    const C = 2 * Math.PI * r;
+    const off = C * (1 - s.total / 100);
+    const cor = corScore(s.total);
+    wrapMini.innerHTML =
+      '<svg viewBox="0 0 72 72">'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--progress-bg)" stroke-width="' + sw + '"/>'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + cor + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + off.toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>'
+      + '</svg>'
+      + '<div class="score-mini-label"><span class="num">' + s.total + '</span></div>';
+  }
+  if ($("scoreValor")) {
+    $("scoreValor").innerText = s.total + "/100";
+    $("scoreValor").style.color = corScore(s.total);
+  }
+  if ($("scoreFrase")) $("scoreFrase").innerText = s.frase;
+  // Breakdown completo na Liberdade
+  const wrapDet = $("scoreBreakdown");
+  if (wrapDet) {
+    wrapDet.innerHTML = s.breakdown.map(function (b) {
+      const pct = b.max > 0 ? (b.pontos / b.max * 100) : 0;
+      const cor = pct >= 80 ? "var(--green)" : pct >= 40 ? "var(--yellow)" : "var(--red)";
+      return '<div class="score-item">'
+        + '<div class="score-item-top">'
+        +   '<span class="score-item-nome">' + escHtml(b.nome) + '</span>'
+        +   '<span class="score-item-pts">' + b.pontos + ' / ' + b.max + '</span>'
+        + '</div>'
+        + '<div class="score-item-bar"><div style="width:' + pct + '%;background:' + cor + '"></div></div>'
+        + '<div class="score-item-det">' + escHtml(b.detalhe) + '</div>'
+        + '</div>';
+    }).join("");
+  }
+  if ($("scoreTotalGrande")) {
+    $("scoreTotalGrande").innerText = s.total;
+    $("scoreTotalGrande").style.color = corScore(s.total);
+  }
+  if ($("scoreFraseGrande")) $("scoreFraseGrande").innerText = s.frase;
+}
+
+/* ===========================================================
    Liberdade financeira — quanto falta pra sair do buraco
    =========================================================== */
 function mesesEntre(dataIni, dataFim) {
@@ -2615,6 +2857,63 @@ function renderizarLiberdade() {
         + '</div>';
     }).join("");
   }
+}
+
+/* ===========================================================
+   Plano de quitação (Snowball / Avalanche)
+   =========================================================== */
+let estrategiaQuitacao = "snowball"; // ou "avalanche"
+
+function alternarEstrategia(novo) {
+  estrategiaQuitacao = novo;
+  if ($("btnSnowball")) $("btnSnowball").classList.toggle("active", novo === "snowball");
+  if ($("btnAvalanche")) $("btnAvalanche").classList.toggle("active", novo === "avalanche");
+  renderizarPlanoQuitacao();
+}
+
+function renderizarPlanoQuitacao() {
+  if (!$("planoQuitacaoLista")) return;
+  const l = calcularLiberdade();
+  // Pega só grupos com recorrência (avulsos não fazem sentido pra estratégia)
+  const grupos = l.grupos.filter(function (g) { return !g.avulso || g.parcelasRestantes > 1; });
+
+  const explic = $("estrategiaExplicacao");
+  if (explic) {
+    explic.innerText = estrategiaQuitacao === "snowball"
+      ? "Snowball: quita primeiro a dívida com MENOR valor total. Gera vitórias rápidas — bom pra motivação."
+      : "Avalanche: quita primeiro a dívida com MAIOR parcela mensal. Alivia mais rápido o aperto do mês.";
+  }
+
+  let ordenado;
+  if (estrategiaQuitacao === "snowball") {
+    ordenado = grupos.slice().sort(function (a, b) { return a.valorTotal - b.valorTotal; });
+  } else {
+    ordenado = grupos.slice().sort(function (a, b) { return b.parcelaValor - a.parcelaValor; });
+  }
+  ordenado = ordenado.slice(0, 5);
+
+  if (!ordenado.length) {
+    $("planoQuitacaoLista").innerHTML = '<p class="empty">Sem dívidas recorrentes pendentes. Você não precisa de estratégia agora.</p>';
+    return;
+  }
+
+  $("planoQuitacaoLista").innerHTML = ordenado.map(function (g, i) {
+    const foco = i === 0;
+    const proxStr = g.proximaData ? dataBR(g.proximaData) : "—";
+    return '<div class="plano-item' + (foco ? ' foco' : '') + '">'
+      + '<div class="plano-item-top">'
+      +   '<span class="plano-item-pos">#' + (i + 1) + '</span>'
+      +   '<span class="plano-item-nome">' + escHtml(g.nome) + '</span>'
+      +   '<span class="plano-item-valor">' + dinheiro(g.valorTotal) + '</span>'
+      + '</div>'
+      + '<div class="plano-item-info">'
+      +   '<span>' + g.parcelasRestantes + ' parcela' + (g.parcelasRestantes === 1 ? '' : 's') + '</span>'
+      +   '<span>· ' + dinheiro(g.parcelaValor) + '/mês</span>'
+      +   '<span>· próxima ' + proxStr + '</span>'
+      + '</div>'
+      + (foco ? '<div class="plano-item-foco-msg">Pague esta primeiro — quitando, você ' + (estrategiaQuitacao === "snowball" ? "sente vitória rápida e ganha confiança" : "libera " + dinheiro(g.parcelaValor) + "/mês imediatamente") + '.</div>' : '')
+      + '</div>';
+  }).join("");
 }
 
 /* ===========================================================
@@ -3728,7 +4027,9 @@ async function iniciar() {
     registrarSW();
     // Verifica notificações pendentes (uma vez no boot + a cada 60 min)
     setTimeout(verificarENotificar, 1500);
+    setTimeout(verificarNotificacaoMotivacional, 2500);
     setInterval(verificarENotificar, 60 * 60 * 1000);
+    setInterval(verificarNotificacaoMotivacional, 60 * 60 * 1000);
   } catch (e) {
     console.error("Erro no init:", e);
     toast("Erro ao iniciar o app. Veja o console.", "error");
@@ -3834,6 +4135,7 @@ window.alternarModoSelecao = alternarModoSelecao;
 window.adicionarValorMeta = adicionarValorMeta;
 window.atualizarCampoQuantasConta = atualizarCampoQuantasConta;
 window.renderizarLiberdade = renderizarLiberdade;
+window.alternarEstrategia = alternarEstrategia;
 // Expostos só pra testes (não usados na UI)
 window.normalizarCategoria = normalizarCategoria;
 window.escHtml = escHtml;
