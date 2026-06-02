@@ -1,0 +1,2933 @@
+{
+  "contas": [
+    {
+      "id": "id_mpcoycqh_6cxjvwn5t9k",
+      "nome": "MOTO (1/40)",
+      "valor": 1213,
+      "data": "2026-05-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 1,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_09cxv9qy4shn",
+      "nome": "MOTO (2/40)",
+      "valor": 1213,
+      "data": "2026-06-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 2,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_hjsayvgmxn",
+      "nome": "MOTO (3/40)",
+      "valor": 1213,
+      "data": "2026-07-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 3,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_gb6jwm4e9kj",
+      "nome": "MOTO (4/40)",
+      "valor": 1213,
+      "data": "2026-08-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 4,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_j7sjhzg1lvc",
+      "nome": "MOTO (5/40)",
+      "valor": 1213,
+      "data": "2026-09-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 5,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_w66qd8gtyy",
+      "nome": "MOTO (6/40)",
+      "valor": 1213,
+      "data": "2026-10-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 6,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_i732dd4vlpp",
+      "nome": "MOTO (7/40)",
+      "valor": 1213,
+      "data": "2026-11-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 7,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_njc25u37bvh",
+      "nome": "MOTO (8/40)",
+      "valor": 1213,
+      "data": "2026-12-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 8,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_tr8qsizexu",
+      "nome": "MOTO (9/40)",
+      "valor": 1213,
+      "data": "2027-01-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 9,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_qkk4xwofp4f",
+      "nome": "MOTO (10/40)",
+      "valor": 1213,
+      "data": "2027-02-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 10,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_sz0vzxratl",
+      "nome": "MOTO (11/40)",
+      "valor": 1213,
+      "data": "2027-03-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 11,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_rlq6843luyn",
+      "nome": "MOTO (12/40)",
+      "valor": 1213,
+      "data": "2027-04-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 12,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_xojcwlte7gb",
+      "nome": "MOTO (13/40)",
+      "valor": 1213,
+      "data": "2027-05-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 13,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_mxp2towfsrm",
+      "nome": "MOTO (14/40)",
+      "valor": 1213,
+      "data": "2027-06-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 14,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_fkm2wrpzqb4",
+      "nome": "MOTO (15/40)",
+      "valor": 1213,
+      "data": "2027-07-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 15,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_ckm4wwgh89n",
+      "nome": "MOTO (16/40)",
+      "valor": 1213,
+      "data": "2027-08-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 16,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_ob9dumydle",
+      "nome": "MOTO (17/40)",
+      "valor": 1213,
+      "data": "2027-09-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 17,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_qdnimmop7s",
+      "nome": "MOTO (18/40)",
+      "valor": 1213,
+      "data": "2027-10-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 18,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_c0b6ka7pi0a",
+      "nome": "MOTO (19/40)",
+      "valor": 1213,
+      "data": "2027-11-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 19,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_ngmiebrzn4a",
+      "nome": "MOTO (20/40)",
+      "valor": 1213,
+      "data": "2027-12-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 20,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_rtsdtzbl2bd",
+      "nome": "MOTO (21/40)",
+      "valor": 1213,
+      "data": "2028-01-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 21,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_vojipp8o6f",
+      "nome": "MOTO (22/40)",
+      "valor": 1213,
+      "data": "2028-02-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 22,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_o4e88uaeuym",
+      "nome": "MOTO (23/40)",
+      "valor": 1213,
+      "data": "2028-03-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 23,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_kal7ulfopv",
+      "nome": "MOTO (24/40)",
+      "valor": 1213,
+      "data": "2028-04-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 24,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_en5duhauj8o",
+      "nome": "MOTO (25/40)",
+      "valor": 1213,
+      "data": "2028-05-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 25,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_q05lz9yqcmh",
+      "nome": "MOTO (26/40)",
+      "valor": 1213,
+      "data": "2028-06-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 26,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_46i1iyxk08j",
+      "nome": "MOTO (27/40)",
+      "valor": 1213,
+      "data": "2028-07-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 27,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_fdc4tl48s46",
+      "nome": "MOTO (28/40)",
+      "valor": 1213,
+      "data": "2028-08-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 28,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_dmbsfxqjosd",
+      "nome": "MOTO (29/40)",
+      "valor": 1213,
+      "data": "2028-09-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 29,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_3hihe04h7co",
+      "nome": "MOTO (30/40)",
+      "valor": 1213,
+      "data": "2028-10-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 30,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_fxw1eyb4bha",
+      "nome": "MOTO (31/40)",
+      "valor": 1213,
+      "data": "2028-11-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 31,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_19nmkp8jyhx",
+      "nome": "MOTO (32/40)",
+      "valor": 1213,
+      "data": "2028-12-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 32,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_zyw49fkf7x",
+      "nome": "MOTO (33/40)",
+      "valor": 1213,
+      "data": "2029-01-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 33,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_cgwg3fbelp",
+      "nome": "MOTO (34/40)",
+      "valor": 1213,
+      "data": "2029-02-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 34,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_d5i1hev77o8",
+      "nome": "MOTO (35/40)",
+      "valor": 1213,
+      "data": "2029-03-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 35,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_n50e5rzezak",
+      "nome": "MOTO (36/40)",
+      "valor": 1213,
+      "data": "2029-04-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 36,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_sju9xe1k56",
+      "nome": "MOTO (37/40)",
+      "valor": 1213,
+      "data": "2029-05-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 37,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_1c2hnbdcw59",
+      "nome": "MOTO (38/40)",
+      "valor": 1213,
+      "data": "2029-06-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 38,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_qr97bg3ngw",
+      "nome": "MOTO (39/40)",
+      "valor": 1213,
+      "data": "2029-07-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 39,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoycqh_vro3zz305x",
+      "nome": "MOTO (40/40)",
+      "valor": 1213,
+      "data": "2029-08-25",
+      "tipo": "mensal recorrente",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoycqh_uwjxq8t6ld",
+        "parcelaAtual": 40,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_xjaon7ev81o",
+      "nome": "SMART FIT (1/7)",
+      "valor": 149.9,
+      "data": "2026-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 1,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_ukhjrnfhtzk",
+      "nome": "SMART FIT (2/7)",
+      "valor": 149.9,
+      "data": "2026-06-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 2,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_8xyreytcfbi",
+      "nome": "SMART FIT (3/7)",
+      "valor": 149.9,
+      "data": "2026-07-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 3,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_gtrmr4273vj",
+      "nome": "SMART FIT (4/7)",
+      "valor": 149.9,
+      "data": "2026-08-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 4,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_o3kzv8i67pp",
+      "nome": "SMART FIT (5/7)",
+      "valor": 149.9,
+      "data": "2026-09-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 5,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_d102irlo60r",
+      "nome": "SMART FIT (6/7)",
+      "valor": 149.9,
+      "data": "2026-10-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 6,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcoyzzq_h04vpwbkhs",
+      "nome": "SMART FIT (7/7)",
+      "valor": 149.9,
+      "data": "2026-11-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 7,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcozro0_m2r0rtm16kc",
+      "nome": "JOSUE (1/4)",
+      "valor": 584.62,
+      "data": "2026-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pago",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcozro0_57qimk7b0bt",
+        "parcelaAtual": 1,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcozro0_fljp3e39qyb",
+      "nome": "JOSUE (2/4)",
+      "valor": 584.62,
+      "data": "2026-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcozro0_57qimk7b0bt",
+        "parcelaAtual": 2,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcozro0_vz0f2ux0vo",
+      "nome": "JOSUE (3/4)",
+      "valor": 584.62,
+      "data": "2026-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcozro0_57qimk7b0bt",
+        "parcelaAtual": 3,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcozro0_skam4gnpuck",
+      "nome": "JOSUE (4/4)",
+      "valor": 584.62,
+      "data": "2026-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcozro0_57qimk7b0bt",
+        "parcelaAtual": 4,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp0hoe_h8mpqkjuav",
+      "nome": "HENRIQUE (1/2)",
+      "valor": 133.86,
+      "data": "2026-05-30",
+      "tipo": "mensal recorrente",
+      "categoria": "ESCOLA IDE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp0hoe_nxvikudtucq",
+        "parcelaAtual": 1,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp0hoe_4pukfnimbrf",
+      "nome": "HENRIQUE (2/2)",
+      "valor": 133.86,
+      "data": "2026-06-30",
+      "tipo": "mensal recorrente",
+      "categoria": "ESCOLA IDE",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp0hoe_nxvikudtucq",
+        "parcelaAtual": 2,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_yquqace77sh",
+      "nome": "INTERNET CELUALR (1/7)",
+      "valor": 40,
+      "data": "2026-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 1,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_89v2n3l65ll",
+      "nome": "INTERNET CELUALR (2/7)",
+      "valor": 40,
+      "data": "2026-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 2,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_l1ubrjn8ncn",
+      "nome": "INTERNET CELUALR (3/7)",
+      "valor": 40,
+      "data": "2026-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 3,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_kgigghwm8e",
+      "nome": "INTERNET CELUALR (4/7)",
+      "valor": 40,
+      "data": "2026-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 4,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_n8ny0oleq1",
+      "nome": "INTERNET CELUALR (5/7)",
+      "valor": 40,
+      "data": "2026-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 5,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_s3ua38knoak",
+      "nome": "INTERNET CELUALR (6/7)",
+      "valor": 40,
+      "data": "2026-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 6,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp190t_myjyp5iunpj",
+      "nome": "INTERNET CELUALR (7/7)",
+      "valor": 40,
+      "data": "2026-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 7,
+        "totalParcelas": 7,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_hb6sakgjx7",
+      "nome": "CELULAR (1/7)",
+      "valor": 171.75,
+      "data": "2026-05-22",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 1,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_wpxh1map2ve",
+      "nome": "CELULAR (2/7)",
+      "valor": 171.75,
+      "data": "2026-06-06",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 2,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_zlhoh8x2hum",
+      "nome": "CELULAR (3/7)",
+      "valor": 171.75,
+      "data": "2026-06-21",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 3,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_3465rcdzg1l",
+      "nome": "CELULAR (4/7)",
+      "valor": 171.75,
+      "data": "2026-07-06",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 4,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_wz6yxrf3jah",
+      "nome": "CELULAR (5/7)",
+      "valor": 171.75,
+      "data": "2026-07-21",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 5,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_acre5zqyymq",
+      "nome": "CELULAR (6/7)",
+      "valor": 171.75,
+      "data": "2026-08-05",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 6,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcp93h5_lp4uun97kw",
+      "nome": "CELULAR (7/7)",
+      "valor": 171.75,
+      "data": "2026-08-20",
+      "tipo": "quinzenal",
+      "categoria": "PRESTAÇAO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp93h5_q6b0jqy4avn",
+        "parcelaAtual": 7,
+        "totalParcelas": 7,
+        "frequencia": "quinzenal"
+      }
+    },
+    {
+      "id": "id_mpcpcee5_xocgud4xs9d",
+      "nome": "MULTA",
+      "valor": 130,
+      "data": "2026-06-03",
+      "tipo": "valor cheio",
+      "categoria": "TRANSPORTE",
+      "status": "pendente",
+      "origem": "manual"
+    },
+    {
+      "id": "id_mpfocyv4_m8spy24kuij",
+      "nome": "TELA DO CELULAR (1/2)",
+      "valor": 125,
+      "data": "2026-06-14",
+      "tipo": "mensal recorrente",
+      "categoria": "CELULAR",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfocyv4_wt2m9k5q1r8",
+        "parcelaAtual": 1,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfocyv4_dlmesygv5yi",
+      "nome": "TELA DO CELULAR (2/2)",
+      "valor": 125,
+      "data": "2026-07-14",
+      "tipo": "mensal recorrente",
+      "categoria": "CELULAR",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfocyv4_wt2m9k5q1r8",
+        "parcelaAtual": 2,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfoeqru_12cspp3utan9",
+      "nome": "CARLOS (1/2)",
+      "valor": 177,
+      "data": "2026-05-05",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfoeqru_cob6j6qd9nk",
+        "parcelaAtual": 1,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfoeqru_93t5hplo4iq",
+      "nome": "CARLOS (2/2)",
+      "valor": 177,
+      "data": "2026-06-05",
+      "tipo": "mensal recorrente",
+      "categoria": "EMPRESTIMO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfoeqru_cob6j6qd9nk",
+        "parcelaAtual": 2,
+        "totalParcelas": 2,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfofmt5_dz86hplpha",
+      "nome": "BAU (1/4)",
+      "valor": 152,
+      "data": "2026-06-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfofmt5_u5y7udgmhls",
+        "parcelaAtual": 1,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfofmt5_qolfjj93n3n",
+      "nome": "BAU (2/4)",
+      "valor": 152,
+      "data": "2026-07-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfofmt5_u5y7udgmhls",
+        "parcelaAtual": 2,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfofmt5_r5q577s1vtl",
+      "nome": "BAU (3/4)",
+      "valor": 152,
+      "data": "2026-08-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfofmt5_u5y7udgmhls",
+        "parcelaAtual": 3,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfofmt5_sbql4nhftf",
+      "nome": "BAU (4/4)",
+      "valor": 152,
+      "data": "2026-09-15",
+      "tipo": "mensal recorrente",
+      "categoria": "MOTO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfofmt5_u5y7udgmhls",
+        "parcelaAtual": 4,
+        "totalParcelas": 4,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq5_pe8yh1a8op8",
+      "nome": "MERCADO (1/6)",
+      "valor": 200,
+      "data": "2026-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 1,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq6_f5g6iwaqb7",
+      "nome": "MERCADO (2/6)",
+      "valor": 200,
+      "data": "2026-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 2,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq6_lpgwivth5t",
+      "nome": "MERCADO (3/6)",
+      "valor": 200,
+      "data": "2026-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 3,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq6_5bwcbkvw8v",
+      "nome": "MERCADO (4/6)",
+      "valor": 200,
+      "data": "2026-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 4,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq6_sbefc30e0b",
+      "nome": "MERCADO (5/6)",
+      "valor": 200,
+      "data": "2026-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 5,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpfogyq6_o7z7z9efgx",
+      "nome": "MERCADO (6/6)",
+      "valor": 200,
+      "data": "2026-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 6,
+        "totalParcelas": 6,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext0cbz06o",
+      "nome": "SMART FIT (8/40)",
+      "valor": 149.9,
+      "data": "2026-12-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 8,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext17fpvvk",
+      "nome": "SMART FIT (9/40)",
+      "valor": 149.9,
+      "data": "2027-01-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 9,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext2qbcnjf",
+      "nome": "SMART FIT (10/40)",
+      "valor": 149.9,
+      "data": "2027-02-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 10,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext3w28s2q",
+      "nome": "SMART FIT (11/40)",
+      "valor": 149.9,
+      "data": "2027-03-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 11,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext4eqx8wi",
+      "nome": "SMART FIT (12/40)",
+      "valor": 149.9,
+      "data": "2027-04-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 12,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext540dr5y",
+      "nome": "SMART FIT (13/40)",
+      "valor": 149.9,
+      "data": "2027-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 13,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext6bf77ox",
+      "nome": "SMART FIT (14/40)",
+      "valor": 149.9,
+      "data": "2027-06-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 14,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext7bwwzz9",
+      "nome": "SMART FIT (15/40)",
+      "valor": 149.9,
+      "data": "2027-07-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 15,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext83sr5pz",
+      "nome": "SMART FIT (16/40)",
+      "valor": 149.9,
+      "data": "2027-08-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 16,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext9lxja93",
+      "nome": "SMART FIT (17/40)",
+      "valor": 149.9,
+      "data": "2027-09-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 17,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extaikmryo",
+      "nome": "SMART FIT (18/40)",
+      "valor": 149.9,
+      "data": "2027-10-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 18,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extb7l3yug",
+      "nome": "SMART FIT (19/40)",
+      "valor": 149.9,
+      "data": "2027-11-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 19,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extcv7jt7j",
+      "nome": "SMART FIT (20/40)",
+      "valor": 149.9,
+      "data": "2027-12-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 20,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extdfljpqh",
+      "nome": "SMART FIT (21/40)",
+      "valor": 149.9,
+      "data": "2028-01-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 21,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_exte2xiv6f",
+      "nome": "SMART FIT (22/40)",
+      "valor": 149.9,
+      "data": "2028-02-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 22,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extf7hrzsx",
+      "nome": "SMART FIT (23/40)",
+      "valor": 149.9,
+      "data": "2028-03-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 23,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extg0c2go2",
+      "nome": "SMART FIT (24/40)",
+      "valor": 149.9,
+      "data": "2028-04-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 24,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_exth19pdgf",
+      "nome": "SMART FIT (25/40)",
+      "valor": 149.9,
+      "data": "2028-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 25,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extiot6yya",
+      "nome": "SMART FIT (26/40)",
+      "valor": 149.9,
+      "data": "2028-06-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 26,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extj2q4fd1",
+      "nome": "SMART FIT (27/40)",
+      "valor": 149.9,
+      "data": "2028-07-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 27,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extkppkk5f",
+      "nome": "SMART FIT (28/40)",
+      "valor": 149.9,
+      "data": "2028-08-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 28,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extlv2slo2",
+      "nome": "SMART FIT (29/40)",
+      "valor": 149.9,
+      "data": "2028-09-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 29,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extmy23w5m",
+      "nome": "SMART FIT (30/40)",
+      "valor": 149.9,
+      "data": "2028-10-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 30,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extnwjltiz",
+      "nome": "SMART FIT (31/40)",
+      "valor": 149.9,
+      "data": "2028-11-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 31,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extovvmr4b",
+      "nome": "SMART FIT (32/40)",
+      "valor": 149.9,
+      "data": "2028-12-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 32,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extp269o0k",
+      "nome": "SMART FIT (33/40)",
+      "valor": 149.9,
+      "data": "2029-01-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 33,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extqpj5v8h",
+      "nome": "SMART FIT (34/40)",
+      "valor": 149.9,
+      "data": "2029-02-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 34,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extrstazr1",
+      "nome": "SMART FIT (35/40)",
+      "valor": 149.9,
+      "data": "2029-03-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 35,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extsgkq99k",
+      "nome": "SMART FIT (36/40)",
+      "valor": 149.9,
+      "data": "2029-04-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 36,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_exttdbjcc1",
+      "nome": "SMART FIT (37/40)",
+      "valor": 149.9,
+      "data": "2029-05-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 37,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extuxfav20",
+      "nome": "SMART FIT (38/40)",
+      "valor": 149.9,
+      "data": "2029-06-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 38,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extvvaf0eg",
+      "nome": "SMART FIT (39/40)",
+      "valor": 149.9,
+      "data": "2029-07-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 39,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extwmz4qr6",
+      "nome": "SMART FIT (40/40)",
+      "valor": 149.9,
+      "data": "2029-08-01",
+      "tipo": "mensal recorrente",
+      "categoria": "ACADEMIA",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcoyzzq_ahmmnnfxkpr",
+        "parcelaAtual": 40,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extxrdd9w2",
+      "nome": "INTERNET CELULAR (8/40)",
+      "valor": 40,
+      "data": "2026-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 8,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_exty52dbtw",
+      "nome": "INTERNET CELULAR (9/40)",
+      "valor": 40,
+      "data": "2027-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 9,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_extzg2mbi2",
+      "nome": "INTERNET CELULAR (10/40)",
+      "valor": 40,
+      "data": "2027-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 10,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext10ao4wq5",
+      "nome": "INTERNET CELULAR (11/40)",
+      "valor": 40,
+      "data": "2027-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 11,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext11h9xnjw",
+      "nome": "INTERNET CELULAR (12/40)",
+      "valor": 40,
+      "data": "2027-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 12,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext126k0asz",
+      "nome": "INTERNET CELULAR (13/40)",
+      "valor": 40,
+      "data": "2027-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 13,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext13of8czs",
+      "nome": "INTERNET CELULAR (14/40)",
+      "valor": 40,
+      "data": "2027-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 14,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1408e0kc",
+      "nome": "INTERNET CELULAR (15/40)",
+      "valor": 40,
+      "data": "2027-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 15,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext15ya3ylw",
+      "nome": "INTERNET CELULAR (16/40)",
+      "valor": 40,
+      "data": "2027-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 16,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext16ovtpi6",
+      "nome": "INTERNET CELULAR (17/40)",
+      "valor": 40,
+      "data": "2027-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 17,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext179pjbxl",
+      "nome": "INTERNET CELULAR (18/40)",
+      "valor": 40,
+      "data": "2027-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 18,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext18b7oyfo",
+      "nome": "INTERNET CELULAR (19/40)",
+      "valor": 40,
+      "data": "2027-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 19,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext19wbr12o",
+      "nome": "INTERNET CELULAR (20/40)",
+      "valor": 40,
+      "data": "2027-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 20,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1a92pgc9",
+      "nome": "INTERNET CELULAR (21/40)",
+      "valor": 40,
+      "data": "2028-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 21,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1bwb2oy7",
+      "nome": "INTERNET CELULAR (22/40)",
+      "valor": 40,
+      "data": "2028-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 22,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1cps71l1",
+      "nome": "INTERNET CELULAR (23/40)",
+      "valor": 40,
+      "data": "2028-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 23,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1dopi6eu",
+      "nome": "INTERNET CELULAR (24/40)",
+      "valor": 40,
+      "data": "2028-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 24,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1e331sqg",
+      "nome": "INTERNET CELULAR (25/40)",
+      "valor": 40,
+      "data": "2028-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 25,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1f2k8syu",
+      "nome": "INTERNET CELULAR (26/40)",
+      "valor": 40,
+      "data": "2028-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 26,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1g83hu4w",
+      "nome": "INTERNET CELULAR (27/40)",
+      "valor": 40,
+      "data": "2028-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 27,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1hhyiz42",
+      "nome": "INTERNET CELULAR (28/40)",
+      "valor": 40,
+      "data": "2028-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 28,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1iuc3f25",
+      "nome": "INTERNET CELULAR (29/40)",
+      "valor": 40,
+      "data": "2028-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 29,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1j3vtfwz",
+      "nome": "INTERNET CELULAR (30/40)",
+      "valor": 40,
+      "data": "2028-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 30,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1kg5x3cu",
+      "nome": "INTERNET CELULAR (31/40)",
+      "valor": 40,
+      "data": "2028-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 31,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1l7xs5ss",
+      "nome": "INTERNET CELULAR (32/40)",
+      "valor": 40,
+      "data": "2028-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 32,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1m7dm65o",
+      "nome": "INTERNET CELULAR (33/40)",
+      "valor": 40,
+      "data": "2029-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 33,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1n4ru20f",
+      "nome": "INTERNET CELULAR (34/40)",
+      "valor": 40,
+      "data": "2029-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 34,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1oykxwcb",
+      "nome": "INTERNET CELULAR (35/40)",
+      "valor": 40,
+      "data": "2029-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 35,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1pygca2f",
+      "nome": "INTERNET CELULAR (36/40)",
+      "valor": 40,
+      "data": "2029-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 36,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkw_ext1qmi4awe",
+      "nome": "INTERNET CELULAR (37/40)",
+      "valor": 40,
+      "data": "2029-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 37,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1rjtcqhz",
+      "nome": "INTERNET CELULAR (38/40)",
+      "valor": 40,
+      "data": "2029-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 38,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1sezjq98",
+      "nome": "INTERNET CELULAR (39/40)",
+      "valor": 40,
+      "data": "2029-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 39,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1tgelsp7",
+      "nome": "INTERNET CELULAR (40/40)",
+      "valor": 40,
+      "data": "2029-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "ESSENCIAL",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpcp190t_g0wnvdn3ia",
+        "parcelaAtual": 40,
+        "totalParcelas": 40,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1ul9fjyl",
+      "nome": "MERCADO (7/39)",
+      "valor": 200,
+      "data": "2026-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 7,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1vzv3f1w",
+      "nome": "MERCADO (8/39)",
+      "valor": 200,
+      "data": "2027-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 8,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1wsgf2jr",
+      "nome": "MERCADO (9/39)",
+      "valor": 200,
+      "data": "2027-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 9,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1xgr9ro5",
+      "nome": "MERCADO (10/39)",
+      "valor": 200,
+      "data": "2027-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 10,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1yifyqzh",
+      "nome": "MERCADO (11/39)",
+      "valor": 200,
+      "data": "2027-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 11,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext1z5019j3",
+      "nome": "MERCADO (12/39)",
+      "valor": 200,
+      "data": "2027-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 12,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext20b59o4s",
+      "nome": "MERCADO (13/39)",
+      "valor": 200,
+      "data": "2027-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 13,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext21o38q88",
+      "nome": "MERCADO (14/39)",
+      "valor": 200,
+      "data": "2027-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 14,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext22pm046k",
+      "nome": "MERCADO (15/39)",
+      "valor": 200,
+      "data": "2027-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 15,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext23x24yum",
+      "nome": "MERCADO (16/39)",
+      "valor": 200,
+      "data": "2027-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 16,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext24ahiluf",
+      "nome": "MERCADO (17/39)",
+      "valor": 200,
+      "data": "2027-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 17,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext25b17dzr",
+      "nome": "MERCADO (18/39)",
+      "valor": 200,
+      "data": "2027-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 18,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext261r5kis",
+      "nome": "MERCADO (19/39)",
+      "valor": 200,
+      "data": "2027-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 19,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext27darvuz",
+      "nome": "MERCADO (20/39)",
+      "valor": 200,
+      "data": "2028-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 20,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2815vlhg",
+      "nome": "MERCADO (21/39)",
+      "valor": 200,
+      "data": "2028-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 21,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext297ivc7s",
+      "nome": "MERCADO (22/39)",
+      "valor": 200,
+      "data": "2028-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 22,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2a6c533d",
+      "nome": "MERCADO (23/39)",
+      "valor": 200,
+      "data": "2028-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 23,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2b2cl11m",
+      "nome": "MERCADO (24/39)",
+      "valor": 200,
+      "data": "2028-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 24,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2cah55rw",
+      "nome": "MERCADO (25/39)",
+      "valor": 200,
+      "data": "2028-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 25,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2d9z5nm1",
+      "nome": "MERCADO (26/39)",
+      "valor": 200,
+      "data": "2028-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 26,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2ekx6qh2",
+      "nome": "MERCADO (27/39)",
+      "valor": 200,
+      "data": "2028-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 27,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2ff0l2bz",
+      "nome": "MERCADO (28/39)",
+      "valor": 200,
+      "data": "2028-09-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 28,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2gphz8al",
+      "nome": "MERCADO (29/39)",
+      "valor": 200,
+      "data": "2028-10-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 29,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2h38g7di",
+      "nome": "MERCADO (30/39)",
+      "valor": 200,
+      "data": "2028-11-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 30,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2imug673",
+      "nome": "MERCADO (31/39)",
+      "valor": 200,
+      "data": "2028-12-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 31,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2j08tb83",
+      "nome": "MERCADO (32/39)",
+      "valor": 200,
+      "data": "2029-01-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 32,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2k0iet8k",
+      "nome": "MERCADO (33/39)",
+      "valor": 200,
+      "data": "2029-02-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 33,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2lwns2nj",
+      "nome": "MERCADO (34/39)",
+      "valor": 200,
+      "data": "2029-03-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 34,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2mc2u1k3",
+      "nome": "MERCADO (35/39)",
+      "valor": 200,
+      "data": "2029-04-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 35,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2nnn9ic0",
+      "nome": "MERCADO (36/39)",
+      "valor": 200,
+      "data": "2029-05-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 36,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2orsf1s7",
+      "nome": "MERCADO (37/39)",
+      "valor": 200,
+      "data": "2029-06-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 37,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2pnhmpua",
+      "nome": "MERCADO (38/39)",
+      "valor": 200,
+      "data": "2029-07-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 38,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    },
+    {
+      "id": "id_mpwmmqkx_ext2q2rhaau",
+      "nome": "MERCADO (39/39)",
+      "valor": 200,
+      "data": "2029-08-20",
+      "tipo": "mensal recorrente",
+      "categoria": "MERCADO",
+      "status": "pendente",
+      "origem": "recorrencia",
+      "recorrencia": {
+        "grupo": "id_mpfogyq5_62ohbl5euf3",
+        "parcelaAtual": 39,
+        "totalParcelas": 39,
+        "frequencia": "mensal"
+      }
+    }
+  ],
+  "metas": [
+    {
+      "id": "id_mpcot6e9_xkhkymx95us",
+      "nome": "VIAGEM F1 SAO PAULO",
+      "alvo": 6000,
+      "guardado": 0,
+      "prazo": "2026-11-05",
+      "prioridade": "alta"
+    }
+  ],
+  "comprasCartao": [],
+  "cartao": {
+    "nome": "CARTAO ITAU",
+    "fatura": 2189.16,
+    "vencimento": "2026-06-14",
+    "limite": 3000
+  },
+  "salarioMes": 3000,
+  "ultimaAtualizacaoCartao": "2026-05-19",
+  "salariosPorMes": {
+    "2026-08": 2000,
+    "2026-06": 2000,
+    "2026-05": 0,
+    "2026-07": 2000,
+    "2026-09": 2000,
+    "2026-10": 2000,
+    "2026-11": 2000,
+    "2026-12": 2000
+  },
+  "faturasPorMes": {
+    "2026-07": 1750.59,
+    "2026-08": 1750.59,
+    "2026-09": 1750.59,
+    "2026-10": 1670.59,
+    "2026-11": 1092.93,
+    "2026-12": 786.14
+  },
+  "dataBackup": "2026-06-02T12:41:38.577Z",
+  "notaExtensao": "Estendido até ago/2029: SMART FIT, INTERNET CELULAR, MERCADO. 99 parcelas adicionadas."
+}

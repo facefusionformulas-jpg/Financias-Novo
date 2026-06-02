@@ -361,6 +361,7 @@ function popularConfigSeguranca() {
       $("avisoBiometria").innerText = "";
     }
   }
+  atualizarVisibilidadeBotaoBackupInicial();
 }
 function salvarNomeConfig() {
   const novo = $("confNome").value.trim();
@@ -1663,6 +1664,44 @@ function importarBackupArquivoComoMerge(evento) {
   leitor.readAsText(arquivo);
 }
 
+async function importarBackupInicialRemoto() {
+  if (seguranca.backupInicialImportado) {
+    if (!confirm("Você já importou esse backup antes. Mesclar de novo? Itens que já foram adicionados serão ignorados (deduplica por id).")) return;
+  }
+  const btn = $("btnImportarBackupInicial");
+  if (btn) { btn.disabled = true; btn.innerText = "Baixando..."; }
+  try {
+    const resp = await fetch("./imports/backup-inicial.json?t=" + Date.now(), { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const dados = await resp.json();
+    const total = (dados.contas || []).length;
+    if (!confirm("Mesclar " + total + " contas do backup inicial? Nada vai ser apagado — só itens novos serão adicionados.")) {
+      if (btn) { btn.disabled = false; btn.innerText = "Importar meus dados antigos"; }
+      return;
+    }
+    mesclarBackup(dados);
+    seguranca.backupInicialImportado = new Date().toISOString();
+    dbSet("seguranca", seguranca);
+    atualizarVisibilidadeBotaoBackupInicial();
+  } catch (e) {
+    toast("Falha ao baixar backup: " + (e && e.message || e), "error");
+    console.warn(e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerText = "Importar meus dados antigos"; }
+  }
+}
+function atualizarVisibilidadeBotaoBackupInicial() {
+  const btn = $("btnImportarBackupInicial");
+  if (!btn) return;
+  if (seguranca.backupInicialImportado) {
+    btn.style.display = "none";
+    const aviso = $("avisoBackupInicial");
+    if (aviso) aviso.innerText = "Backup inicial importado em " + new Date(seguranca.backupInicialImportado).toLocaleString("pt-BR");
+  } else {
+    btn.style.display = "";
+  }
+}
+
 async function mesclarDoClipboard() {
   try {
     let txt = "";
@@ -2130,3 +2169,4 @@ window.salvarNomeConfig = salvarNomeConfig;
 window.salvarSenhaConfig = salvarSenhaConfig;
 window.alternarBloqueioAtivo = alternarBloqueioAtivo;
 window.alternarBiometriaAtiva = alternarBiometriaAtiva;
+window.importarBackupInicialRemoto = importarBackupInicialRemoto;
