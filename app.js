@@ -165,15 +165,28 @@ function toast(msg, tipo, ms) {
 function openTab(id, btn) {
   document.querySelectorAll(".tab").forEach(function (t) { t.classList.add("hidden"); });
   $(id).classList.remove("hidden");
-  document.querySelectorAll("nav button").forEach(function (b) { b.classList.remove("active"); });
+  document.querySelectorAll(".sidebar-nav .sidebar-item").forEach(function (b) { b.classList.remove("active"); });
   if (btn) btn.classList.add("active");
+  if (window.innerWidth <= 900) fecharSidebar();
+  // Atualiza título mobile
+  const titulo = btn ? (btn.querySelector("span") ? btn.querySelector("span").innerText : "Painel") : "Painel";
+  const mt = document.querySelector(".mobile-title");
+  if (mt) mt.innerText = titulo;
   renderizar();
 }
 function openTabPorId(tab) {
-  const b = Array.from(document.querySelectorAll("nav button")).find(function (x) {
+  const b = Array.from(document.querySelectorAll(".sidebar-nav .sidebar-item")).find(function (x) {
     const oc = x.getAttribute("onclick") || ""; return oc.indexOf("'" + tab + "'") !== -1;
   });
   openTab(tab, b);
+}
+function toggleSidebar() {
+  $("sidebar").classList.toggle("open");
+  $("sidebarOverlay").classList.toggle("visible");
+}
+function fecharSidebar() {
+  $("sidebar").classList.remove("open");
+  $("sidebarOverlay").classList.remove("visible");
 }
 
 /* ===========================================================
@@ -245,6 +258,7 @@ async function salvarSetupInicial() {
   await dbSet("seguranca", seguranca);
   esconderOverlay("setupOverlay");
   toast("Bem-vindo, " + nome + "!", "success");
+  atualizarNomeSidebar();
   renderizar();
 }
 function pularSetupInicial() {
@@ -348,8 +362,13 @@ async function desbloquearComBiometria(automatico) {
 }
 
 // Configurações de segurança no modal
+function atualizarNomeSidebar() {
+  const el = $("sidebarUserName");
+  if (el) el.innerText = usuario.nome || "pessoal";
+}
 function popularConfigSeguranca() {
   if ($("confNome")) $("confNome").value = usuario.nome || "";
+  atualizarNomeSidebar();
   if ($("confBloqueioAtivo")) $("confBloqueioAtivo").checked = !!seguranca.bloqueioAtivo;
   if ($("confBiometriaAtiva")) $("confBiometriaAtiva").checked = !!seguranca.biometriaCredId;
   if ($("avisoBiometria")) {
@@ -2073,6 +2092,7 @@ async function iniciar() {
     } catch (e) { /* ignora */ }
     iniciarCampos();
     aplicarTemaSalvo();
+    atualizarNomeSidebar();
     alternarCampoQuinzenasConta();
     alternarCampoQuinzenas();
     renderizar();
@@ -2170,3 +2190,6 @@ window.salvarSenhaConfig = salvarSenhaConfig;
 window.alternarBloqueioAtivo = alternarBloqueioAtivo;
 window.alternarBiometriaAtiva = alternarBiometriaAtiva;
 window.importarBackupInicialRemoto = importarBackupInicialRemoto;
+window.toggleSidebar = toggleSidebar;
+window.fecharSidebar = fecharSidebar;
+window.atualizarNomeSidebar = atualizarNomeSidebar;
