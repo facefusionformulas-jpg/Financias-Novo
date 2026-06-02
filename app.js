@@ -337,19 +337,27 @@ function bloqueioPrecisaSerMostrado() {
   return !!(seguranca.bloqueioAtivo && usuario.senhaHash);
 }
 
-// Sessão ativa: sessionStorage (dura enquanto aba existe) + localStorage (manter conectado X dias)
+// Sessão ativa: sessionStorage (dura enquanto aba existe) + localStorage (manter sempre conectado)
 function sessaoAtiva() {
   try {
     if (sessionStorage.getItem("financas_sessao") === "ativa") return true;
     const persist = localStorage.getItem("financas_manter_conectado");
     if (persist) {
-      const dados = JSON.parse(persist);
-      if (dados && dados.ate && new Date(dados.ate) > new Date()) {
+      // Aceita "sim" (formato novo) ou JSON antigo com `ate`
+      if (persist === "sim") {
         sessionStorage.setItem("financas_sessao", "ativa");
         return true;
-      } else {
-        localStorage.removeItem("financas_manter_conectado");
       }
+      try {
+        const dados = JSON.parse(persist);
+        if (dados && dados.ate && new Date(dados.ate) > new Date()) {
+          sessionStorage.setItem("financas_sessao", "ativa");
+          // Migra pro formato novo (sempre conectado)
+          localStorage.setItem("financas_manter_conectado", "sim");
+          return true;
+        }
+      } catch (_) { /* não é JSON */ }
+      localStorage.removeItem("financas_manter_conectado");
     }
   } catch (e) {}
   return false;
@@ -358,9 +366,9 @@ function marcarSessaoAtiva(manterConectado) {
   try {
     sessionStorage.setItem("financas_sessao", "ativa");
     if (manterConectado) {
-      const ate = new Date();
-      ate.setDate(ate.getDate() + 30);
-      localStorage.setItem("financas_manter_conectado", JSON.stringify({ ate: ate.toISOString() }));
+      localStorage.setItem("financas_manter_conectado", "sim");
+    } else {
+      localStorage.removeItem("financas_manter_conectado");
     }
   } catch (e) {}
 }
