@@ -478,31 +478,71 @@ function salvarDiasAntes() {
   salvar();
 }
 /**
- * Dispara notificação usando o Service Worker (necessário em PWA standalone)
- * com fallback pra `new Notification()` quando rodando sem SW (file:// ou aba normal).
+ * Detecta se a página está rodando como PWA instalada (standalone).
+ * Importante: nesse modo, `new Notification()` lança "Illegal constructor".
+ * @returns {boolean}
+ */
+function isPWAInstalada() {
+  try {
+    if (window.matchMedia && (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: minimal-ui)").matches
+    )) return true;
+    if (window.navigator.standalone) return true; // iOS Safari instalado
+  } catch (e) {}
+  return false;
+}
+
+/**
+ * Dispara notificação preferindo Service Worker. Funciona em PWA standalone
+ * (onde `new Notification()` é proibido) e em aba normal.
  * @param {string} titulo
  * @param {NotificationOptions} opts
  * @returns {Promise<boolean>}
  */
 async function dispararNotificacao(titulo, opts) {
-  if (!notificacoesSuportadas() || Notification.permission !== "granted") return false;
+  if (!notificacoesSuportadas()) {
+    toast("Notificações não suportadas neste navegador.", "error");
+    return false;
+  }
+  if (Notification.permission !== "granted") {
+    toast("Permissão de notificações não concedida.", "warn");
+    return false;
+  }
   opts = opts || {};
-  // Tenta via Service Worker (funciona em PWA instalado)
-  try {
-    if ("serviceWorker" in navigator) {
-      const reg = await navigator.serviceWorker.ready;
+
+  // 1) Service Worker (universal — funciona em standalone E em browser)
+  if ("serviceWorker" in navigator) {
+    try {
+      // Timeout de 4s pra serviceWorker.ready não pendurar
+      const reg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise(function (_, rej) { setTimeout(function () { rej(new Error("SW ready timeout")); }, 4000); })
+      ]);
       if (reg && typeof reg.showNotification === "function") {
         await reg.showNotification(titulo, opts);
         return true;
       }
+      console.warn("[notif] SW pronto mas sem showNotification");
+    } catch (e) {
+      console.warn("[notif] SW falhou:", e);
+      // continua pro fallback ↓
     }
-  } catch (e) { console.warn("[notif] SW.showNotification falhou:", e); }
-  // Fallback: construtor direto (não funciona em standalone, mas vale tentar)
+  }
+
+  // 2) Em PWA standalone, `new Notification()` é PROIBIDO — não tenta
+  if (isPWAInstalada()) {
+    toast("Service Worker não respondeu. Feche e abra o app de novo.", "error", 5000);
+    return false;
+  }
+
+  // 3) Fallback construtor (só em aba normal)
   try {
     new Notification(titulo, opts);
     return true;
   } catch (e) {
-    console.warn("[notif] new Notification falhou:", e);
+    toast("Erro: " + (e && e.message || e), "error", 5000);
     return false;
   }
 }
