@@ -477,22 +477,49 @@ function salvarDiasAntes() {
   seguranca.diasAntesNotificar = d;
   salvar();
 }
+/**
+ * Dispara notificação usando o Service Worker (necessário em PWA standalone)
+ * com fallback pra `new Notification()` quando rodando sem SW (file:// ou aba normal).
+ * @param {string} titulo
+ * @param {NotificationOptions} opts
+ * @returns {Promise<boolean>}
+ */
+async function dispararNotificacao(titulo, opts) {
+  if (!notificacoesSuportadas() || Notification.permission !== "granted") return false;
+  opts = opts || {};
+  // Tenta via Service Worker (funciona em PWA instalado)
+  try {
+    if ("serviceWorker" in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && typeof reg.showNotification === "function") {
+        await reg.showNotification(titulo, opts);
+        return true;
+      }
+    }
+  } catch (e) { console.warn("[notif] SW.showNotification falhou:", e); }
+  // Fallback: construtor direto (não funciona em standalone, mas vale tentar)
+  try {
+    new Notification(titulo, opts);
+    return true;
+  } catch (e) {
+    console.warn("[notif] new Notification falhou:", e);
+    return false;
+  }
+}
+
 async function testarNotificacao() {
   const ok = await pedirPermissaoNotificacoes();
   if (!ok) return;
-  try {
-    new Notification("Teste de notificação", {
-      body: "Funcionou! Você será avisado dos vencimentos automaticamente.",
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
-      tag: "financas-teste"
-    });
-    toast("Notificação enviada.", "success");
-  } catch (e) {
-    toast("Falha: " + (e && e.message || e), "error");
-  }
+  const sucesso = await dispararNotificacao("Teste de notificação", {
+    body: "Funcionou. Você será avisado dos vencimentos automaticamente.",
+    icon: "./icons/icon-192.png",
+    badge: "./icons/icon-192.png",
+    tag: "financas-teste"
+  });
+  if (sucesso) toast("Notificação enviada.", "success");
+  else toast("Não foi possível enviar. Verifique permissões.", "error");
 }
-function verificarENotificar() {
+async function verificarENotificar() {
   if (!seguranca.notificacoesAtivas) return;
   if (!notificacoesSuportadas() || Notification.permission !== "granted") return;
   const dias = Number(seguranca.diasAntesNotificar || 3);
@@ -508,32 +535,30 @@ function verificarENotificar() {
     if (localStorage.getItem(chave) === "1") return;
   } catch (e) {}
   let disparou = false;
-  try {
-    if (vencidas.length) {
-      const total = vencidas.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
-      new Notification(vencidas.length + " conta(s) vencida(s)", {
-        body: "Total atrasado: " + dinheiro(total),
-        icon: "./icons/icon-192.png",
-        badge: "./icons/icon-192.png",
-        tag: "financas-vencidas",
-        renotify: true
-      });
-      disparou = true;
-    }
-    if (urgentes.length) {
-      const total = urgentes.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
-      new Notification("Contas vencendo em até " + dias + " dia" + (dias === 1 ? "" : "s"), {
-        body: urgentes.length + " conta(s) · " + dinheiro(total),
-        icon: "./icons/icon-192.png",
-        badge: "./icons/icon-192.png",
-        tag: "financas-urgentes",
-        renotify: true
-      });
-      disparou = true;
-    }
-    if (disparou) localStorage.setItem(chave, "1");
-  } catch (e) {
-    console.warn("Falha ao notificar:", e);
+  if (vencidas.length) {
+    const total = vencidas.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+    const ok = await dispararNotificacao(vencidas.length + " conta(s) vencida(s)", {
+      body: "Total atrasado: " + dinheiro(total),
+      icon: "./icons/icon-192.png",
+      badge: "./icons/icon-192.png",
+      tag: "financas-vencidas",
+      renotify: true
+    });
+    if (ok) disparou = true;
+  }
+  if (urgentes.length) {
+    const total = urgentes.reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+    const ok = await dispararNotificacao("Contas vencendo em até " + dias + " dia" + (dias === 1 ? "" : "s"), {
+      body: urgentes.length + " conta(s) · " + dinheiro(total),
+      icon: "./icons/icon-192.png",
+      badge: "./icons/icon-192.png",
+      tag: "financas-urgentes",
+      renotify: true
+    });
+    if (ok) disparou = true;
+  }
+  if (disparou) {
+    try { localStorage.setItem(chave, "1"); } catch (e) {}
   }
 }
 

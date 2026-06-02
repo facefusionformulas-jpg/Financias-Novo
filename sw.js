@@ -4,7 +4,7 @@
 // Pra forçar atualização total: bumpe o número da versão abaixo.
 "use strict";
 
-const VERSION = "v16";
+const VERSION = "v17";
 const CACHE = "financas-" + VERSION;
 
 const ASSETS = [
@@ -54,6 +54,19 @@ self.addEventListener("message", (e) => {
       e.source.postMessage({ type: "VERSION", version: VERSION });
     }
   }
+});
+
+// Click em notificação foca/abre o app
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientes) => {
+      for (const c of clientes) {
+        if ("focus" in c) return c.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./");
+    })
+  );
 });
 
 function isNavigation(req) {
