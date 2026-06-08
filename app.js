@@ -3388,13 +3388,18 @@ function renderizarHoje() {
    Backup manual (export/import JSON)
    =========================================================== */
 function montarBackupAtual() {
-  return {
+  const base = {
     contas: contas, metas: metas, comprasCartao: comprasCartao, cartao: cartao,
     salarioMes: salarioMes, ultimaAtualizacaoCartao: ultimaAtualizacaoCartao,
     salariosPorMes: salariosPorMes, faturasPorMes: faturasPorMes, valesPorMes: valesPorMes,
     habitos: habitos, registroHabitos: registroHabitos, conquistasDesbloqueadas: conquistasDesbloqueadas,
     dataBackup: new Date().toISOString()
   };
+  // Incorpora dados do módulo Planejamento (motoboy iFood + dívidas + caixa)
+  if (typeof plMontarBackup === "function") {
+    try { Object.assign(base, plMontarBackup()); } catch (e) { console.warn("plMontarBackup:", e); }
+  }
+  return base;
 }
 function aplicarBackup(dados) {
   if (!dados) return false;
@@ -3410,6 +3415,10 @@ function aplicarBackup(dados) {
   if (Array.isArray(dados.habitos)) habitos = dados.habitos;
   if (dados.registroHabitos && typeof dados.registroHabitos === "object") registroHabitos = dados.registroHabitos;
   if (dados.conquistasDesbloqueadas && typeof dados.conquistasDesbloqueadas === "object") conquistasDesbloqueadas = dados.conquistasDesbloqueadas;
+  // Restaura dados do módulo Planejamento (se vierem no backup)
+  if (typeof plAplicarBackup === "function") {
+    try { plAplicarBackup(dados); } catch (e) { console.warn("plAplicarBackup:", e); }
+  }
   salvar(); iniciarCampos(); renderizar();
   return true;
 }
@@ -3488,6 +3497,11 @@ function mesclarBackup(dados) {
   // Cartão e salarioMes: só preenche se atual está zerado
   if (dados.cartao && (!cartao || (cartao.fatura === 0 && Number(cartao.limite || 0) === 0))) cartao = dados.cartao;
   if ((!salarioMes || salarioMes === 0) && dados.salarioMes) salarioMes = Number(dados.salarioMes || 0);
+
+  // Mescla módulo Planejamento sem duplicar (dívidas/iFood por id; caixa/config só se vazio)
+  if (typeof plMesclarBackup === "function") {
+    try { novos.planejamento = plMesclarBackup(dados); } catch (e) { console.warn("plMesclarBackup:", e); }
+  }
 
   salvar(); iniciarCampos(); renderizar();
   const total = Object.values(novos).reduce(function (a, b) { return a + b; }, 0);
@@ -3652,6 +3666,10 @@ function limparTudo() {
   cartao = { nome: "Cartão principal", fatura: 0, vencimento: hoje, limite: 5000 };
   salarioMes = 0; salariosPorMes = {}; faturasPorMes = {}; valesPorMes = {};
   habitos = []; registroHabitos = {}; conquistasDesbloqueadas = {};
+  // Limpa também os dados do módulo Planejamento (dívidas, iFood, caixa)
+  if (typeof plLimparTudo === "function") {
+    try { plLimparTudo(); } catch (e) { console.warn("plLimparTudo:", e); }
+  }
   salvar(); iniciarCampos(); renderizar();
 }
 

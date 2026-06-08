@@ -861,6 +861,104 @@ function renderPlanejamento() {
   }
 }
 
+/* ===========================================================
+   Integração com backup/restore do app principal
+   =========================================================== */
+
+/** Retorna fatia do estado pra ser mesclada no backup geral.
+    Devolve cópia rasa dos arrays/objetos pra evitar que mutações posteriores
+    no estado interno afetem o snapshot capturado. */
+function plMontarBackup() {
+  return {
+    pl_dividas: pl_dividas.slice(),
+    pl_ifood: pl_ifood.slice(),
+    pl_caixa: {
+      meta: pl_caixa.meta,
+      saldo: pl_caixa.saldo,
+      movimentos: (pl_caixa.movimentos || []).slice()
+    },
+    pl_config: Object.assign({}, pl_config)
+  };
+}
+
+/** Aplica dados de backup nas chaves do módulo. Muta os arrays/objetos no lugar
+    pra preservar todas as referências que outros pontos possam ter cacheado. */
+function plAplicarBackup(dados) {
+  if (!dados) return;
+  if (Array.isArray(dados.pl_dividas)) {
+    pl_dividas.length = 0;
+    dados.pl_dividas.forEach(function (d) { pl_dividas.push(d); });
+  }
+  if (Array.isArray(dados.pl_ifood)) {
+    pl_ifood.length = 0;
+    dados.pl_ifood.forEach(function (r) { pl_ifood.push(r); });
+  }
+  if (dados.pl_caixa && typeof dados.pl_caixa === "object") {
+    pl_caixa.meta = Number(dados.pl_caixa.meta || 0);
+    pl_caixa.saldo = Number(dados.pl_caixa.saldo || 0);
+    pl_caixa.movimentos.length = 0;
+    if (Array.isArray(dados.pl_caixa.movimentos)) {
+      dados.pl_caixa.movimentos.forEach(function (m) { pl_caixa.movimentos.push(m); });
+    }
+  }
+  if (dados.pl_config && typeof dados.pl_config === "object") {
+    Object.assign(pl_config, dados.pl_config);
+  }
+  plSalvar();
+  renderPlanejamento();
+}
+
+/** Limpa todos os dados do módulo (chamada pelo "Limpar tudo" do app). pl_config mantém defaults. */
+async function plLimparTudo() {
+  pl_dividas.length = 0;
+  pl_ifood.length = 0;
+  pl_caixa.meta = 0;
+  pl_caixa.saldo = 0;
+  pl_caixa.movimentos.length = 0;
+  // pl_config mantém defaults (salário, custos etc) — não faz sentido zerar isso
+  await plSalvar();
+  renderPlanejamento();
+}
+
+/** Mescla dados de outro backup nas chaves do módulo SEM apagar o que já existe.
+    Dívidas/iFood: por id (não duplica). Caixa/config: prefere o atual quando há valor. */
+function plMesclarBackup(dados) {
+  if (!dados) return 0;
+  let novos = 0;
+  if (Array.isArray(dados.pl_dividas)) {
+    const ids = new Set(pl_dividas.map(function (d) { return String(d.id); }));
+    dados.pl_dividas.forEach(function (d) {
+      if (d && d.id && !ids.has(String(d.id))) { pl_dividas.push(d); novos++; }
+    });
+  }
+  if (Array.isArray(dados.pl_ifood)) {
+    const ids = new Set(pl_ifood.map(function (r) { return String(r.id); }));
+    dados.pl_ifood.forEach(function (r) {
+      if (r && r.id && !ids.has(String(r.id))) { pl_ifood.push(r); novos++; }
+    });
+  }
+  if (dados.pl_caixa && typeof dados.pl_caixa === "object") {
+    if (!pl_caixa.meta && dados.pl_caixa.meta) { pl_caixa.meta = dados.pl_caixa.meta; novos++; }
+    if (!pl_caixa.saldo && dados.pl_caixa.saldo) { pl_caixa.saldo = dados.pl_caixa.saldo; novos++; }
+    if (Array.isArray(dados.pl_caixa.movimentos)) {
+      const ids = new Set((pl_caixa.movimentos || []).map(function (m) { return String(m.id); }));
+      dados.pl_caixa.movimentos.forEach(function (m) {
+        if (m && m.id && !ids.has(String(m.id))) { pl_caixa.movimentos.push(m); novos++; }
+      });
+    }
+  }
+  if (dados.pl_config && typeof dados.pl_config === "object") {
+    Object.keys(dados.pl_config).forEach(function (k) {
+      if (pl_config[k] === undefined || pl_config[k] === null || pl_config[k] === 0) {
+        pl_config[k] = dados.pl_config[k]; novos++;
+      }
+    });
+  }
+  plSalvar();
+  renderPlanejamento();
+  return novos;
+}
+
 /* Registra SUB_TABS imediatamente — funciona porque planejamento.js carrega após app.js. */
 try {
   if (typeof SUB_TABS !== "undefined") {
@@ -898,3 +996,7 @@ window.plMovimentarCaixa = plMovimentarCaixa;
 window.plExcluirMovimentoCaixa = plExcluirMovimentoCaixa;
 window.plSalvarConfig = plSalvarConfig;
 window.plMarcarCnhResolvida = plMarcarCnhResolvida;
+window.plMontarBackup = plMontarBackup;
+window.plAplicarBackup = plAplicarBackup;
+window.plLimparTudo = plLimparTudo;
+window.plMesclarBackup = plMesclarBackup;

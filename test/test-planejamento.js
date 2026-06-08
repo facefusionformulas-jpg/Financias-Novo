@@ -169,6 +169,50 @@ ok(ordReal.indexOf("Facio") < idxMercado, "Facio (fintech) antes do Mercado (con
 // Carlos (pessoal) deve vir por último
 eq(ordReal[ordReal.length - 1], "Carlos", "Carlos (pessoal) vai pro fim da fila");
 
+// === 12. Backup/restore — montar e aplicar (v4.1) ===
+inside(`
+  pl_dividas.length = 0;
+  PL_DIVIDAS_INICIAIS.forEach(d => pl_dividas.push(Object.assign({ id: 'pl_' + d.nome, valor_pago: 0, status: 'aberta' }, d)));
+  pl_ifood.length = 0;
+  pl_ifood.push({ id: 'r1', data: '2026-06-08', ganho: 250, horas: 8, km: 100, gasto_combustivel: 21 });
+  Object.assign(pl_caixa, { meta: 5000, saldo: 1200, movimentos: [{ id: 'm1', data: '2026-06-01', valor: 1200, tipo: 'entrada', descricao: 'inicial' }] });
+`);
+const backupSnap = inside("plMontarBackup()");
+ok(backupSnap.pl_dividas && backupSnap.pl_dividas.length === 11, "plMontarBackup inclui as 11 dívidas");
+ok(backupSnap.pl_ifood && backupSnap.pl_ifood.length === 1, "plMontarBackup inclui ifood");
+eq(backupSnap.pl_caixa.saldo, 1200, "plMontarBackup inclui caixa saldo");
+eq(backupSnap.pl_caixa.meta, 5000, "plMontarBackup inclui caixa meta");
+ok(backupSnap.pl_config && backupSnap.pl_config.salario_fixo === 2000, "plMontarBackup inclui config");
+
+// === 13. Aplicar backup substitui o estado ===
+inside(`
+  pl_dividas.length = 0;
+  pl_ifood.length = 0;
+  Object.assign(pl_caixa, { meta: 0, saldo: 0, movimentos: [] });
+`);
+eq(inside("pl_dividas.length"), 0, "estado zerado antes de aplicar backup");
+inside("plAplicarBackup(" + JSON.stringify(backupSnap) + ")");
+eq(inside("pl_dividas.length"), 11, "aplicar backup restaura 11 dívidas");
+eq(inside("pl_ifood.length"), 1, "aplicar backup restaura ifood");
+eq(inside("pl_caixa.saldo"), 1200, "aplicar backup restaura caixa saldo");
+
+// === 14. Limpar tudo zera dívidas/ifood/caixa mas preserva config ===
+inside("plLimparTudo()");
+eq(inside("pl_dividas.length"), 0, "plLimparTudo zera dividas");
+eq(inside("pl_ifood.length"), 0, "plLimparTudo zera ifood");
+eq(inside("pl_caixa.saldo"), 0, "plLimparTudo zera caixa saldo");
+eq(inside("pl_config.salario_fixo"), 2000, "plLimparTudo PRESERVA config (salário fica)");
+
+// === 15. Mesclar backup não duplica ===
+inside(`
+  pl_dividas.length = 0;
+  pl_dividas.push({ id: 'a', nome: 'Existe', valor_total: 100, valor_pago: 0, tipo: 'cartao', status: 'aberta' });
+`);
+const novos = inside("plMesclarBackup({ pl_dividas: [{ id: 'a', nome: 'Duplicata', valor_total: 999 }, { id: 'b', nome: 'Nova', valor_total: 50, valor_pago: 0, tipo: 'fintech', status: 'aberta' }] })");
+eq(inside("pl_dividas.length"), 2, "mesclar adiciona só a nova (id 'b'), não duplica 'a'");
+eq(inside("pl_dividas.find(d => d.id === 'a').nome"), "Existe", "mesclar preserva nome original do id 'a'");
+ok(novos >= 1, "plMesclarBackup retorna contagem de novos");
+
 console.log("");
 console.log("─".repeat(40));
 console.log("Resultado: " + passou + " ok / " + falhou + " falhas");
