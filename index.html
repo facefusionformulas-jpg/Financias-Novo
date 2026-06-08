@@ -78,6 +78,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
           <span>Análise</span>
         </button>
+        <button class="sidebar-item" onclick="openTab('trampo',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h3l3 6.5M5.5 14V9h5l3 5"/></svg>
+          <span>Trampo</span>
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -676,6 +680,29 @@
         </div>
       </section>
 
+      <!-- ===== MÓDULO PLANEJAMENTO (Trampo) ===== -->
+      <!-- TRAMPO · Painel -->
+      <section id="planejamento" class="tab section hidden">
+        <h2 class="section-title">Painel de planejamento</h2>
+        <p class="section-desc">Quanto o iFood precisa render, quanto sobra, quanto falta pra sair das dívidas, quanto tem no caixa.</p>
+        <!-- Conteúdo renderizado dinamicamente por planejamento.js -->
+      </section>
+
+      <!-- TRAMPO · Dívidas -->
+      <section id="dividas-motoboy" class="tab section hidden">
+        <!-- Conteúdo renderizado dinamicamente por planejamento.js -->
+      </section>
+
+      <!-- TRAMPO · iFood -->
+      <section id="ifood" class="tab section hidden">
+        <!-- Conteúdo renderizado dinamicamente por planejamento.js -->
+      </section>
+
+      <!-- TRAMPO · Caixa -->
+      <section id="caixa" class="tab section hidden">
+        <!-- Conteúdo renderizado dinamicamente por planejamento.js -->
+      </section>
+
     </main>
     </div>
 
@@ -873,5 +900,6 @@
 
   <script src="./db.js"></script>
   <script src="./app.js"></script>
+  <script src="./planejamento.js"></script>
 </body>
 </html>

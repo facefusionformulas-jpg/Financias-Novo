@@ -4,7 +4,7 @@
 // Pra forçar atualização total: bumpe o número da versão abaixo.
 "use strict";
 
-const VERSION = "v24";
+const VERSION = "v25";
 const CACHE = "financas-" + VERSION;
 
 const ASSETS = [
@@ -13,6 +13,7 @@ const ASSETS = [
   "./styles.css",
   "./db.js",
   "./app.js",
+  "./planejamento.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

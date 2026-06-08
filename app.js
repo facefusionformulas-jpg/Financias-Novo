@@ -1886,6 +1886,8 @@ function renderizarInterno() {
   safeCall(popularDatalistCategorias, "popularDatalistCategorias");
   safeCall(atualizarBarraSelecao, "atualizarBarraSelecao");
   safeCall(atualizarBotaoModoSelecao, "atualizarBotaoModoSelecao");
+  // Módulo Planejamento (motoboy + iFood + dívidas + caixa)
+  if (typeof renderPlanejamento === "function") safeCall(renderPlanejamento, "renderPlanejamento");
 }
 function safeCall(fn, label) {
   try { fn(); }
@@ -4015,6 +4017,10 @@ async function iniciar() {
     atualizarNomeSidebar();
     alternarCampoQuinzenasConta();
     alternarCampoQuinzenas();
+    // Carrega o módulo Planejamento (dívidas, iFood, caixa) antes do primeiro render
+    if (typeof plInit === "function") {
+      try { await plInit(); } catch (e) { console.warn("plInit:", e); }
+    }
     renderizar();
     renderizarStatusBackup();
     // Bloqueio aparece SE estiver ativado — antes do app ficar visível pra interação

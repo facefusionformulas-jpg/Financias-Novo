@@ -2002,6 +2002,129 @@ code {
 }
 
 /* ===== Print ===== */
+/* ===== Módulo Planejamento (Trampo) ===== */
+.pl-alerta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+.pl-alerta-vermelho {
+  background: color-mix(in srgb, var(--red) 12%, var(--card));
+  border-left: 4px solid var(--red);
+  color: var(--text);
+}
+.pl-hero {
+  padding: 18px;
+}
+.pl-hero .metric-value {
+  font-size: 28px;
+  margin: 4px 0;
+}
+.pl-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.02em;
+}
+.pl-rank {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--card2);
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+.pl-divida-item {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.pl-label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: var(--muted);
+  gap: 4px;
+}
+.pl-label input {
+  font-size: 14px;
+}
+.pl-cenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.pl-cenario {
+  background: var(--card2);
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.pl-cenario-meses {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pl-cenario-mes {
+  background: var(--card);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--border);
+  font-size: 13px;
+}
+.pl-cenario-mes.livre {
+  border-left-color: var(--green);
+  background: color-mix(in srgb, var(--green) 8%, var(--card));
+}
+.pl-cenario-mes .mes-num {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.pl-cenario-mes .mes-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+}
+.pl-cenario-mes .mes-info span {
+  color: var(--muted);
+}
+.pl-cenario-mes .mes-info strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+.pl-cenario-mes .mes-quitadas {
+  font-size: 11px;
+  color: var(--green);
+  margin-top: 4px;
+  font-weight: 600;
+}
+.pl-caixa-hero {
+  padding: 24px;
+}
+.pl-caixa-hero .metric-value {
+  font-family: 'JetBrains Mono', monospace;
+}
+
 @media print {
   :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
     --bg: #ffffff; --paper: #ffffff; --card: #ffffff; --text: #111827;
