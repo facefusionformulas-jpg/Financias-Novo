@@ -127,10 +127,110 @@ function plLabelTipo(tipo) {
 }
 
 /* ===========================================================
+   Vinculação com contas do app principal (Finanças)
+   =========================================================== */
+
+/** Normaliza nome pra comparação: lowercase, sem acentos, sem sufixos de parcela "1/4". */
+function plNormalizarNome(s) {
+  return String(s == null ? "" : s)
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/\s*[(\[]?\s*\d+\s*\/\s*\d+\s*[\])]?\s*$/, "")
+    .replace(/\s*\d+\s*x\s*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Encontra contas no app principal com nome parecido com o da dívida. Inclui pagas. */
+function plBuscarContasParecidas(divida) {
+  if (typeof contas === "undefined" || !Array.isArray(contas)) return [];
+  const alvo = plNormalizarNome(divida.nome);
+  if (!alvo) return [];
+  return contas.filter(function (c) {
+    return plNormalizarNome(c.nome) === alvo;
+  });
+}
+
+/** Retorna apenas as contas atualmente vinculadas a esta dívida. */
+function plContasVinculadas(divida) {
+  if (typeof contas === "undefined" || !Array.isArray(contas)) return [];
+  const ids = new Set((divida.contas_vinculadas || []).map(String));
+  if (!ids.size) return [];
+  return contas.filter(function (c) { return ids.has(String(c.id)); });
+}
+
+/** Valor pago "efetivo": se vinculada, soma das parcelas pagas em Contas.
+    Se NÃO vinculada, usa o valor_pago armazenado (modo standalone). */
+function plValorPagoEfetivo(divida) {
+  const vinc = plContasVinculadas(divida);
+  if (vinc.length === 0) return Number(divida.valor_pago || 0);
+  return vinc
+    .filter(function (c) { return c.status === "pago"; })
+    .reduce(function (s, c) { return s + Number(c.valor || 0); }, 0);
+}
+
+/** Vincula uma conta à dívida (idempotente). */
+async function plVincularConta(dividaId, contaId) {
+  const d = pl_dividas.find(function (x) { return x.id === dividaId; });
+  if (!d) return;
+  if (!Array.isArray(d.contas_vinculadas)) d.contas_vinculadas = [];
+  const sid = String(contaId);
+  if (d.contas_vinculadas.map(String).indexOf(sid) === -1) {
+    d.contas_vinculadas.push(sid);
+  }
+  // Atualiza status com base no efetivo
+  if (plValorPagoEfetivo(d) >= Number(d.valor_total || 0) - 0.01) {
+    d.status = "quitada";
+    d.quitada_em = d.quitada_em || new Date().toISOString();
+  } else {
+    d.status = "aberta";
+    delete d.quitada_em;
+  }
+  await plSalvar();
+  renderPlanejamento();
+}
+
+async function plDesvincularConta(dividaId, contaId) {
+  const d = pl_dividas.find(function (x) { return x.id === dividaId; });
+  if (!d || !Array.isArray(d.contas_vinculadas)) return;
+  const sid = String(contaId);
+  d.contas_vinculadas = d.contas_vinculadas.filter(function (id) { return String(id) !== sid; });
+  await plSalvar();
+  renderPlanejamento();
+}
+
+/** Vincula todas as contas com nome parecido de uma vez. */
+async function plVincularTodasSugestoes(dividaId) {
+  const d = pl_dividas.find(function (x) { return x.id === dividaId; });
+  if (!d) return;
+  const sugestoes = plBuscarContasParecidas(d);
+  if (!sugestoes.length) {
+    if (window.toast) toast("Nenhuma conta com nome parecido encontrada.", "error");
+    return;
+  }
+  if (!Array.isArray(d.contas_vinculadas)) d.contas_vinculadas = [];
+  const jaTem = new Set(d.contas_vinculadas.map(String));
+  let n = 0;
+  sugestoes.forEach(function (c) {
+    if (!jaTem.has(String(c.id))) {
+      d.contas_vinculadas.push(String(c.id));
+      n++;
+    }
+  });
+  if (plValorPagoEfetivo(d) >= Number(d.valor_total || 0) - 0.01) {
+    d.status = "quitada";
+    d.quitada_em = d.quitada_em || new Date().toISOString();
+  }
+  await plSalvar();
+  renderPlanejamento();
+  if (window.toast) toast("Vinculado a " + n + " conta(s).", "success");
+}
+
+/* ===========================================================
    Cálculos
    =========================================================== */
 function plRestante(d) {
-  return Math.max(0, Number(d.valor_total || 0) - Number(d.valor_pago || 0));
+  return Math.max(0, Number(d.valor_total || 0) - plValorPagoEfetivo(d));
 }
 
 function plTotalDividas() {
@@ -138,7 +238,7 @@ function plTotalDividas() {
 }
 
 function plTotalPago() {
-  return pl_dividas.reduce(function (s, d) { return s + Number(d.valor_pago || 0); }, 0);
+  return pl_dividas.reduce(function (s, d) { return s + plValorPagoEfetivo(d); }, 0);
 }
 
 /** Avalanche: maior juros primeiro; juros desconhecido cai no peso por tipo. */
@@ -319,6 +419,12 @@ async function plExcluirDivida(id) {
 async function plRegistrarPagamento(id) {
   const d = pl_dividas.find(function (x) { return x.id === id; });
   if (!d) return;
+  // Se está vinculada a contas de Finanças, o pagamento se faz LÁ (fonte única).
+  if (Array.isArray(d.contas_vinculadas) && d.contas_vinculadas.length > 0) {
+    if (window.toast) toast("Essa dívida está vinculada a parcelas em Finanças. Marque a parcela como paga lá — o valor atualiza aqui automaticamente.", "info");
+    if (typeof openTabPorId === "function") openTabPorId("contas");
+    return;
+  }
   const rest = plRestante(d);
   const raw = prompt("Quanto você pagou agora?\nRestante: " + plDinheiro(rest));
   if (raw === null) return;
@@ -470,6 +576,120 @@ async function plMarcarCnhResolvida() {
   pl_config.cnh_resolvida = !pl_config.cnh_resolvida;
   await plSalvar();
   renderPlanejamento();
+}
+
+/* ===========================================================
+   Modal de vinculação com contas
+   =========================================================== */
+let pl_modalDividaId = null;
+let pl_modalBusca = "";
+
+function plAbrirModalVincular(dividaId) {
+  pl_modalDividaId = dividaId;
+  pl_modalBusca = "";
+  plRenderModalVincular();
+}
+
+function plFecharModalVincular() {
+  pl_modalDividaId = null;
+  const el = document.getElementById("plModalVincular");
+  if (el) el.remove();
+}
+
+function plRenderModalVincular() {
+  if (!pl_modalDividaId) return;
+  const d = pl_dividas.find(function (x) { return x.id === pl_modalDividaId; });
+  if (!d) return plFecharModalVincular();
+  const todas = (typeof contas !== "undefined" && Array.isArray(contas)) ? contas : [];
+  const idsVinc = new Set((d.contas_vinculadas || []).map(String));
+  const sugestoes = plBuscarContasParecidas(d).filter(function (c) { return !idsVinc.has(String(c.id)); });
+  const busca = (pl_modalBusca || "").toLowerCase();
+  const outras = todas
+    .filter(function (c) { return !idsVinc.has(String(c.id)) && plNormalizarNome(c.nome) !== plNormalizarNome(d.nome); })
+    .filter(function (c) { return !busca || c.nome.toLowerCase().includes(busca); })
+    .slice(0, 30);
+  const vinculadas = plContasVinculadas(d);
+
+  function linhaConta(c, vinculada) {
+    const checked = vinculada ? "checked" : "";
+    const callback = vinculada
+      ? "plDesvincularConta('" + d.id + "','" + c.id + "')"
+      : "plVincularConta('" + d.id + "','" + c.id + "')";
+    const statusPill = c.status === "pago"
+      ? '<span class="pl-pill" style="background:#22c55e20;color:#22c55e">pago</span>'
+      : '<span class="pl-pill" style="background:var(--card2);color:var(--muted)">pendente</span>';
+    return '<label class="pl-modal-conta">'
+      + '<input type="checkbox" ' + checked + ' onchange="' + callback + '">'
+      + '<div class="pl-modal-conta-info">'
+      + '  <span>' + plEsc(c.nome) + ' ' + statusPill + '</span>'
+      + '  <span class="item-meta">' + plDinheiro(c.valor) + ' · vence ' + plDataBR(c.data) + (c.categoria ? ' · ' + plEsc(c.categoria) : '') + '</span>'
+      + '</div>'
+      + '</label>';
+  }
+
+  let html = '<div class="modal-overlay" id="plModalVincular" onclick="if(event.target===this)plFecharModalVincular()">'
+    + '<div class="modal-panel" role="dialog" aria-modal="true" style="max-width:640px">'
+    + '  <div class="modal-header">'
+    + '    <h2>Vincular "' + plEsc(d.nome) + '" com contas</h2>'
+    + '    <button class="modal-close" onclick="plFecharModalVincular()" aria-label="Fechar">×</button>'
+    + '  </div>'
+    + '  <div class="modal-body">'
+    + '    <p class="section-desc" style="margin-top:0">Quando vinculada, o valor pago da dívida é calculado AUTOMATICAMENTE pelas parcelas pagas em Finanças. Marca/desmarca pra sincronizar.</p>';
+
+  if (vinculadas.length > 0) {
+    html += '<div class="card" style="margin-bottom:14px;background:#818cf818;border-left:3px solid #818cf8">'
+      + '<h3>🔗 Vinculadas (' + vinculadas.length + ')</h3>'
+      + '<div class="list" style="margin-top:10px">'
+      + vinculadas.map(function (c) { return linhaConta(c, true); }).join("")
+      + '</div></div>';
+  }
+
+  if (sugestoes.length > 0) {
+    html += '<div class="card" style="margin-bottom:14px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+      + '<h3>Sugestões — mesmo nome (' + sugestoes.length + ')</h3>'
+      + '<button class="btn btn-small btn-green" onclick="plVincularTodasSugestoes(\'' + d.id + '\')">Vincular todas</button>'
+      + '</div>'
+      + '<div class="list" style="margin-top:10px">'
+      + sugestoes.map(function (c) { return linhaConta(c, false); }).join("")
+      + '</div></div>';
+  } else if (vinculadas.length === 0) {
+    html += '<p class="empty">Nenhuma conta com nome igual em Finanças. Use a busca abaixo se a conta tem outro nome.</p>';
+  }
+
+  html += '<div class="card">'
+    + '<h3>Outras contas em Finanças</h3>'
+    + '<div class="form-grid" style="grid-template-columns:1fr;margin-top:10px">'
+    + '<input type="text" id="plModalBusca" placeholder="Buscar por nome..." value="' + plEsc(pl_modalBusca) + '" oninput="plAtualizarBuscaModal(this.value)">'
+    + '</div>'
+    + '<div class="list" style="margin-top:10px;max-height:240px;overflow-y:auto">'
+    + (outras.length ? outras.map(function (c) { return linhaConta(c, false); }).join("") : '<p class="empty">Nenhuma conta encontrada.</p>')
+    + '</div></div>';
+
+  html += '  </div>'
+    + '  <div style="padding:12px 24px 18px;display:flex;justify-content:flex-end;gap:8px">'
+    + '    <button class="btn btn-dark" onclick="plFecharModalVincular()">Fechar</button>'
+    + '  </div>'
+    + '</div>'
+    + '</div>';
+
+  // Remove qualquer modal anterior e injeta o novo
+  const existente = document.getElementById("plModalVincular");
+  if (existente) existente.remove();
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  document.body.appendChild(wrapper.firstChild);
+
+  // Restaura foco na busca se já estava digitando
+  if (pl_modalBusca) {
+    const inp = document.getElementById("plModalBusca");
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }
+}
+
+function plAtualizarBuscaModal(v) {
+  pl_modalBusca = v;
+  plRenderModalVincular();
 }
 
 /* ===========================================================
@@ -665,21 +885,38 @@ function renderPlDividas() {
     + (ordenadas.length
         ? ordenadas.map(function (d, i) {
             const rest = plRestante(d);
-            const pct = d.valor_total > 0 ? (Number(d.valor_pago || 0) / d.valor_total * 100) : 0;
+            const pago = plValorPagoEfetivo(d);
+            const pct = d.valor_total > 0 ? (pago / d.valor_total * 100) : 0;
+            const vinculadas = plContasVinculadas(d);
+            const temVinculo = vinculadas.length > 0;
+            const sugestoes = temVinculo ? [] : plBuscarContasParecidas(d);
+            const pagasVinc = vinculadas.filter(function (c) { return c.status === "pago"; }).length;
+
             return '<div class="item pl-divida-item">'
               + '<div style="flex:1">'
               + '  <p class="item-title"><span class="pl-rank">#' + (i + 1) + '</span> ' + plEsc(d.nome)
               + '    <span class="pl-pill" style="background:' + plCorTipo(d.tipo) + '20;color:' + plCorTipo(d.tipo) + '">' + plEsc(plLabelTipo(d.tipo)) + '</span>'
               + (d.juros ? '    <span class="pl-pill" style="background:#f8717120;color:#f87171">' + Number(d.juros).toFixed(2).replace(".", ",") + '% am</span>' : "")
+              + (temVinculo
+                  ? '    <span class="pl-pill" style="background:#818cf820;color:#818cf8" title="Pagamentos sincronizados com Finanças">🔗 ' + pagasVinc + '/' + vinculadas.length + ' pagas</span>'
+                  : "")
               + '  </p>'
-              + '  <p class="item-meta">' + plDinheiro(rest) + ' restantes · pago ' + plDinheiro(d.valor_pago || 0) + ' (' + pct.toFixed(0) + '%)'
+              + '  <p class="item-meta">' + plDinheiro(rest) + ' restantes · pago ' + plDinheiro(pago) + ' (' + pct.toFixed(0) + '%)'
               + (d.vence_em ? ' · vence ' + plDataBR(d.vence_em) : "")
               + '</p>'
               + (d.observacao ? '<p class="item-meta" style="font-style:italic">"' + plEsc(d.observacao) + '"</p>' : "")
+              + (sugestoes.length > 0
+                  ? '<div class="pl-duplicata-aviso" style="margin-top:8px;padding:8px 10px;background:#facc1518;border-left:3px solid #facc15;border-radius:6px;font-size:12px;color:var(--text)">'
+                    + '⚠️ <strong>Possível duplicata em Finanças:</strong> achei ' + sugestoes.length + ' conta(s) com nome "' + plEsc(d.nome) + '". '
+                    + '<button class="btn btn-small" style="margin-left:6px" onclick="plAbrirModalVincular(\'' + d.id + '\')">Vincular</button>'
+                    + '  </div>'
+                  : "")
               + '  <div class="progress" style="margin-top:6px"><div class="progress-bar" style="width:' + pct + '%;background:' + plCorTipo(d.tipo) + '"></div></div>'
               + '</div>'
               + '<div class="item-actions" style="flex-wrap:wrap;justify-content:flex-end">'
-              + '  <button class="btn btn-small btn-green" onclick="plRegistrarPagamento(\'' + d.id + '\')">+ Pago</button>'
+              + (temVinculo
+                  ? '<button class="btn btn-small" onclick="plAbrirModalVincular(\'' + d.id + '\')" title="Gerenciar vínculo">🔗 Vínculos</button>'
+                  : '<button class="btn btn-small btn-green" onclick="plRegistrarPagamento(\'' + d.id + '\')">+ Pago</button>')
               + '  <button class="btn btn-small" onclick="plMarcarQuitada(\'' + d.id + '\')">Quitar</button>'
               + '  <button class="btn btn-small btn-dark" onclick="plEditarDivida(\'' + d.id + '\')">Editar</button>'
               + '  <button class="btn btn-small btn-red" onclick="plExcluirDivida(\'' + d.id + '\')">Excluir</button>'
@@ -856,6 +1093,8 @@ function renderPlanejamento() {
     renderPlDividas();
     renderPlIfood();
     renderPlCaixa();
+    // Se o modal de vínculo está aberto, re-renderiza pra refletir mudanças
+    if (pl_modalDividaId) plRenderModalVincular();
   } catch (e) {
     console.error("[pl] render:", e);
   }
@@ -1000,3 +1239,9 @@ window.plMontarBackup = plMontarBackup;
 window.plAplicarBackup = plAplicarBackup;
 window.plLimparTudo = plLimparTudo;
 window.plMesclarBackup = plMesclarBackup;
+window.plAbrirModalVincular = plAbrirModalVincular;
+window.plFecharModalVincular = plFecharModalVincular;
+window.plVincularConta = plVincularConta;
+window.plDesvincularConta = plDesvincularConta;
+window.plVincularTodasSugestoes = plVincularTodasSugestoes;
+window.plAtualizarBuscaModal = plAtualizarBuscaModal;

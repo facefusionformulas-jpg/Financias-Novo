@@ -2124,6 +2124,41 @@ code {
 .pl-caixa-hero .metric-value {
   font-family: 'JetBrains Mono', monospace;
 }
+.pl-modal-conta {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card2);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.pl-modal-conta:hover {
+  border-color: var(--border-strong);
+}
+.pl-modal-conta input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.pl-modal-conta-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.pl-duplicata-aviso {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pl-duplicata-aviso button {
+  vertical-align: middle;
+}
 
 @media print {
   :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {

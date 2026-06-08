@@ -203,6 +203,62 @@ eq(inside("pl_ifood.length"), 0, "plLimparTudo zera ifood");
 eq(inside("pl_caixa.saldo"), 0, "plLimparTudo zera caixa saldo");
 eq(inside("pl_config.salario_fixo"), 2000, "plLimparTudo PRESERVA config (salário fica)");
 
+// === v4.2: Vinculação com contas Finanças ===
+
+// 16. plNormalizarNome — match fuzzy
+eq(inside('plNormalizarNome("Cartão de Crédito")'), "cartao de credito", "normaliza acentos + lowercase");
+eq(inside('plNormalizarNome("Mercado 3/6")'), "mercado", "remove sufixo de parcela X/Y");
+eq(inside('plNormalizarNome("Mercado (2/6)")'), "mercado", "remove sufixo (X/Y) com parênteses");
+eq(inside('plNormalizarNome("  Pay  Joy  ")'), "pay joy", "trima e normaliza espaços");
+
+// 17. Detecção de duplicatas vs contas[]
+inside(`
+  pl_dividas.length = 0;
+  pl_dividas.push({ id:'d1', nome:'Mercado', valor_total:1227, valor_pago:0, tipo:'conta', status:'aberta' });
+  pl_dividas.push({ id:'d2', nome:'Cartão de crédito', valor_total:2300, valor_pago:0, tipo:'cartao', status:'aberta' });
+  pl_dividas.push({ id:'d3', nome:'Aluguel', valor_total:500, valor_pago:0, tipo:'conta', status:'aberta' });
+  // Simula contas existentes (precisa estar no sandbox)
+  globalThis.contas = [
+    { id:'c1', nome:'Mercado 1/6', valor:204.50, data:'2026-06-10', status:'pendente' },
+    { id:'c2', nome:'Mercado 2/6', valor:204.50, data:'2026-07-10', status:'pendente' },
+    { id:'c3', nome:'Cartão de Crédito', valor:2300, data:'2026-06-11', status:'pago' }
+  ];
+`);
+eq(inside("plBuscarContasParecidas(pl_dividas[0]).length"), 2, "achou 2 contas Mercado parecidas com a dívida");
+eq(inside("plBuscarContasParecidas(pl_dividas[1]).length"), 1, "achou 1 conta Cartão de Crédito (case-insensitive)");
+eq(inside("plBuscarContasParecidas(pl_dividas[2]).length"), 0, "Aluguel não tem duplicata");
+
+// 18. Valor pago EFETIVO = soma das parcelas pagas em Contas
+inside("plVincularConta('d1','c1'); plVincularConta('d1','c2');");
+eq(inside("pl_dividas[0].contas_vinculadas.length"), 2, "Mercado tem 2 contas vinculadas");
+eq(inside("plValorPagoEfetivo(pl_dividas[0])"), 0, "ambas pendentes → pago = 0");
+inside("contas[0].status = 'pago'");
+eq(inside("plValorPagoEfetivo(pl_dividas[0])"), 204.50, "1 parcela paga → pago = R$ 204,50");
+inside("contas[1].status = 'pago'");
+eq(inside("plValorPagoEfetivo(pl_dividas[0])"), 409.00, "2 parcelas pagas → pago = R$ 409,00");
+eq(inside("plRestante(pl_dividas[0])"), 818.00, "restante = total − pago efetivo");
+
+// 19. plValorPagoEfetivo cai pro valor_pago armazenado quando NÃO há vínculo
+inside(`
+  pl_dividas.push({ id:'d4', nome:'Solo', valor_total:100, valor_pago:30, tipo:'conta', status:'aberta' });
+`);
+eq(inside("plValorPagoEfetivo(pl_dividas[pl_dividas.length-1])"), 30, "sem vínculo → usa valor_pago armazenado");
+
+// 20. Cartão de crédito: 1 conta paga = vinculada → dívida fica quitada automaticamente
+inside("plVincularConta('d2','c3')");
+eq(inside("plValorPagoEfetivo(pl_dividas[1])"), 2300, "Cartão (vinculado a c3 paga) → pago = total");
+eq(inside("plRestante(pl_dividas[1])"), 0, "Cartão restante = 0");
+eq(inside("pl_dividas[1].status"), "quitada", "Cartão fica quitada automaticamente ao vincular");
+
+// 21. plTotalPago soma os efetivos
+const totalPagoVinc = inside("plTotalPago()");
+ok(totalPagoVinc >= 2300 + 409, "plTotalPago usa valores efetivos das vinculadas");
+
+// 22. Desvincular reverte
+inside("plDesvincularConta('d1','c1')");
+eq(inside("pl_dividas[0].contas_vinculadas.length"), 1, "após desvincular: 1 vínculo");
+eq(inside("plValorPagoEfetivo(pl_dividas[0])"), 204.50, "pago efetivo cai pra 1 conta paga");
+
 // === 15. Mesclar backup não duplica ===
 inside(`
   pl_dividas.length = 0;
